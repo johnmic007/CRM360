@@ -215,15 +215,15 @@ class InvoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->query(function (Builder $query) {
-            $user = auth()->user();
+        // ->query(function (Builder $query) {
+        //     $user = auth()->user();
         
-            if (!$user || !$user->company_id) {
-                return $query->whereRaw('1 = 0'); // Return no records if the user or company_id is missing
-            }
+        //     if (!$user || !$user->company_id) {
+        //         return $query->whereRaw('1 = 0'); // Return no records if the user or company_id is missing
+        //     }
         
-            return $query->where('company_id', $user->company_id);
-        })
+        //     return $query->where('company_id', $user->company_id);
+        // })
         
             ->columns([
                 TextColumn::make('invoice_number')

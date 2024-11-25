@@ -130,13 +130,13 @@ class UserResource extends Resource
     {
         return $table
 
-        ->query(
-            Invoice::query()
-                ->whereHas('company', function (Builder $query) {
-                    $query->where('id', auth()->user()->company_id);
-                })
+        // ->query(
+        //     Invoice::query()
+        //         ->whereHas('company', function (Builder $query) {
+        //             $query->where('id', auth()->user()->company_id);
+        //         })
               
-        )
+        // )
 
             ->columns([
                 TextColumn::make('name')
