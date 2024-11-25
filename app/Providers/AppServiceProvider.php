@@ -2,7 +2,11 @@
 
 namespace App\Providers;
 
+use App\Models\School;
 use Illuminate\Support\ServiceProvider;
+use TomatoPHP\FilamentInvoices\Facades\FilamentInvoices;
+use TomatoPHP\FilamentInvoices\Services\Contracts\InvoiceFor;
+use TomatoPHP\FilamentInvoices\Services\Contracts\InvoiceFrom;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,8 +21,17 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot(): void
+   
+    
+    public function boot()
     {
-        //
+        // FilamentInvoices::registerFor([
+        //     InvoiceFor::make(School::class)
+        //         ->label('School')
+        // ]);
+        // FilamentInvoices::registerFrom([
+        //     InvoiceFrom::make(School::class)
+        //         ->label('Company')
+        // ]);
     }
 }

@@ -5,16 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class School extends Model
+class Company extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'block_id', 'address'];
-
-    public function block()
-    {
-        return $this->belongsTo(Block::class);
-    }
+    protected $fillable = ['name', 'email', 'phone', 'address'];
 
     public function invoices()
     {

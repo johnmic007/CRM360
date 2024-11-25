@@ -11,8 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
+        Schema::create('mous', function (Blueprint $table) {
             $table->id();
+            $table->string('title'); // Title of the MOU
+            $table->text('description')->nullable(); // Description of the MOU
+            $table->integer('school_id');
+            $table->integer('company_id');
+            $table->string('image')->nullable(); 
+        
+
             $table->timestamps();
         });
     }
@@ -22,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('roles');
+        Schema::dropIfExists('mous');
     }
 };

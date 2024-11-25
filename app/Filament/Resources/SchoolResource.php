@@ -6,6 +6,9 @@ use App\Filament\Resources\SchoolResource\Pages;
 use App\Models\Block;
 use App\Models\School;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Tables;
 
@@ -18,17 +21,23 @@ class SchoolResource extends Resource
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
-            Forms\Components\Select::make('block_id')
+            Select::make('block_id')
                 ->label('Block')
                 ->options(Block::all()->pluck('name', 'id')) // Fetch block names for the dropdown
                 ->required()
                 ->searchable()
                 ->placeholder('Select a block'),
 
-            Forms\Components\TextInput::make('name')
+            TextInput::make('name')
                 ->label('School Name')
                 ->required()
                 ->maxLength(255),
+            
+            Textarea::make('address')
+             ->label('School Address')
+             ->required()
+
+
         ]);
     }
 
@@ -49,6 +58,15 @@ class SchoolResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
+
+
+    public static function getRelations(): array
+{
+    return [
+        \App\Filament\Resources\SchoolResource\RelationManagers\InvoicesRelationManager::class,
+    ];
+}
+
 
     public static function getPages(): array
     {
