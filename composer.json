@@ -10,9 +10,11 @@
         "althinect/filament-spatie-roles-permissions": "^2.2",
         "dompdf/dompdf": "^3.0",
         "filament/filament": "3.2.57",
+        "guava/calendar": "^1.10",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "*",
+        "mokhosh/filament-kanban": "^2.9",
         "tomatophp/filament-invoices": "^1.0"
     },
     "require-dev": {
@@ -29,7 +31,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/InvoiceHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

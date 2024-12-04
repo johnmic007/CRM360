@@ -23,7 +23,13 @@ class MouResource extends Resource
 {
     protected static ?string $model = Mou::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-arrow-up';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['old' ]);
+    }
+
 
 
     

@@ -9,7 +9,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasRoles , Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -21,7 +21,10 @@ class User extends Authenticatable
         'email',
         'password',
         'manager_id', // To define the reporting hierarchy
-        'company_id'
+        'company_id',
+        'allocated_districts',
+        'allocated_blocks',
+        'wallet_balance'
     ];
 
     /**
@@ -42,6 +45,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'allocated_districts' => 'array', 
+        'allocated_blocks' => 'array',
     ];
 
     /**
@@ -52,6 +57,30 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')
             ->where('model_has_roles.model_type', self::class);
     }
+
+    public function districts()
+    {
+        return $this->belongsToMany(District::class, 'districts', 'id', 'id', 'allocated_districts');
+    }
+
+    public function blocks()
+    {
+        return $this->belongsToMany(Block::class, 'blocks', 'id', 'id', 'allocated_blocks');
+    }
+
+
+    public function walletLogs()
+{
+    return $this->hasMany(WalletLog::class);
+}
+
+
+    // User.php model
+    public function walletPaymentLogs()
+    {
+        return $this->hasMany(WalletPaymentLogs::class);
+    }
+
 
     /**
      * Define the relationship for a user's subordinates (users they directly manage).
@@ -106,37 +135,36 @@ class User extends Authenticatable
      *
      * @return array<int>
      */
-   // app/Models/User.php
+    // app/Models/User.php
 
 
-   
 
-public function getAllSubordinateIds()
-{
-    $subordinatesIds = [];
 
-    // Initialize the list of subordinates starting with direct subordinates.
-    $subordinates = $this->subordinates()->pluck('id')->toArray();
+    public function getAllSubordinateIds()
+    {
+        $subordinatesIds = [];
 
-    // Loop through each direct subordinate and collect their subordinates recursively
-    $allSubordinates = collect($subordinates);  // Start with direct subordinates.
+        // Initialize the list of subordinates starting with direct subordinates.
+        $subordinates = $this->subordinates()->pluck('id')->toArray();
 
-    while ($subordinates) {
-        // Fetch subordinates of the subordinates in the current loop
-        $newSubordinates = User::whereIn('manager_id', $subordinates)->pluck('id')->toArray();
+        // Loop through each direct subordinate and collect their subordinates recursively
+        $allSubordinates = collect($subordinates);  // Start with direct subordinates.
 
-        if (empty($newSubordinates)) {
-            break;  // If no new subordinates, break out of the loop.
+        while ($subordinates) {
+            // Fetch subordinates of the subordinates in the current loop
+            $newSubordinates = User::whereIn('manager_id', $subordinates)->pluck('id')->toArray();
+
+            if (empty($newSubordinates)) {
+                break;  // If no new subordinates, break out of the loop.
+            }
+
+            // Merge new subordinates into the list and continue the loop
+            $allSubordinates = $allSubordinates->merge($newSubordinates);
+
+            // Update the subordinates for the next iteration
+            $subordinates = $newSubordinates;
         }
 
-        // Merge new subordinates into the list and continue the loop
-        $allSubordinates = $allSubordinates->merge($newSubordinates);
-
-        // Update the subordinates for the next iteration
-        $subordinates = $newSubordinates;
+        return $allSubordinates->toArray();
     }
-
-    return $allSubordinates->toArray();
-}
-
 }

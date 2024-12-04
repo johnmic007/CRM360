@@ -3,10 +3,17 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers\WalletPaymentLogsRelationManager;
+use App\Filament\Resources\WalletLogsResource\RelationManagers\UserRelationManager;
+use App\Filament\Resources\WalletLogsResource\RelationManagers\WalletLogsRelationManager;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\WalletLog;
+use App\Models\WalletPaymentLogs;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -21,7 +28,15 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+
+    protected static ?string $navigationGroup = 'Users Management';
+
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales', 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm', 'bda']);
+    }
 
     public static function form(Form $form): Form
     {
@@ -42,7 +57,7 @@ class UserResource extends Resource
                 // Password input
                 TextInput::make('password')
                     ->password()
-                    ->required()
+                    // ->required()
                     ->dehydrated(fn($state) => $state ? bcrypt($state) : null),
 
                 Select::make('company_id')
@@ -61,6 +76,26 @@ class UserResource extends Resource
                     ->required() // Make it required
                     ->hidden(fn() => !auth()->user()->roles()->where('name', 'admin')->exists()) // Hide if not admin
                     ->helperText('This field is visible only to Admin users.'),
+
+                // District and Block allocation fields for admin and sales roles
+                // Forms\Components\Select::make('districts')
+                //     ->label('Allocate Districts')
+                //     ->options(\App\Models\District::pluck('name', 'id'))
+                //     ->multiple()
+                //     ->preload()
+                //     ->required()
+                //     ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
+                //     ->helperText('Select the districts to allocate to this user.'),
+
+                Forms\Components\Select::make('allocated_blocks')
+                    ->label('Allocate Blocks')
+                    ->options(\App\Models\Block::pluck('name', 'id'))
+                    ->multiple()
+                    ->preload()
+                    ->required()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
+                    ->helperText('Select the blocks to allocate to this user.'),
+
 
 
                 // Role selection with hierarchy logic
@@ -130,13 +165,14 @@ class UserResource extends Resource
     {
         return $table
 
-        // ->query(
-        //     Invoice::query()
-        //         ->whereHas('company', function (Builder $query) {
-        //             $query->where('id', auth()->user()->company_id);
-        //         })
-              
-        // )
+            // ->query(
+            //     Invoice::query()
+            //         ->whereHas('company', function (Builder $query) {
+            //             $query->where('id', auth()->user()->company_id);
+            //         })
+
+            // )
+
 
             ->columns([
                 TextColumn::make('name')
@@ -155,6 +191,7 @@ class UserResource extends Resource
                     ->label('Manager')
                     ->getStateUsing(fn($record) => $record->manager ? $record->manager->name : 'No Manager'),
             ])
+
             ->filters([
                 // Role filter
                 // Tables\Filters\SelectFilter::make('role')
@@ -163,6 +200,8 @@ class UserResource extends Resource
                 //     ->query(function ($query, $value) {
                 //         return $query->whereHas('roles', fn($q) => $q->where('id', $value));
                 //     }),
+
+
 
 
                 SelectFilter::make('role')
@@ -194,9 +233,93 @@ class UserResource extends Resource
                         $subordinateIds = $user->getAllSubordinateIds();
 
                         return $query->whereIn('id', $subordinateIds);
-                    }),
+                    })
+                    ->default(true) // Ensure it's applied by default
+                    ->hidden(), // Prevent users from toggling or seeing the filter
+
+
+
+            ])
+            ->actions([
+                Tables\Actions\Action::make('TopUp')
+                    ->label('Top-Up Wallet')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('success')
+                    ->modalHeading('Top-Up Wallet')
+                    ->form([
+                        TextInput::make('amount')
+                            ->label('Amount')
+                            ->numeric()
+                            ->required()
+                            ->rules(['min:1']) // Ensure minimum amount of 1
+                            ->helperText('Enter the amount to top-up.'),
+
+                        Select::make('payment_method')
+                            ->label('Payment Method')
+                            ->options([
+                                'cash' => 'Cash',
+                                'bank_transfer' => 'Bank Transfer',
+                                'credit_card' => 'Credit Card',
+                            ])
+                            ->required(),
+
+                        TextInput::make('reference_number')
+                            ->label('Reference Number')
+                            ->nullable()
+                            ->helperText('Optional reference number for the payment.'),
+
+                        DatePicker::make('payment_date')
+                            ->required(),
+
+
+                        FileUpload::make('payment_proof')
+                            ->label('Payment Proof')
+                            ->image()  // Specify that this is an image
+                            ->directory('payment_proofs')  // Store the image in a specific directory
+                            ->nullable(),
+                    ])
+                    ->action(function (array $data, User $record) {
+                        // Handle file upload for payment proof
+                        $paymentProofPath = null;
+                        if (isset($data['payment_proof'])) {
+                            $paymentProofPath = $data['payment_proof']->store('payment_proofs', 'public');
+                        }
+
+                        // Process the top-up
+                        $amount = $data['amount'];
+
+                        // Update the user's wallet balance
+                        $record->wallet_balance += $amount;
+                        $record->save();
+
+                        // Log the wallet top-up transaction
+                        WalletLog::create([
+                            'user_id' => $record->id,
+                            'company_id' => $record->company_id,
+                            'amount' => $amount,
+                            'payment_date' => $data['payment_date'],
+                            'type' => 'credit',
+                            'description' => 'Wallet top-up by admin',
+                            'payment_method' => $data['payment_method'],
+                            'reference_number' => $data['reference_number'],
+                            'payment_proof' => $paymentProofPath,
+                        ]);
+                    })
+                    ->requiresConfirmation()
+                // ->visible(fn(User $record) => auth()->user()->hasRole('sales'))
+
             ]);
     }
+
+
+
+    public static function getRelations(): array
+    {
+        return [
+            WalletLogsRelationManager::class,
+        ];
+    }
+
 
     public static function getPages(): array
     {

@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\CalendarWidget;
+use App\Filament\Widgets\DealWonLineChartWidget;
+use App\Filament\Widgets\SalesLeadChartWidget;
+use App\Filament\Widgets\WalletBalanceWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -35,10 +39,15 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->sidebarCollapsibleOnDesktop()
+            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
+                WalletBalanceWidget::class,
+                CalendarWidget::class,
+                SalesLeadChartWidget::class,
+                DealWonLineChartWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -55,5 +64,6 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+            
     }
 }

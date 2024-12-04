@@ -55,12 +55,39 @@
             </tbody>
         </table>
 
-        <!-- Summary -->
+        <!-- Books Section -->
+        @if ($record->books->isNotEmpty())
+        <div class="mt-8">
+            <h2 class="text-xl font-bold mb-4">Books</h2>
+            <table class="w-full mb-8 border-collapse">
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="border px-4 py-2 text-left">Book</th>
+                        <th class="border px-4 py-2 text-right">Quantity</th>
+                        <th class="border px-4 py-2 text-right">Price</th>
+                        <th class="border px-4 py-2 text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($record->books as $book)
+                    <tr>
+                        <td class="border px-4 py-2">{{ $book->title }}</td>
+                        <td class="border px-4 py-2 text-right">{{ $book->books_count }}</td>
+                        <td class="border px-4 py-2 text-right">{{ number_format($book->price, 2) }}</td>
+                        <td class="border px-4 py-2 text-right">{{ number_format($book->books_count * $book->price, 2) }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+
+        <!-- Summary Section -->
         <div class="flex justify-end">
             <div class="w-1/2">
                 <div class="flex justify-between mb-2">
                     <span class="font-semibold">Subtotal:</span>
-                    <span>{{ number_format($record->items->sum('total'), 2) }}</span>
+                    <span>{{ number_format($record->items->sum('total') + $record->books->sum(fn($book) => $book->books_count * $book->price), 2) }}</span>
                 </div>
                 <div class="flex justify-between mb-2">
                     <span class="font-semibold">Total Amount:</span>
@@ -75,6 +102,17 @@
                     <span>{{ number_format($record->total_amount - $record->paid, 2) }}</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Additional Information -->
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold">Additional Information</h2>
+            <ul>
+                <li><strong>No. of Students:</strong> {{ $record->students_count }}</li>
+                <li><strong>No. of Books:</strong> {{ $record->books_count }}</li>
+                <li><strong>Trainer Required:</strong> {{ $record->trainer_required ? 'Yes' : 'No' }}</li>
+                <li><strong>Validity:</strong> {{ $record->validity_start->format('d/m/Y') }} to {{ $record->validity_end->format('d/m/Y') }}</li>
+            </ul>
         </div>
 
         <!-- Notes -->

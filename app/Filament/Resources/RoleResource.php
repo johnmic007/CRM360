@@ -19,12 +19,15 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-finger-print';
 
-    // public static function canViewAny(): bool
-    // {
-    //     return auth()->user()->hasRole(['admin']);
-    // }
+    protected static ?string $navigationGroup = 'Users Management';
+
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin']);
+    }
 
     public static function form(Form $form): Form
     {

@@ -6,7 +6,9 @@ use App\Filament\Resources\InvoiceLogResource\RelationManagers\InvoiceLogRelatio
 use App\Filament\Resources\InvoiceLogResource\RelationManagers\NameRelationManager;
 use App\Filament\Resources\InvoResource\Pages;
 use App\Filament\Resources\InvoResource\RelationManagers;
+use App\Filament\Resources\InvoResource\Widgets\InvoiceStats;
 use App\Filament\Resources\PaymentResource\RelationManagers\PaymentRelationManager;
+use App\Helpers\InvoiceHelper;
 use App\Models\Invo;
 use App\Models\Invoice;
 use Filament\Forms;
@@ -21,11 +23,14 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\HasManyRepeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,7 +40,12 @@ class InvoResource extends Resource
 {
     protected static ?string $model = Invoice::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm', 'bda']);
+    }
 
     public static function form(Form $form): Form
     {
@@ -44,8 +54,7 @@ class InvoResource extends Resource
 
             TextInput::make('invoice_number')
                 ->label('Invoice Number')
-                ->required()
-                ->unique(),
+                ->required(),
 
             Section::make('Invoice Details')
                 ->schema([
@@ -55,6 +64,7 @@ class InvoResource extends Resource
                                 ->label('School')
                                 ->relationship('school', 'name')
                                 ->required()
+                                ->reactive()
                                 ->default(fn() => request()->query('school_id')), // Set default value from query parameter
 
 
@@ -111,30 +121,31 @@ class InvoResource extends Resource
                                         ->required()
                                         ->reactive()
                                         ->afterStateUpdated(function (callable $set, $get, $state) {
-                                            $set('total', $state * ($get('price') ?? 0));
+                                            $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
                                         }),
-
                                     TextInput::make('price')
                                         ->label('Price')
                                         ->numeric()
                                         ->required()
                                         ->reactive()
                                         ->afterStateUpdated(function (callable $set, $get, $state) {
-                                            $set('total', ($get('quantity') ?? 0) * $state);
+                                            // Update the total for this item based on quantity and price
+                                            $quantity = $get('quantity') ?? 0;
+                                            $price = $get('price') ?? 0;
+                                            $set('total', $quantity * $price); // Set the total for the item
                                         }),
 
                                     TextInput::make('total')
                                         ->label('Total')
                                         ->numeric()
-                                        ->disabled()
+                                        ->readonly()
                                         ->default(0),
                                 ]),
                         ])
                         ->reactive()
                         ->afterStateUpdated(function (callable $set, $get) {
-                            // Recalculate total_amount whenever items change
                             $items = $get('items') ?? [];
-                            $totalAmount = collect($items)->sum(fn($item) => ($item['total'] ?? 0));
+                            $totalAmount = InvoiceHelper::calculateTotalAmount($items);
                             $set('total_amount', $totalAmount);
                         })
                         ->createItemButtonLabel('Add Item'),
@@ -142,15 +153,127 @@ class InvoResource extends Resource
                 ->collapsible()
                 ->collapsed(false),
 
+            Section::make('Add Books')
+                ->schema([
+                    Repeater::make('books')
+                        ->relationship('books') // Refers to the books relationship in the model
+                        ->schema([
+                            Grid::make(2) // Two fields in one row for each repeater entry
+                                ->schema([
+
+                                    Select::make('book_id')
+                                        ->label('Book')
+                                        ->options(
+                                            \App\Models\Book::whereNotNull('title')->pluck('title', 'id')->toArray()
+                                        )
+                                        ->searchable()
+                                        ->required()
+                                        ->reactive()
+                                        ->afterStateUpdated(function (callable $set, $get, $state) {
+                                            // Get the price of the selected book
+                                            $bookPrice = \App\Models\Book::find($state)->price ?? 0;
+
+                                            // Update the price field dynamically
+                                            $set('price', $bookPrice);
+
+                                            // Recalculate total after price change
+                                            $quantity = $get('books.0.books_count') ?? 0; // Get quantity from first book (assuming all have the same quantity)
+                                            $set('total', $quantity * $bookPrice); // Update the total for the current book
+                                        }),
+
+                                    TextInput::make('school_id')
+                                        ->hidden()
+                                        ->default(fn(callable $get) => $get('../../school_id')), // Get the parent `school_id`
+
+                                    TextInput::make('books_count')
+                                        ->label('Quantity')
+                                        ->numeric()
+                                        ->minValue(1)
+                                        ->required()
+                                        ->reactive()
+
+                                        ->afterStateUpdated(function (callable $set, $get, $state) {
+
+                                            $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
+
+                                            // Recalculate total based on quantity and price when quantity is updated
+                                            $quantity = $state;
+                                            $price = $get('price') ?? 0;
+                                            $set('total', $quantity * $price);
+                                        }),
+
+                                    TextInput::make('price')
+                                        ->label('Price')
+                                        ->numeric()
+                                        ->readonly()
+                                        ->default(0),
+
+                                    TextInput::make('total')
+                                        ->label('Total')
+                                        ->numeric()
+                                        ->readonly()
+                                        ->default(0),
+                                ]),
+                        ])
+                        ->grid([
+                            'default' => 2, // Ensures two repeater items appear per row
+                        ])
+                        ->reactive() // Reactively update books repeater when parent changes
+                        ->default(fn($get) => collect($get('books'))->map(function ($book) use ($get) {
+                            return array_merge($book, ['school_id' => $get('school_id')]);
+                        }))
+                        ->createItemButtonLabel('Add Book') // Button label for adding books
+                        ->reactive()
+
+                ])
+                ->collapsible()
+                ->collapsed(false),
+
+
             // Total Amount Section
             Section::make('Summary')
                 ->schema([
-                    TextInput::make('total_amount')
-                        ->label('Total Amount')
-                        ->numeric()
-                        ->disabled()
-                        ->default(0)
-                        ->extraAttributes(['class' => 'text-xl font-bold']),
+
+
+                    Grid::make(2)
+                        ->schema([
+                            TextInput::make('students_count')
+                                ->label('No of students')
+                                ->numeric()
+                                ->default(0),
+
+                            TextInput::make('books_count')
+                                ->label('No of Books')
+                                ->numeric()
+                                ->default(0),
+
+                            Toggle::make('trainer_required')
+                                ->label('Trainer Required')
+                                ->default(0),
+
+                            DatePicker::make('validity_start')
+                                ->label('Validity Start')
+                                ->required()
+                                ->placeholder('Select start date'),
+
+                            DatePicker::make('validity_end')
+                                ->label('Validity End')
+                                ->required()
+                                ->placeholder('Select end date')
+                                ->afterOrEqual('validity_start')
+
+                        ]),
+
+                    Grid::make(1)
+                        ->schema([TextInput::make('total_amount')
+                            ->label('Total Amount')
+                            ->numeric()
+                            ->disabled()
+                            ->default(0)
+                            ->extraAttributes(['class' => 'text-xl font-bold']),])
+
+
+
                 ])
                 ->collapsible()
                 ->collapsed(false),
@@ -158,18 +281,33 @@ class InvoResource extends Resource
 
             Section::make('Deal Closure Details')
                 ->schema([
-                    Select::make('closed_by_id')
+                    Select::make('closed_by')
                         ->label('Closed By')
                         ->options(function () {
                             $currentUser = auth()->user();
 
-                            // Get subordinates using the scope defined in the User model
-                            $subordinates = User::query()->viewableBy($currentUser)->pluck('name', 'id');
+                            // Get subordinates with specific roles (BDA and BDM) and the same company_id
+                            $subordinates = User::query()
+                                ->viewableBy($currentUser) // Assuming this scope limits to viewable users
+                                ->where('company_id', $currentUser->company_id) // Filter by the same company_id
+                                ->whereHas('roles', function ($query) {
+                                    $query->whereIn('name', ['BDA', 'BDM']); // Filter roles to BDA and BDM
+                                })
+                                ->pluck('name', 'id');
 
                             return $subordinates;
                         })
                         ->required()
                         ->searchable(),
+
+
+
+                    Textarea::make('description')
+                        ->label('Description')
+                        ->placeholder('Provide additional details about the deal closure')
+                        ->required()
+                        ->maxLength(255),
+
                 ])
                 ->collapsible()
                 ->collapsed(false),
@@ -202,11 +340,11 @@ class InvoResource extends Resource
             //     ->collapsed(false),
 
 
-            Textarea::make('deal_closure_description')
-                ->label('Description')
-                ->placeholder('Provide additional details about the deal closure')
-                ->required()
-                ->maxLength(255),
+            // Textarea::make('description')
+            //     ->label('Description')
+            //     ->placeholder('Provide additional details about the deal closure')
+            //     ->required()
+            //     ->maxLength(255),
 
 
         ]);
@@ -215,16 +353,18 @@ class InvoResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        // ->query(function (Builder $query) {
-        //     $user = auth()->user();
-        
-        //     if (!$user || !$user->company_id) {
-        //         return $query->whereRaw('1 = 0'); // Return no records if the user or company_id is missing
-        //     }
-        
-        //     return $query->where('company_id', $user->company_id);
-        // })
-        
+            // ->query(function (Builder $query) {
+            //     // dd($query->company_id);
+            //     $user = auth()->user();
+
+            //     if (!$user || !$user->company_id) {
+            //         return $query; // Return all records if no user or company_id
+            //     }
+
+            //     return $query->where('company_id', $user->company_id);
+            // })
+
+
             ->columns([
                 TextColumn::make('invoice_number')
                     ->label('Invoice Number')
@@ -243,7 +383,7 @@ class InvoResource extends Resource
 
                 TextColumn::make('total_amount')
                     ->label('Total Amount')
-                    ->money('USD') // Adjust the currency as needed
+                    ->money('INR') // Adjust the currency as needed
                     ->sortable(),
 
                 TextColumn::make('paid')
@@ -294,6 +434,7 @@ class InvoResource extends Resource
                 //     ->icon('heroicon-o-eye')
                 //     ->openUrlInNewTab(),
 
+
                 Tables\Actions\Action::make('Pay')
                     ->label('Pay')
                     ->icon('heroicon-o-credit-card')
@@ -324,8 +465,37 @@ class InvoResource extends Resource
                                     $set('amount', $get('total_amount') - $get('paid')); // Prevent overpayment
                                 }
                             }),
+                        Select::make('payment_method')
+                            ->label('Payment Method')
+                            ->options([
+                                'cash' => 'Cash',
+                                'check' => 'Check',
+                                'bank_transfer' => 'Bank Transfer',
+                            ])
+                            ->required(),
+                        DatePicker::make('payment_date')
+                            ->required(),
+
+                        TextInput::make('reference_number')
+                            ->label('Reference Number')
+                            ->nullable(),
+                        // TextInput::make('transaction_reference')
+                        //     ->label('Transaction Reference')
+                        //     ->nullable(),
+                        FileUpload::make('payment_proof')
+                            ->label('Payment Proof')
+                            ->image()  // Specify that this is an image
+                            ->directory('payment_proofs')  // Store the image in a specific directory
+                            ->nullable(),
                     ])
                     ->action(function (array $data, Invoice $record) {
+                        // Handle file upload for payment proof
+                        $paymentProofPath = null;
+                        if (isset($data['payment_proof'])) {
+                            $paymentProofPath = $data['payment_proof']->store('payment_proofs', 'public');
+                        }
+
+                        // Process the payment
                         $remaining = $record->total_amount - $record->paid;
                         $payment = min($data['amount'], $remaining);
 
@@ -335,19 +505,42 @@ class InvoResource extends Resource
                             'status' => $record->paid + $payment >= $record->total_amount ? 'paid' : $record->status,
                         ]);
 
-                        // Create a log entry for the payment
+                        // If there's still a balance, calculate the next payment date (e.g., 30 days from now)
+                        if ($record->paid < $record->total_amount) {
+                            $nextPaymentDate = now()->addDays(30)->toDateString();  // Set next payment due date
+                        } else {
+                            $nextPaymentDate = null;  // No further payment due
+                        }
+
+                        // Create a log entry for the payment in invoice_logs
                         $record->logs()->create([
                             'type' => 'payment',
+                            'payment_method' => $data['payment_method'],
+                            'reference_number' => $data['reference_number'],
+                            // 'transaction_reference' => $data['transaction_reference'],
+                            'payment_proof' => $paymentProofPath,
+                            'payment_date' => $data['payment_date'],
+                            'paid_amount' => $payment,
                             'description' => 'Paid amount: ' . $payment,
+                            'next_payment_due' => $nextPaymentDate,  // Store next payment date in the log
                         ]);
                     })
                     ->requiresConfirmation()
-                    ->visible(fn(Invoice $record) => $record->paid < $record->total_amount), // Show button only if unpaid amount exists
+                    ->visible(fn(Invoice $record) => $record->paid < $record->total_amount),
+
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
             ]);
     }
+
+    public static function getWidgets(): array
+    {
+        return [
+            InvoiceStats::class,
+        ];
+    }
+
 
     public static function getRelations(): array
     {
