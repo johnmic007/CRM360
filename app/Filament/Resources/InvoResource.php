@@ -42,6 +42,9 @@ class InvoResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
+    protected static ?string $label = 'MOU'; // Singular form
+protected static ?string $pluralLabel = 'MOUs'; 
+
     public static function canViewAny(): bool
     {
         return auth()->user()->hasRole(['admin', 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm', 'bda']);
@@ -53,10 +56,10 @@ class InvoResource extends Resource
             // Invoice Details Section
 
             TextInput::make('invoice_number')
-                ->label('Invoice Number')
+                ->label('MOU Number')
                 ->required(),
 
-            Section::make('Invoice Details')
+            Section::make('MOU Details')
                 ->schema([
                     Grid::make(2)
                         ->schema([
@@ -77,6 +80,37 @@ class InvoResource extends Resource
                                 ->disabled(), // Make the field non-editable
 
 
+                                TextInput::make('students_count')
+                                ->label('No of students')
+                                ->numeric()
+                                ->default(0)
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(function (callable $set, callable $get, $state) {
+                                    // Update quantities in items
+                                    $items = $get('items') ?? [];
+                                    foreach ($items as $index => $item) {
+                                        $set('items.' . $index . '.quantity', $state);
+                                        // Update total for each item
+                                        $price = $item['price'] ?? 0;
+                                        $set('items.' . $index . '.total', $state * $price);
+                                    }
+                                    // Update books_count in books
+                                    // $books = $get('books') ?? [];
+                                    // foreach ($books as $index => $book) {
+                                    //     $set('books.' . $index . '.books_count', $state);
+                                    //     // Update total for each book
+                                    //     $price = $book['price'] ?? 0;
+                                    //     $set('books.' . $index . '.total', $state * $price);
+                                    // }
+                                    // // Recalculate total amount
+                                    // $totalAmount = InvoiceHelper::calculateTotalAmount($get('items'), $get('books'));
+                                    // $set('total_amount', $totalAmount);
+                                    // // Recalculate total number of books
+                                    // $totalBooks = array_sum(array_column($get('books') ?? [], 'books_count'));
+                                    // $set('books_count', $totalBooks);
+                                }),
+                
 
                             DatePicker::make('issue_date')
                                 ->label('Issue Date')
@@ -100,7 +134,7 @@ class InvoResource extends Resource
                 ->collapsed(false),
 
             // Invoice Items Section
-            Section::make('Invoice Items')
+            Section::make('MOU Items')
                 ->schema([
                     HasManyRepeater::make('items')
                         ->relationship('items')
@@ -115,14 +149,30 @@ class InvoResource extends Resource
 
                             Grid::make(3)
                                 ->schema([
+                                    // TextInput::make('quantity')
+                                    //     ->label('Quantity')
+                                    //     ->numeric()
+                                    //     ->required()
+                                    //     ->reactive()
+                                    //     ->afterStateUpdated(function (callable $set, $get, $state) {
+                                    //         $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
+                                    //     }),
+
                                     TextInput::make('quantity')
-                                        ->label('Quantity')
-                                        ->numeric()
-                                        ->required()
-                                        ->reactive()
-                                        ->afterStateUpdated(function (callable $set, $get, $state) {
-                                            $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
-                                        }),
+                                    ->label('Quantity')
+                                    ->numeric()
+                                    ->default(fn ($get) => $get('../../students_count') ?? 0)
+                                    ->readOnly()
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set, callable $get, $state) {
+                                        $price = $get('price') ?? 0;
+                                        $set('total', $state * $price);
+                                        // Recalculate total amount
+                                        $totalAmount = InvoiceHelper::calculateTotalAmount($get('../../items'), $get('../../books'));
+                                        $set('../../total_amount', $totalAmount);
+                                    }),
+
+
                                     TextInput::make('price')
                                         ->label('Price')
                                         ->numeric()
@@ -185,34 +235,40 @@ class InvoResource extends Resource
                                         ->hidden()
                                         ->default(fn(callable $get) => $get('../../school_id')), // Get the parent `school_id`
 
-                                    TextInput::make('books_count')
+                                        TextInput::make('books_count')
                                         ->label('Quantity')
                                         ->numeric()
-                                        ->minValue(1)
-                                        ->required()
+                                        ->default(fn ($get) => $get('../../students_count') ?? 0)
+                                        // ->disabled()
                                         ->reactive()
-
-                                        ->afterStateUpdated(function (callable $set, $get, $state) {
-
-                                            $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
-
-                                            // Recalculate total based on quantity and price when quantity is updated
-                                            $quantity = $state;
-                                            $price = $get('price') ?? 0;
-                                            $set('total', $quantity * $price);
+                                        ->afterStateUpdated(function (callable $set, callable $get, $state) {
+                                            // Recalculate total number of books
+                                            $books = $get('../../books') ?? [];
+                                            $totalBooks = array_sum(array_column($books, 'books_count'));
+                                            $set('../../books_count', $totalBooks);
                                         }),
 
-                                    TextInput::make('price')
-                                        ->label('Price')
-                                        ->numeric()
-                                        ->readonly()
-                                        ->default(0),
+                                        // ->afterStateUpdated(function (callable $set, $get, $state) {
 
-                                    TextInput::make('total')
-                                        ->label('Total')
-                                        ->numeric()
-                                        ->readonly()
-                                        ->default(0),
+                                        //     $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
+
+                                        //     // Recalculate total based on quantity and price when quantity is updated
+                                        //     $quantity = $state;
+                                        //     $price = $get('price') ?? 0;
+                                        //     $set('total', $quantity * $price);
+                                        // }),
+
+                                    // TextInput::make('price')
+                                    //     ->label('Price')
+                                    //     ->numeric()
+                                    //     ->readonly()
+                                    //     ->default(0),
+
+                                    // TextInput::make('total')
+                                    //     ->label('Total')
+                                    //     ->numeric()
+                                    //     ->readonly()
+                                    //     ->default(0),
                                 ]),
                         ])
                         ->grid([
@@ -222,6 +278,12 @@ class InvoResource extends Resource
                         ->default(fn($get) => collect($get('books'))->map(function ($book) use ($get) {
                             return array_merge($book, ['school_id' => $get('school_id')]);
                         }))
+                        ->afterStateUpdated(function (callable $set, callable $get) {
+                            // Recalculate total number of books
+                            $books = $get('books') ?? [];
+                            $totalBooks = array_sum(array_column($books, 'books_count'));
+                            $set('books_count', $totalBooks);
+                        })
                         ->createItemButtonLabel('Add Book') // Button label for adding books
                         ->reactive()
 
@@ -238,14 +300,22 @@ class InvoResource extends Resource
                     Grid::make(2)
                         ->schema([
                             TextInput::make('students_count')
-                                ->label('No of students')
+                                ->label('Total no of students')
                                 ->numeric()
+                                ->readOnly()
                                 ->default(0),
 
-                            TextInput::make('books_count')
-                                ->label('No of Books')
+                                TextInput::make('books_count')
+                                ->label('Total no of Books')
                                 ->numeric()
-                                ->default(0),
+                                ->default(0)
+                                ->readOnly()
+                                ->reactive()
+                                ->formatStateUsing(function (callable $get) {
+                                    $books = $get('books') ?? [];
+                                    $totalBooks = array_sum(array_column($books, 'books_count'));
+                                    return $totalBooks;
+                                }),
 
                             Toggle::make('trainer_required')
                                 ->label('Trainer Required')
@@ -367,7 +437,7 @@ class InvoResource extends Resource
 
             ->columns([
                 TextColumn::make('invoice_number')
-                    ->label('Invoice Number')
+                    ->label('MOU Number')
                     ->sortable()
                     ->searchable(),
 
@@ -439,7 +509,7 @@ class InvoResource extends Resource
                     ->label('Pay')
                     ->icon('heroicon-o-credit-card')
                     ->color('primary')
-                    ->modalHeading('Pay Invoice')
+                    ->modalHeading('Pay MOU')
                     ->form([
                         TextInput::make('total_amount')
                             ->label('Total Amount')

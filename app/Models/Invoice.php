@@ -21,7 +21,7 @@ class Invoice extends Model
         'paid',
         'total_amount',
         'due_amount',
-        'status',
+        'payment_status',
         'students_count',
         'trainer_required',
         'validity_start',
@@ -35,6 +35,10 @@ class Invoice extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+
+
+    
 
 
 
@@ -73,11 +77,40 @@ class Invoice extends Model
         return $this->hasMany(InvoiceLog::class);
     }
 
+    // protected static function booted()
+    // {
+    //     static::addGlobalScope(new CompanyScope());
+    // }
+
+
     protected static function booted()
     {
-        static::addGlobalScope(new CompanyScope());
-    }
 
+        static::addGlobalScope(new CompanyScope());
+
+        static::saved(function ($invoice) {
+            // Ensure the school is associated
+            $school = $invoice->school;
+
+
+            if ($school) {
+                // Update school status based on the invoice `paid` and `total_amount`
+
+                // dd($school);
+
+                if ($invoice->paid == 0) {
+                    // Do not update the school status
+                    return;
+                } elseif ($invoice->paid == $invoice->total_amount) {
+                    $school->payment_status = 'Paid';
+                } elseif ($invoice->paid < $invoice->total_amount) {
+                    $school->payment_status = 'Partially Paid';
+                }
+
+                $school->save();
+            }
+        });
+    }
     
 
     protected static function boot()

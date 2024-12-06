@@ -14,8 +14,7 @@
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "maatwebsite/excel": "*",
-        "mokhosh/filament-kanban": "^2.9",
-        "tomatophp/filament-invoices": "^1.0"
+        "mokhosh/filament-kanban": "^2.9"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

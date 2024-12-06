@@ -7,6 +7,7 @@ use App\Filament\Resources\SchoolResource\Pages;
 use App\Filament\Resources\SchoolResource\RelationManagers\LeadStatusesRelationManager;
 use App\Filament\Resources\SchoolResource\RelationManagers\SchoolPaymentRelationManager;
 use App\Models\Block;
+use App\Models\District;
 use App\Models\School;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -27,32 +28,83 @@ class SchoolResource extends Resource
 
     protected static ?string $navigationGroup = 'Utilities';
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales']);
+    }
+
+
 
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
+            // Select::make('block_id')
+            //     ->label('Block')
+            //     ->options(Block::all()->pluck('name', 'id')) // Fetch block names for the dropdown
+            //     ->required()
+            //     ->searchable()
+            //     ->placeholder('Select a block'),
+
+
+            Select::make('district_id')
+                ->label('District')
+                ->options(District::pluck('name', 'id')->toArray())
+                ->placeholder('Select a district')
+                ->reactive()
+                ->required()
+                // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+                ->helperText('Select the district where the task is located.'),
+
             Select::make('block_id')
                 ->label('Block')
-                ->options(Block::all()->pluck('name', 'id')) // Fetch block names for the dropdown
+                // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+                ->options(function (callable $get) {
+                    $districtId = $get('district_id');
+                    if (!$districtId) {
+                        return [];
+                    }
+                    return Block::where('district_id', $districtId)->pluck('name', 'id')->toArray();
+                })
+                ->placeholder('Select a block')
+                ->reactive()
                 ->required()
-                ->searchable()
-                ->placeholder('Select a block'),
+                ->helperText('Select the block within the selected district.'),
+
+            Select::make('school_id')
+                ->label('School')
+                // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+                ->options(function (callable $get) {
+                    $blockId = $get('block_id');
+                    if (!$blockId) {
+                        return [];
+                    }
+                    return School::where('block_id', $blockId)->pluck('name', 'id')->toArray();
+                })
+                ->placeholder('Select a school')
+                ->reactive()
+                ->required()
+                ->helperText('Select the school where this task will take place.'),
 
             TextInput::make('name')
                 ->label('School Name')
                 ->required()
                 ->maxLength(255),
 
+            Select::make('board_id')
+                ->label('Board')
+                ->relationship('board', 'name') // Assumes the `School` model has a `name` attribute
+                ->required(),
+
             Select::make('payment_status')
                 ->label('Payment Status')
                 ->options([
                     'New' => 'New',
-                    'Pending Payment' => 'Pending Payment',
                     'Paid' => 'Paid',
                     'Partially Paid' => 'Partially Paid',
-                    'Payment Overdue' => 'Payment Overdue',
                 ])
-                ->required()
+                ->disabled()
+                ->hidden(fn (string $context) => $context === 'create')
+
                 ->placeholder('Select a payment status'),
 
             // Select::make('process_status')

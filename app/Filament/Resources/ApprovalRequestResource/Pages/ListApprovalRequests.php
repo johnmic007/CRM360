@@ -17,7 +17,7 @@ class ListApprovalRequests extends ListRecords
     public function getTableQuery(): Builder
     {
         $user = Auth::user();
-
+    
         // Admin and Sales roles see all requests for their company_id
         if ($user->hasRole(['admin', 'sales'])) {
             return ApprovalRequest::query()
@@ -25,12 +25,16 @@ class ListApprovalRequests extends ListRecords
                     $query->where('company_id', $user->company_id);
                 });
         }
-
-        // Managers see requests assigned to them
+    
+        // Managers see requests assigned to them, and users see their own requests
         return ApprovalRequest::query()
-            ->where('manager_id', $user->id)
+            ->where(function ($query) use ($user) {
+                $query->where('manager_id', $user->id)
+                    ->orWhere('user_id', $user->id); // Include the user's own requests
+            })
             ->where('company_id', $user->company_id);
     }
+    
 
     public function getTabs(): array
     {

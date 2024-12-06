@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ApprovalRequest extends Model
 {
@@ -24,6 +25,17 @@ class ApprovalRequest extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
+
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
 
 
     protected static function boot()
@@ -37,7 +49,7 @@ class ApprovalRequest extends Model
                 SalesLeadManagement::create([
                     'school_id' => $approvalRequest->school_id,
                     'allocated_to' => $approvalRequest->user_id,
-                    // 'company_id' => $approvalRequest->company_id,
+                    'company_id' => $approvalRequest->company_id,
                     'status' => 'School Nurturing',
                 ]);
             }

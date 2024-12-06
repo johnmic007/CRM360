@@ -39,7 +39,7 @@ class TaskResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->hasAnyRole(['admin', 'sales']);
+        return auth()->user()->hasAnyRole(['admin', 'sales' , 'head_trainer']);
     }
 
 
@@ -240,8 +240,15 @@ class TaskResource extends Resource
                     ->schema([
                         Select::make('user_id')
                             ->label('Assign to User')
-                            ->options(User::pluck('name', 'id')->toArray())
-                            ->searchable()
+                            ->options(
+                                User::whereHas('roles', function ($query) {
+                                    $query->where('name', 'trainer'); // Filter users with the 'trainer' role
+                                })
+                                ->where('company_id', $user->company_id) // Filter by the company ID of the current user
+                                ->pluck('name', 'id') // Get the user name and ID
+                                ->toArray() // Convert to an array for options
+                            )
+                            ->preload()                            ->searchable()
                             ->placeholder('Assign this task to a user')
                             ->required()
                             ->hidden(!$user->hasAnyRole(['admin', 'sales']))

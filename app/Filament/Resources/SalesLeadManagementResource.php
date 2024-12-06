@@ -86,11 +86,11 @@ class SalesLeadManagementResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('district.name')->label('District'),
-            Tables\Columns\TextColumn::make('block.name')->label('Block'),
+            // Tables\Columns\TextColumn::make('district.name')->label('District'),
+            // Tables\Columns\TextColumn::make('block.name')->label('Block'),
             Tables\Columns\TextColumn::make('school.name')->label('School'),
             Tables\Columns\TextColumn::make('status')->label('Status'),
-            Tables\Columns\TextColumn::make('feedback')->label('Feedback')->limit(50),
+            // Tables\Columns\TextColumn::make('feedback')->label('Feedback')->limit(50),
         ])
             ->filters([])
             ->actions([

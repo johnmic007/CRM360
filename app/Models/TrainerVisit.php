@@ -10,8 +10,13 @@ class TrainerVisit extends Model
     protected $fillable = [
         'user_id',
         'school_id',
+        'company_id',
         'visit_date',
         'travel_mode',
+        'starting_meter_photo',
+        'starting_km',
+        'ending_meter_photo',
+        'ending_km',
         'distance_traveled',
         'travel_expense',
         'food_expense',
@@ -23,6 +28,11 @@ class TrainerVisit extends Model
         'sales_role_evaluation',
     ];
 
+
+    protected $casts = [
+        
+        'school_id' => 'array', 
+    ];
     // Calculate the travel expense based on the mode of transport
     public function calculateTravelExpense()
     {

@@ -27,6 +27,11 @@ class School extends Model
         return $this->belongsTo(Block::class);
     }
 
+    public function board()
+    {
+        return $this->belongsTo(Board::class);
+    }
+
     public function schoolPayments()
     {
         return $this->hasMany(InvoiceLog::class );

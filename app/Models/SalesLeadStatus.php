@@ -10,6 +10,7 @@ class SalesLeadStatus extends Model
 {
     protected $fillable = [
         'sales_lead_management_id', 
+        'potential_meet',
         'school_id', 
         'visited_by', 
         'status', 
@@ -22,7 +23,7 @@ class SalesLeadStatus extends Model
 
     public function salesLead()
     {
-        return $this->belongsTo(SalesLeadManagement::class, 'sales_lead_management_id');
+        return $this->belongsTo(SalesLeadManagement::class, 'school_id');
     }
 
     public function school()

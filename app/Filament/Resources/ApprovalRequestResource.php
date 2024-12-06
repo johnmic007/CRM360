@@ -55,25 +55,27 @@ class ApprovalRequestResource extends Resource
 
                 Forms\Components\Select::make('status')
                 ->label('Status')
+                
                 ->options([
                     'Pending' => 'Pending',
                     'Approved' => 'Approved',
                     'Rejected' => 'Rejected',
                 ])
+                ->disabled()
                 ->required()
-                ->disabled(function () {
-                    $recordId = request()->route('record'); // Get the record ID from the route
-                    if (!$recordId) {
-                        return true; // Disable if no record ID is found
-                    }
+                // ->disabled(function () {
+                //     $recordId = request()->route('record'); // Get the record ID from the route
+                //     if (!$recordId) {
+                //         return true; // Disable if no record ID is found
+                //     }
             
-                    $record = ApprovalRequest::find($recordId); // Retrieve the record using the ID
-                    if (!$record) {
-                        return true; // Disable if the record does not exist
-                    }
+                //     $record = ApprovalRequest::find($recordId); // Retrieve the record using the ID
+                //     if (!$record) {
+                //         return true; // Disable if the record does not exist
+                //     }
             
-                    return auth()->id() !== $record->manager_id; // Disable if the logged-in user is not the manager
-                }),
+                //     return auth()->id() !== $record->manager_id; // Disable if the logged-in user is not the manager
+                // }),
             
         ]);
     }

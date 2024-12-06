@@ -26,6 +26,18 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+
+        $widgets = [
+            WalletBalanceWidget::class,
+            CalendarWidget::class,
+        ];
+        
+        // Conditionally add the DealWonLineChartWidget and SalesLeadChartWidget
+        if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales'])) {
+            $widgets[] = DealWonLineChartWidget::class;
+            $widgets[] = SalesLeadChartWidget::class;
+        }
+        
         return $panel
             ->default()
             ->id('admin')
@@ -41,14 +53,15 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->sidebarCollapsibleOnDesktop()
             // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                // Widgets\AccountWidget::class,
-                // Widgets\FilamentInfoWidget::class,
-                WalletBalanceWidget::class,
-                CalendarWidget::class,
-                SalesLeadChartWidget::class,
-                DealWonLineChartWidget::class,
-            ])
+            // ->widgets([
+            //     // Widgets\AccountWidget::class,
+            //     // Widgets\FilamentInfoWidget::class,
+            //     WalletBalanceWidget::class,
+            //     CalendarWidget::class,
+            //     SalesLeadChartWidget::class,
+            //     DealWonLineChartWidget::class,
+            // ])
+            ->widgets($widgets)
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

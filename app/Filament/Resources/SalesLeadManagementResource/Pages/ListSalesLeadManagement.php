@@ -19,6 +19,20 @@ class ListSalesLeadManagement extends ListRecords
         ];
     }
 
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()
+            ->when(
+                !auth()->user()->hasRole('admin'),
+                fn (Builder $query) => $query->where('allocated_to', auth()->id()) // Non-admins see only their tasks
+            )
+            ->when(
+                auth()->user()->hasRole(['admin', 'sales']), // Admins and Sales see all tasks for their company
+                fn (Builder $query) => $query->where('company_id', auth()->user()->company_id) // Admins see tasks for their company
+            );
+    }
+
     public function getTabs(): array
     {
         $userCompanyId = auth()->user()->company_id;

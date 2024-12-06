@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class InvoiceLog extends Model
@@ -21,6 +22,7 @@ class InvoiceLog extends Model
         'transaction_reference',
         'payment_proof',
         'school_id',
+        'company_id',
     ];
 
     public static function boot()
@@ -30,6 +32,9 @@ class InvoiceLog extends Model
         // Listen to the 'creating' event
         static::creating(function ($invoiceLog) {
             // Only set school_id if the type is 'payment'
+
+            $invoiceLog->company_id = Auth::user()->company_id;
+
             if ($invoiceLog->type === 'payment') {
                 // Retrieve the associated school_id from the invoice using invoice_id
                 $invoice = Invoice::find($invoiceLog->invoice_id);

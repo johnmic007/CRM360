@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+
 
 class BookShipment extends Model
 {
@@ -11,6 +13,7 @@ class BookShipment extends Model
 
     protected $fillable = [
         'school_id', 
+        'company_id',
         'status',
         'district_id',
         'block_id',
@@ -30,6 +33,14 @@ class BookShipment extends Model
     public function details()
     {
         return $this->hasMany(BookShipmentDetail::class);
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($shipment) {
+            // Assign the authenticated user's company_id
+            $shipment->company_id = Auth::user()->company_id;
+        });
     }
 }
 

@@ -20,6 +20,10 @@ class SalesLeadKanbanBoard extends KanbanBoard
 
     protected static string $statusEnum = SalesLeadStatus::class;
 
+    protected static ?string $label = 'Sales Report'; // Singular form
+
+    protected static ?string $pluralLabel = 'Sales Reports'; 
+
     protected static ?string $navigationIcon = 'heroicon-o-clipboard';
 
     protected static string $recordTitleAttribute = 'school_id';
@@ -195,11 +199,13 @@ class SalesLeadKanbanBoard extends KanbanBoard
                     Forms\Components\Textarea::make('remarks')
                         ->label('Remarks')
                         ->rows(3)
+                        ->required()
                         ->placeholder('Add any relevant remarks...')
                         ->helperText('Provide additional notes or details about this status.'),
 
                     Forms\Components\TextInput::make('contacted_person')
                         ->label('Contacted Person')
+                        ->required()
                         ->placeholder('Enter the name of the contacted person.')
                         ->helperText('The name of the person contacted for this status.'),
 
@@ -208,13 +214,22 @@ class SalesLeadKanbanBoard extends KanbanBoard
                         ->placeholder('e.g., Principal, Teacher')
                         ->helperText('Designation of the person contacted for this status.'),
 
+                    Forms\Components\Checkbox::make('potential_meet')
+                        ->label('Potential Meet'),
+
+                        Forms\Components\DatePicker::make('visited_date')
+                        ->label('Visited Date')
+                        ->readOnly()
+                        ->helperText('Specify the date when the school was visited.')
+                        ->default(now()) 
+                        ->required(),
+
                     Forms\Components\DatePicker::make('follow_up_date')
                         ->label('Follow-Up Date')
                         ->helperText('Specify the follow-up date for this status.'),
 
-                    Forms\Components\DatePicker::make('visited_date')
-                        ->label('Visited Date')
-                        ->helperText('Specify the date when the school was visited.'),
+                       
+                    
                 ])
                 ->createItemButtonLabel('Add Follow-Up Entry')
                 ->columns(2);
@@ -232,9 +247,15 @@ class SalesLeadKanbanBoard extends KanbanBoard
                         ->placeholder('Add any relevant remarks...')
                         ->helperText('Provide additional notes or details about this status.'),
 
-                    Forms\Components\DatePicker::make('visited_date')
+                        Forms\Components\Checkbox::make('potential_meet')
+                        ->label('Potential Meet'),
+
+                        Forms\Components\DatePicker::make('visited_date')
                         ->label('Visited Date')
-                        ->helperText('Specify the date when the school was visited.'),
+                        ->readOnly()
+                        ->helperText('Specify the date when the school was visited.')
+                        ->default(now()) // Sets the default value to the current date
+                        ->required(),
 
                     Forms\Components\DatePicker::make('reschedule_date')
                         ->label(' Reschedule Date'),

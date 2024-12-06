@@ -22,6 +22,11 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationLabel = 'Customers';
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales', 'head', 'zonal_manager', 'regional _manager', 'senior_manager']);
+    }
+
 
     public static function form(Form $form): Form
     {

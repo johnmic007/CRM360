@@ -58,6 +58,12 @@ class User extends Authenticatable
             ->where('model_has_roles.model_type', self::class);
     }
 
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function districts()
     {
         return $this->belongsToMany(District::class, 'districts', 'id', 'id', 'allocated_districts');

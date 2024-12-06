@@ -2,5 +2,5 @@
     <span class="text-primary-400">❖</span>
     {{ $status['title'] }}
 
-    ({{ count( $status['records']) }})
+    <!-- ({{ count( $status['records']) }}) -->
 </h3>
