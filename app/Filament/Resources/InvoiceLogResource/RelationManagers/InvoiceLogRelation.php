@@ -10,7 +10,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class InvoiceLogRelationManager extends RelationManager
+class InvoiceLogRelation extends RelationManager
 {
     protected static string $relationship = 'logs'; // Defined in the Invoice model
 

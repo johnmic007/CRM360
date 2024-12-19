@@ -171,7 +171,6 @@ class SalesLeadManagementResource extends Resource
             // \App\Filament\Resources\SchoolResource\RelationManagers\InvoicesRelationManager::class,
             // \App\Filament\Resources\SchoolResource\RelationManagers\BookRelationManager::class,
             LeadStatusesRelationManager::class,
-            // SchoolPaymentRelationManager::class,
         ];
     }
 

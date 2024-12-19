@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources;
 
-// use App\Filament\Resources\InvoiceLogResource\RelationManagers\InvoiceLogRelationManager;
-use App\Filament\Resources\InvoiceLogResource\RelationManagers\NameRelationManager;
+use App\Filament\Resources\InvoiceLogResource\RelationManagers\InvoiceLogRelation;
+use App\Filament\Resources\InvoiceLogResource\RelationManagers\InvoiceLogRelationManager;
+// use App\Filament\Resources\InvoiceLogResource\RelationManagers\NameRelationManager;
 use App\Filament\Resources\InvoResource\Pages;
 use App\Filament\Resources\InvoResource\RelationManagers;
 use App\Filament\Resources\InvoResource\Widgets\InvoiceStats;
-use App\Filament\Resources\PaymentResource\RelationManagers\PaymentRelationManager;
 use App\Helpers\InvoiceHelper;
 use App\Models\Invo;
 use App\Models\Invoice;
@@ -647,8 +647,7 @@ class InvoResource extends Resource
     public static function getRelations(): array
     {
         return [
-            InvoiceLogRelationManager::class,
-            // PaymentRelationManager::class,
+            InvoiceLogRelation::class,
         ];
     }
 
