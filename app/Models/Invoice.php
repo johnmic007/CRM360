@@ -35,7 +35,7 @@ class Invoice extends Model
 
 
     protected $casts = [
-        'file' => 'array',
+        'files' => 'array',
     ];
 
 

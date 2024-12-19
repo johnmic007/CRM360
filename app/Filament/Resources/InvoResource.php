@@ -74,6 +74,7 @@ class InvoResource extends Resource
                                 ->relationship('school', 'name')
                                 ->required()
                                 ->reactive()
+                                ->searchable()
                                 ->default(fn() => request()->query('school_id')), // Set default value from query parameter
 
 
@@ -400,7 +401,7 @@ class InvoResource extends Resource
                 ->collapsible()
                 ->collapsed(false),
 
-                FileUpload::make('files')->multiple()
+                FileUpload::make('school')->multiple()
 
 
 
@@ -647,7 +648,7 @@ class InvoResource extends Resource
     {
         return [
             InvoiceLogRelationManager::class,
-            PaymentRelationManager::class,
+            // PaymentRelationManager::class,
         ];
     }
 

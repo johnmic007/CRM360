@@ -22,6 +22,10 @@ Route::get('/trainer-visits/{id}/download', [TrainerVisitController::class, 'dow
 
 
 
+Route::get('/', function () {
+    return redirect('/admin');
+});
+
 use App\Http\Controllers\TaskController;
 
 Route::get('/tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
