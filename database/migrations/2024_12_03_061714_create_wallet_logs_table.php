@@ -20,7 +20,6 @@ return new class extends Migration
             $table->date('payment_date');
             $table->string('payment_proof')->nullable();
             $table->string('reference_number', 100)->unique();
-            $table->unsignedBigInteger('approved_by')->nullable();
             $table->enum('type', ['debit', 'credit']); // Debit or credit transaction
             $table->string('description')->nullable(); // Description of the transaction
             $table->unsignedBigInteger('approved_by')->nullable(); // Who approved the transaction

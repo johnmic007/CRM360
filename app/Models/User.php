@@ -163,7 +163,6 @@ class User extends Authenticatable
         // Fetch all subordinates recursively
         $subordinateIds = $user->getAllSubordinateIds();
 
-        dd($subordinateIds);
 
         return $query->whereIn('id', $subordinateIds); // Include all subordinates
     }
