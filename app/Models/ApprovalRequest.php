@@ -38,23 +38,25 @@ class ApprovalRequest extends Model
 
 
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::saved(function ($approvalRequest) {
-            // Check if the status is 'Approved'
-            if ($approvalRequest->status === 'Approved') {
-                // Create a new SalesLeadManagement record
-                SalesLeadManagement::create([
-                    'school_id' => $approvalRequest->school_id,
-                    'allocated_to' => $approvalRequest->user_id,
-                    'company_id' => $approvalRequest->company_id,
-                    'status' => 'School Nurturing',
-                ]);
-            }
-        });
-    }
+    //     static::saved(function ($approvalRequest) {
+    //         // Check if the status is 'Approved'
+
+    //         // dd($approvalRequest);
+    //         if ($approvalRequest->status === 'Approved') {
+    //             // Create a new SalesLeadManagement record
+    //             SalesLeadManagement::create([
+    //                 'school_id' => $approvalRequest->school_id,
+    //                 'allocated_to' => $approvalRequest->user_id,
+    //                 'company_id' => $approvalRequest->company_id,
+    //                 'status' => 'School Nurturing',
+    //             ]);
+    //         }
+    //     });
+    // }
 
 
 }

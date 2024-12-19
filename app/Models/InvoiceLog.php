@@ -15,6 +15,7 @@ class InvoiceLog extends Model
         'invoice_id',
         'type',
         'description',
+        'head_id',
         'payment_method',
         'reference_number',
         'paid_amount',

@@ -45,7 +45,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'allocated_districts' => 'array', 
+        'allocated_districts' => 'array',
         'allocated_blocks' => 'array',
     ];
 
@@ -56,6 +56,36 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')
             ->where('model_has_roles.model_type', self::class);
+    }
+
+
+    public function issuedBooks()
+    {
+        return $this->hasMany(IssuedBook::class, 'user_id');
+    }
+
+    public function leadStatuses()
+    {
+        return $this->hasMany(SalesLeadStatus::class, 'created_by');
+    }
+    
+
+    public function     DealClosedBy
+    ()
+    {
+        return $this->hasMany(Invoice::class, 'closed_by');
+    }
+
+
+    public function bookLogs()
+    {
+        return $this->hasMany(TestBookLog::class, 'user_id');
+    }
+
+
+    public function SchoolCopy()
+    {
+        return $this->hasMany(TestBookLog::class, 'created_by');
     }
 
 
@@ -76,9 +106,9 @@ class User extends Authenticatable
 
 
     public function walletLogs()
-{
-    return $this->hasMany(WalletLog::class);
-}
+    {
+        return $this->hasMany(WalletLog::class);
+    }
 
 
     // User.php model
@@ -132,6 +162,8 @@ class User extends Authenticatable
 
         // Fetch all subordinates recursively
         $subordinateIds = $user->getAllSubordinateIds();
+
+        dd($subordinateIds);
 
         return $query->whereIn('id', $subordinateIds); // Include all subordinates
     }

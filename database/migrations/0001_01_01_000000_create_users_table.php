@@ -17,6 +17,13 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->integer('wallet_balance');
+            $table->string('allocated_districts');
+            $table->string('allocated_blocks');
+            $table->string('company_id');
+            $table->string('manager_id');
+
+
             $table->rememberToken();
             $table->timestamps();
         });

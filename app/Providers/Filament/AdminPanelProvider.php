@@ -27,16 +27,16 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
 
-        $widgets = [
-            WalletBalanceWidget::class,
-            CalendarWidget::class,
-        ];
+        // $widgets = [
+        //     WalletBalanceWidget::class,
+        //     CalendarWidget::class,
+        // ];
         
-        // Conditionally add the DealWonLineChartWidget and SalesLeadChartWidget
-        if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales'])) {
-            $widgets[] = DealWonLineChartWidget::class;
-            $widgets[] = SalesLeadChartWidget::class;
-        }
+        // // Conditionally add the DealWonLineChartWidget and SalesLeadChartWidget
+        // if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales'])) {
+        //     $widgets[] = DealWonLineChartWidget::class;
+        //     $widgets[] = SalesLeadChartWidget::class;
+        // }
         
         return $panel
             ->default()
@@ -52,16 +52,16 @@ class AdminPanelProvider extends PanelProvider
                 Pages\Dashboard::class,
             ])
             ->sidebarCollapsibleOnDesktop()
-            // ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            // ->widgets([
-            //     // Widgets\AccountWidget::class,
-            //     // Widgets\FilamentInfoWidget::class,
-            //     WalletBalanceWidget::class,
-            //     CalendarWidget::class,
-            //     SalesLeadChartWidget::class,
-            //     DealWonLineChartWidget::class,
-            // ])
-            ->widgets($widgets)
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+            ->widgets([
+                // Widgets\AccountWidget::class,
+                // Widgets\FilamentInfoWidget::class,
+                WalletBalanceWidget::class,
+                CalendarWidget::class,
+                SalesLeadChartWidget::class,
+                DealWonLineChartWidget::class,
+            ])
+            ->databaseNotifications()
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

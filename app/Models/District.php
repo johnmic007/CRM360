@@ -9,5 +9,12 @@ class District extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name' , 'state_id'];
+
+
+
+    public function blocks()
+    {
+        return $this->hasMany(Block::class);
+    }
 }

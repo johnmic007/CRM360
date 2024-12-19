@@ -2,7 +2,11 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\SchoolResource\RelationManagers\LeadStatusesRelationManager;
 use App\Filament\Resources\UserResource\Pages;
+use App\Filament\Resources\UserResource\RelationManagers\DealClosedByRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\IssuedBooksRelationManager;
+use App\Filament\Resources\UserResource\RelationManagers\SchoolCopyRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\WalletPaymentLogsRelationManager;
 use App\Filament\Resources\WalletLogsResource\RelationManagers\UserRelationManager;
 use App\Filament\Resources\WalletLogsResource\RelationManagers\WalletLogsRelationManager;
@@ -35,8 +39,23 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales', 'head', 'zonal_manager', 'regional _manager', 'senior_manager']);
+        return auth()->user()->hasRole(['admin', 'sales', 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
     }
+
+
+    public static function getModelLabel(): string
+    {
+        $user = auth()->user();
+
+        // Check if user has BDA or BDM role
+        if ($user && $user->hasRole(['bda', 'bdm'])) {
+            return 'Team';
+        }
+
+        // Return a default label or empty string if you want no label otherwise
+        return 'Users';
+    }
+
 
     public static function form(Form $form): Form
     {
@@ -52,8 +71,11 @@ class UserResource extends Resource
                     ->email()
                     ->required()
                     ->maxLength(255)
-                    ->unique(User::class, 'email'),
-
+                    ->unique(
+                        User::class,
+                        'email',
+                        ignoreRecord: true // This will ignore the current record when checking uniqueness
+                    ),
                 // Password input
                 TextInput::make('password')
                     ->password()
@@ -158,6 +180,28 @@ class UserResource extends Resource
                     })
                     ->nullable()
                     ->helperText('Assign a manager (only users with higher roles will appear).'),
+
+
+
+                // Forms\Components\Repeater::make('issued_books')
+                //     ->label('Issue Demo Books')
+                //     ->relationship('issuedBooks')
+                //     ->schema([
+                //         Select::make('book_id')
+                //             ->label('Book')
+                //             ->options(\App\Models\Book::pluck('title', 'id')) // Fetch books dynamically
+                //             ->required(),
+                //         TextInput::make('count')
+                //             ->label('Count')
+                //             ->numeric()
+                //             ->minValue(1)
+                //             ->required()
+                //             ->helperText('Enter the number of demo books issued.')
+                //     ])
+                //     ->createItemButtonLabel('Issue New Book')
+                //     ->columns(2)
+                //     ->collapsed(),
+
             ]);
     }
 
@@ -245,6 +289,7 @@ class UserResource extends Resource
                     ->label('Top-Up Wallet')
                     ->icon('heroicon-o-plus-circle')
                     ->color('success')
+                    ->visible(fn(User $record) => auth()->user()->hasRole('admin') || auth()->user()->hasRole('sales'))
                     ->modalHeading('Top-Up Wallet')
                     ->form([
                         TextInput::make('amount')
@@ -270,7 +315,6 @@ class UserResource extends Resource
 
                         DatePicker::make('payment_date')
                             ->required(),
-
 
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
@@ -304,10 +348,15 @@ class UserResource extends Resource
                             'reference_number' => $data['reference_number'],
                             'payment_proof' => $paymentProofPath,
                         ]);
+
+                        // Send a database notification to the user
+                        \Filament\Notifications\Notification::make()
+                            ->title('Wallet Top-Up Successful')
+                            ->body("Your wallet has been credited with an amount of $amount.")
+                            ->success()
+                            ->sendToDatabase($record);
                     })
                     ->requiresConfirmation()
-                // ->visible(fn(User $record) => auth()->user()->hasRole('sales'))
-
             ]);
     }
 
@@ -317,6 +366,12 @@ class UserResource extends Resource
     {
         return [
             WalletLogsRelationManager::class,
+            IssuedBooksRelationManager::class,
+            SchoolCopyRelationManager::class,
+            LeadStatusesRelationManager::class,
+            DealClosedByRelationManager::class,
+
+
         ];
     }
 

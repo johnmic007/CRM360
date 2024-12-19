@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('manager_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('school_id')->constrained('schools')->onDelete('cascade');
+            $table->integer('company_id');
+            $table->string('message')->unique(); // State name
             $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
             $table->timestamps();
         });

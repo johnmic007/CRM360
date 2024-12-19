@@ -49,7 +49,7 @@ class EditTrainerVisit extends EditRecord
                     }
 
                     // Calculate the total expenses
-                    $totalExpense = $record->travel_expense + $record->food_expense;
+                    $totalExpense = $record->total_expense ;
 
                     // Check wallet balance
                     if ($user->wallet_balance < $totalExpense) {

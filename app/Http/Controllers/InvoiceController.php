@@ -15,7 +15,7 @@ class InvoiceController extends Controller
    
     public function downloadInvoice($id)
     {
-        $invoice = Invoice::with(['school', 'company', 'items'])->findOrFail($id);
+        $invoice = Invoice::with(['school', 'company', 'items.item'])->findOrFail($id);
 
         // Render the Blade template
         $html = View::make('invoices.pdf', compact('invoice'))->render();
@@ -35,5 +35,31 @@ class InvoiceController extends Controller
             fn () => print($dompdf->output()),
             'invoice_' . $invoice->invoice_number . '.pdf'
         );
+    }
+
+
+    public function downloadInvoiceCurriculum ($id){
+
+        $invoice = Invoice::with(['school', 'company', 'items.item'])->findOrFail($id);
+
+        // Render the Blade template
+        $html = View::make('invoices.pdf2', compact('invoice'))->render();
+
+        // Initialize Dompdf
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+
+        // Set paper size and orientation
+        $dompdf->setPaper('A4', 'portrait');
+
+        // Render the PDF
+        $dompdf->render();
+
+        // Return the PDF as a download
+        return response()->streamDownload(
+            fn () => print($dompdf->output()),
+            'invoice_' . $invoice->invoice_number . '.pdf'
+        );
+
     }
 }

@@ -10,10 +10,10 @@ class EditSalesLeadManagement extends EditRecord
 {
     protected static string $resource = SalesLeadManagementResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Actions\DeleteAction::make(),
+    //     ];
+    // }
 }

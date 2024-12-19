@@ -17,7 +17,6 @@ class Book extends Model
         'isbn',
         'price',
         'total',
-        'price',
         'published_year',
         'description',
         'school_id',
@@ -31,6 +30,19 @@ class Book extends Model
     public function schools()
 {
     return $this->belongsToMany(School::class, 'school_book');
+}
+
+public function bookLogs()
+{
+    return $this->hasMany(BookLog::class);
+}
+
+/**
+ * The issued records for this book.
+ */
+public function issuedBooks()
+{
+    return $this->hasMany(IssuedBook::class);
 }
 
 

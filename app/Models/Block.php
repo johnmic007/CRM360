@@ -15,4 +15,10 @@ class Block extends Model
     {
         return $this->belongsTo(District::class);
     }
+
+
+    public function schools()
+    {
+        return $this->hasMany(School::class);
+    }
 }

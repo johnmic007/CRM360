@@ -23,11 +23,11 @@ class ListTasks extends ListRecords
     {
         return parent::getTableQuery()
             ->when(
-                !auth()->user()->hasRole('admin'),
+                !auth()->user()->hasRole(['admin' , 'head_trainer']),
                 fn (Builder $query) => $query->where('user_id', auth()->id()) // Non-admins see only their tasks
             )
             ->when(
-                auth()->user()->hasRole(['admin', 'sales']), // Admins and Sales see all tasks for their company
+                auth()->user()->hasRole(['admin', 'sales' , 'head_trainer']), // Admins and Sales see all tasks for their company
                 fn (Builder $query) => $query->where('company_id', auth()->user()->company_id) // Admins see tasks for their company
             );
     }
@@ -36,7 +36,7 @@ class ListTasks extends ListRecords
     {
         $userId = auth()->id();
         $companyId = auth()->user()->company_id;
-        $isAdmin = auth()->user()->hasRole('admin');
+        $isAdmin = auth()->user()->hasRole(['admin', 'head_trainer']);
 
         return [
             'all' => Tab::make('All Tasks')

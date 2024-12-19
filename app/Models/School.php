@@ -13,7 +13,11 @@ class School extends Model
         'id',
         'name',
         'block_id',
+        'board_id',
+        'state_id',
+        'district_id',
         'address',
+        'pincode',
         'status',
         'book_id',
         'payment_status',
@@ -25,6 +29,16 @@ class School extends Model
     public function block()
     {
         return $this->belongsTo(Block::class);
+    }
+
+    public function district()
+    {
+        return $this->belongsTo(District::class);
+    }
+
+    public function state()
+    {
+        return $this->belongsTo(State::class);
     }
 
     public function board()
@@ -59,8 +73,18 @@ class School extends Model
     // }
 
 
+    public function mou()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
     }
+
+
+
+
+    
 }

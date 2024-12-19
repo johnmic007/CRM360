@@ -12,16 +12,16 @@ class ListCustomers extends ListRecords
 {
     protected static string $resource = CustomerResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
+    // protected function getHeaderActions(): array
+    // {
+    //     return [
+    //         Actions\CreateAction::make(),
+    //     ];
+    // }
 
     protected function getTableQuery(): Builder
     {
         // Get the default query and apply the filter for "paid" status
-        return parent::getTableQuery()->where('status', 'paid');
+        return parent::getTableQuery()->where('payment_status', 'paid');
     }
 }

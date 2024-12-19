@@ -19,109 +19,129 @@ class ListSalesLeadManagement extends ListRecords
         ];
     }
 
-
     protected function getTableQuery(): Builder
     {
+        $user = auth()->user();
+
         return parent::getTableQuery()
             ->when(
-                !auth()->user()->hasRole('admin'),
-                fn (Builder $query) => $query->where('allocated_to', auth()->id()) // Non-admins see only their tasks
-            )
-            ->when(
-                auth()->user()->hasRole(['admin', 'sales']), // Admins and Sales see all tasks for their company
-                fn (Builder $query) => $query->where('company_id', auth()->user()->company_id) // Admins see tasks for their company
+                !$user->hasRole('admin'),
+                fn(Builder $query) => $query->where(function ($subQuery) use ($user) {
+                    $accessibleUserIds = $user->getAllSubordinateIds();
+                    $accessibleUserIds[] = $user->id; // Include the user's own ID
+                    $subQuery->whereIn('allocated_to', $accessibleUserIds);
+                })
             );
     }
 
     public function getTabs(): array
     {
-        $userCompanyId = auth()->user()->company_id;
+        $user = auth()->user();
+        $userCompanyId = $user->company_id;
+
+
+        if ($user->hasRole('admin')) {
+            return [
+                'all' => Tab::make('All Leads')
+                    ->modifyQueryUsing(fn(Builder $query) => $query),
+
+                'deal_won' => Tab::make('Deal Won')
+                    ->modifyQueryUsing(
+                        fn(Builder $query) =>
+                        $query->whereIn('status', 'deal_won')
+                        
+                    ),
+
+                    'deal_lost' => Tab::make('Deal Lost')
+                    ->modifyQueryUsing(
+                        fn(Builder $query) =>
+                        $query->whereIn('status', 'deal_lost')
+                        
+                    )
+            ];
+        }
+
+        // Fetch subordinates' IDs
+        $accessibleUserIds = $user->getAllSubordinateIds();
+        $accessibleUserIds[] = $user->id;
 
         return [
             'all' => Tab::make('All Leads')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('company_id', $userCompanyId)),
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereIn('allocated_to', $accessibleUserIds)
+                        ->where('company_id', $userCompanyId)
+                ),
 
             'deal_won' => Tab::make('Deal Won')
-                ->modifyQueryUsing(fn (Builder $query) => 
-                    $query->where('status', 'deal_won')
-                          ->where('company_id', $userCompanyId))
-                ->badge(fn () => $this->getDealWonCount($userCompanyId)),
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereIn('allocated_to', $accessibleUserIds)
+                        ->where('status', 'deal_won')
+                        ->where('company_id', $userCompanyId)
+                )
+                ->badge(fn() => $this->getDealWonCount($accessibleUserIds, $userCompanyId)),
 
             'deal_lost' => Tab::make('Deal Lost')
-                ->modifyQueryUsing(fn (Builder $query) => 
-                    $query->where('status', 'deal_lost')
-                          ->where('company_id', $userCompanyId))
-                ->badge(fn () => $this->getDealLostCount($userCompanyId)),
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereIn('allocated_to', $accessibleUserIds)
+                        ->where('status', 'deal_lost')
+                        ->where('company_id', $userCompanyId)
+                )
+                ->badge(fn() => $this->getDealLostCount($accessibleUserIds, $userCompanyId)),
 
             'demo_completed' => Tab::make('Demo Completed')
-                ->modifyQueryUsing(fn (Builder $query) => 
-                    $query->where('status', 'Demo Completed')
-                          ->where('company_id', $userCompanyId))
-                ->badge(fn () => $this->getDemoCompletedCount($userCompanyId)),
-
-            // 'demo_rescheduled' => Tab::make('Demo Rescheduled')
-            //     ->modifyQueryUsing(fn (Builder $query) => 
-            //         $query->where('status', 'Demo reschedule')
-            //               ->where('company_id', $userCompanyId))
-            //     ->badge(fn () => $this->getDemoRescheduledCount($userCompanyId)),
-
-            // 'lead_re_engaged' => Tab::make('Lead Re-engaged')
-            //     ->modifyQueryUsing(fn (Builder $query) => 
-            //         $query->where('status', 'Lead Re-engaged')
-            //               ->where('company_id', $userCompanyId))
-            //     ->badge(fn () => $this->getLeadReEngagedCount($userCompanyId)),
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereIn('allocated_to', $accessibleUserIds)
+                        ->where('status', 'Demo Completed')
+                        ->where('company_id', $userCompanyId)
+                )
+                ->badge(fn() => $this->getDemoCompletedCount($accessibleUserIds, $userCompanyId)),
 
             'school_nurturing' => Tab::make('School Nurturing')
-                ->modifyQueryUsing(fn (Builder $query) => 
-                    $query->where('status', 'School Nurturing')
-                          ->where('company_id', $userCompanyId))
-                ->badge(fn () => $this->getSchoolNurturingCount($userCompanyId)),
+                ->modifyQueryUsing(
+                    fn(Builder $query) =>
+                    $query->whereIn('allocated_to', $accessibleUserIds)
+                        ->where('status', 'School Nurturing')
+                        ->where('company_id', $userCompanyId)
+                )
+                ->badge(fn() => $this->getSchoolNurturingCount($accessibleUserIds, $userCompanyId)),
         ];
     }
 
-    protected function getDealWonCount(int $companyId): int
+    protected function getDealWonCount(array $accessibleUserIds, int $companyId): int
     {
         return SalesLeadManagementResource::getEloquentQuery()
+            ->whereIn('allocated_to', $accessibleUserIds)
             ->where('status', 'deal_won')
             ->where('company_id', $companyId)
             ->count();
     }
 
-    protected function getDealLostCount(int $companyId): int
+    protected function getDealLostCount(array $accessibleUserIds, int $companyId): int
     {
         return SalesLeadManagementResource::getEloquentQuery()
+            ->whereIn('allocated_to', $accessibleUserIds)
             ->where('status', 'deal_lost')
             ->where('company_id', $companyId)
             ->count();
     }
 
-    protected function getDemoCompletedCount(int $companyId): int
+    protected function getDemoCompletedCount(array $accessibleUserIds, int $companyId): int
     {
         return SalesLeadManagementResource::getEloquentQuery()
+            ->whereIn('allocated_to', $accessibleUserIds)
             ->where('status', 'Demo Completed')
             ->where('company_id', $companyId)
             ->count();
     }
 
-    protected function getDemoRescheduledCount(int $companyId): int
+    protected function getSchoolNurturingCount(array $accessibleUserIds, int $companyId): int
     {
         return SalesLeadManagementResource::getEloquentQuery()
-            ->where('status', 'Demo reschedule')
-            ->where('company_id', $companyId)
-            ->count();
-    }
-
-    protected function getLeadReEngagedCount(int $companyId): int
-    {
-        return SalesLeadManagementResource::getEloquentQuery()
-            ->where('status', 'Lead Re-engaged')
-            ->where('company_id', $companyId)
-            ->count();
-    }
-
-    protected function getSchoolNurturingCount(int $companyId): int
-    {
-        return SalesLeadManagementResource::getEloquentQuery()
+            ->whereIn('allocated_to', $accessibleUserIds)
             ->where('status', 'School Nurturing')
             ->where('company_id', $companyId)
             ->count();

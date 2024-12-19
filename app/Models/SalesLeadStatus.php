@@ -11,6 +11,8 @@ class SalesLeadStatus extends Model
     protected $fillable = [
         'sales_lead_management_id', 
         'potential_meet',
+        'created_by',
+        'is_book_issued',
         'school_id', 
         'visited_by', 
         'status', 
@@ -28,7 +30,12 @@ class SalesLeadStatus extends Model
 
     public function school()
     {
-        return $this->belongsTo(School::class, 'school_id');
+        return $this->belongsTo(School::class);
+    }
+
+    public function issuedBooksLog()
+    {
+        return $this->hasMany(TestBookLog::class, 'lead_id');
     }
 
     public function visitedBy()
@@ -57,6 +64,10 @@ class SalesLeadStatus extends Model
             // Automatically assign the visited_by field to the authenticated user
             if (!$status->visited_by && Auth::check()) {
                 $status->visited_by = Auth::id();
+            }
+
+            if (!$status->created_by && Auth::check()) {
+                $status->created_by = Auth::id();
             }
 
             // Default status if SalesLeadManagement is not found or status is still empty

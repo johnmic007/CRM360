@@ -1,85 +1,90 @@
 <?php
 
-
 namespace App\Filament\Widgets;
 
 use Guava\Calendar\Widgets\CalendarWidget as BaseCalendarWidget;
 use App\Models\Task;
+use App\Models\SalesLeadStatus;
 use Illuminate\Support\Collection;
 
 class CalendarWidget extends BaseCalendarWidget
 {
     protected bool $eventClickEnabled = true;
 
-    protected static ?int $sort = 1;  // Ensure it comes after WalletBalanceWidget
-
+    protected static ?int $sort = 2;
 
     public function getEvents(array $fetchInfo = []): Collection | array
     {
-        return Task::where('user_id', auth()->id())
-            ->with('school') // Eager load the school relationship
+        $taskEvents = Task::where('user_id', auth()->id())
+            ->with('school')
             ->get()
             ->map(fn ($task) => [
-                'title' => $task->title . ' - ' . ($task->school ? $task->school->name : 'No School Assigned'), // Show title and school name
+                'title' => $task->title . ' - ' . ($task->school ? $task->school->name : 'No School Assigned'),
                 'start' => $task->start_date,
                 'end' => $task->end_date,
                 'id' => $task->id,
+                'type' => 'task', // Add event type
                 'backgroundColor' => $this->getStatusColor($task->status),
                 'borderColor' => '#ccc',
                 'extendedProps' => [
                     'description' => $task->description,
                     'status' => ucfirst($task->status),
-                    'school_name' => $task->school ? $task->school->name : 'No School Assigned', // Just the name of the school
+                    'school_name' => $task->school ? $task->school->name : 'No School Assigned',
                 ],
-            ])
-            ->toArray();
+            ])->toArray();
+
+        $salesLeadEvents = SalesLeadStatus::where('created_by', auth()->id())
+            ->with('school')
+            ->get()
+            ->map(fn ($lead) => [
+                'title' => 'Follow-up - ' . ($lead->school ? $lead->school->name : 'No School Assigned'),
+                'start' => $lead->follow_up_date,
+                'end' => $lead->follow_up_date,
+                'id' => $lead->id,
+                'type' => 'salesLead', // Add event type
+                'backgroundColor' => '#007bff', // Blue for Sales Leads
+                'borderColor' => '#ccc',
+                'extendedProps' => [
+                    'status' => ucfirst($lead->status),
+                    'remarks' => $lead->remarks,
+                    'contacted_person' => $lead->contacted_person,
+                    'school_name' => $lead->school ? $lead->school->name : 'No School Assigned',
+                ],
+            ])->toArray();
+
+        return array_merge($taskEvents, $salesLeadEvents);
     }
 
     protected function getStatusColor(string $status): string
     {
         return match ($status) {
-            'pending' => '#ff9800', // Orange
-            'in_progress' => '#2196f3', // Blue
-            'completed' => '#4caf50', // Green
-            'cancelled' => '#f44336', // Red
-            default => '#9e9e9e', // Grey
+            'pending' => '#ff9800',
+            'in_progress' => '#2196f3',
+            'completed' => '#4caf50',
+            'cancelled' => '#f44336',
+            default => '#9e9e9e',
         };
     }
 
     public function onEventClick(array $info = [], ?string $action = null): void
-    {
-        $taskId = $info['event']['id'] ?? null;
-        if ($taskId) {
-            $this->redirect("/admin/tasks/{$taskId}/edit");
-        }
+{
+    $event = $info['event'] ?? [];
+    $eventId = $event['id'] ?? null;
+
+    // Check if the 'contacted_person' field exists in extendedProps
+    $eventType = isset($event['extendedProps']['contacted_person']) ? 'salesLead' : 'task';
+    // dd($eventType);
+    if ($eventType === 'task' && $eventId) {
+        // Redirect only for task events
+        $this->redirect("/admin/tasks/{$eventId}/edit");
     }
 
-    protected function getCustomJavaScript(): ?string
-    {
-        return <<<JS
-        document.addEventListener('DOMContentLoaded', function () {
-            var calendarEl = document.querySelector('[data-calendar-widget]');
-            if (calendarEl) {
-                var calendar = new FullCalendar.Calendar(calendarEl, {
-                    eventMouseEnter: function(info) {
-                        var tooltip = document.createElement('div');
-                        tooltip.classList.add('calendar-tooltip');
-                        tooltip.innerHTML = '<strong>' + info.event.title + '</strong><br>' +
-                                            'Status: ' + info.event.extendedProps.status + '<br>' +
-                                            'School: ' + info.event.extendedProps.school_name + '<br>' +
-                                            (info.event.extendedProps.description || '');
-                        document.body.appendChild(tooltip);
-                        tooltip.style.left = info.jsEvent.pageX + 'px';
-                        tooltip.style.top = info.jsEvent.pageY + 'px';
-                    },
-                    eventMouseLeave: function() {
-                        var tooltips = document.querySelectorAll('.calendar-tooltip');
-                        tooltips.forEach(t => t.remove());
-                    },
-                });
-                calendar.render();
-            }
-        });
-JS;
-    }
+    // For salesLead events, do nothing
+    // if ($eventType === 'salesLead') {
+    //     \Log::info("SalesLead event clicked. ID: {$eventId}");
+    // }
 }
+
+    
+}
+    

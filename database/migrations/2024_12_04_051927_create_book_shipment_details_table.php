@@ -19,11 +19,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('book_shipment', function (Blueprint $table) {
-            $table->id();
-            $table->integer('school_id');
-            $table->integer('status');
-            $table->timestamps();
+        Schema::create('book_shipments', function (Blueprint $table) {
+            $table->id(); 
+            $table->unsignedBigInteger('school_id'); 
+            $table->unsignedBigInteger('company_id'); 
+            $table->string('status')->default('pending'); 
+            $table->unsignedBigInteger('district_id')->nullable(); 
+            $table->unsignedBigInteger('block_id')->nullable(); 
+            $table->string('mode_of_transport')->nullable(); 
+            $table->unsignedBigInteger('closed_by')->nullable(); 
+            $table->string('tracking_number')->nullable(); 
+            $table->string('bills_and_gatepass')->nullable(); 
+            $table->text('remarks')->nullable(); 
+            $table->timestamps(); 
+            $table->softDeletes();
         });
     }
 

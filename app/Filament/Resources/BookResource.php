@@ -49,13 +49,13 @@ class BookResource extends Resource
                 ->unique(Book::class, 'isbn')
                 ->maxLength(13),
 
-                TextInput::make('price')
-                ->label('Price')
-                ->required()
-                ->numeric()
-                ->prefix('₹') // Adds a dollar sign before the input
-                ->minValue(0)
-                ->placeholder('Enter the book price'),            
+                // TextInput::make('price')
+                // ->label('Price')
+                // ->required()
+                // ->numeric()
+                // ->prefix('₹') // Adds a dollar sign before the input
+                // ->minValue(0)
+                // ->placeholder('Enter the book price'),            
 
             TextInput::make('published_year')
                 ->label('Published Year')

@@ -70,20 +70,20 @@ class SchoolResource extends Resource
                 ->required()
                 ->helperText('Select the block within the selected district.'),
 
-            Select::make('school_id')
-                ->label('School')
-                // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
-                ->options(function (callable $get) {
-                    $blockId = $get('block_id');
-                    if (!$blockId) {
-                        return [];
-                    }
-                    return School::where('block_id', $blockId)->pluck('name', 'id')->toArray();
-                })
-                ->placeholder('Select a school')
-                ->reactive()
-                ->required()
-                ->helperText('Select the school where this task will take place.'),
+            // Select::make('school_id')
+            //     ->label('School')
+            //     // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+            //     ->options(function (callable $get) {
+            //         $blockId = $get('block_id');
+            //         if (!$blockId) {
+            //             return [];
+            //         }
+            //         return School::where('block_id', $blockId)->pluck('name', 'id')->toArray();
+            //     })
+            //     ->placeholder('Select a school')
+            //     ->reactive()
+            //     ->required()
+            //     ->helperText('Select the school where this task will take place.'),
 
             TextInput::make('name')
                 ->label('School Name')
@@ -154,8 +154,8 @@ class SchoolResource extends Resource
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('status')
-                    ->label('Status')
+                Tables\Columns\TextColumn::make('payment_status')
+                    ->label('Payment Status')
                     ->badge()
                     ->color(function ($state) {
                         return match ($state) {

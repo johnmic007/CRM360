@@ -17,9 +17,9 @@
 >
     <div class="flex justify-center items-center p-4 rounded-lg shadow-lg bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
         <!-- School Name Label -->
-        <span class="text-sm font-medium opacity-80 mr-2">
+        <!-- <span class="text-sm font-medium opacity-80 mr-2">
             School Name:
-        </span>
+        </span> -->
         <!-- School Name Display -->
         <span class="text-base font-semibold tracking-wide">
             {{ $record->school->name ?? 'No School Assigned' }}

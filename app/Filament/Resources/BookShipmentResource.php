@@ -26,7 +26,12 @@ class BookShipmentResource extends Resource
 {
     protected static ?string $model = BookShipment::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-truck';
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales']);
+    }
 
     public static function form(Form $form): Form
     {
@@ -35,11 +40,26 @@ class BookShipmentResource extends Resource
                 ->schema([
                     Forms\Components\Grid::make(2)
                         ->schema([
+                            Forms\Components\Select::make('state_id')
+                                ->label('State')
+                                ->options(\App\Models\State::pluck('name', 'id')->toArray()) // Fetch states using Eloquent
+                                ->reactive()
+                                ->required()
+                                ->afterStateUpdated(fn(callable $set) => $set('district_id', null)), // Reset district when state changes
+
                             Forms\Components\Select::make('district_id')
                                 ->label('District')
-                                ->options(District::pluck('name', 'id')->toArray()) // Fetch districts using Eloquent
+                                ->options(function (callable $get) {
+                                    $stateId = $get('state_id');
+                                    if (!$stateId) {
+                                        return [];
+                                    }
+                                    // Fetch districts for the chosen state
+                                    return \App\Models\District::where('state_id', $stateId)->pluck('name', 'id')->toArray();
+                                })
                                 ->reactive()
-                                ->required(),
+                                ->required()
+                                ->afterStateUpdated(fn(callable $set) => $set('block_id', null)),
 
                             Forms\Components\Select::make('block_id')
                                 ->label('Block')
@@ -55,13 +75,44 @@ class BookShipmentResource extends Resource
 
                             Forms\Components\Select::make('school_id')
                                 ->label('School')
+                                // ->options(function (callable $get) {
+                                //     $blockId = $get('block_id');
+                                //     if (!$blockId) {
+                                //         return [];
+                                //     }
+                                //     return School::where('block_id', $blockId)->pluck('name', 'id')->toArray(); // Fetch schools using Eloquent
+                                // })
+
+                                // ->options(function (callable $get) {
+                                //     $blockId = $get('block_id');
+                                //     if (!$blockId) {
+                                //         return [];
+                                //     }
+
+                                //     // Adjust the condition inside whereHas based on how you define "invoice signed."
+                                //     // For example, if "signed invoice" means `payment_status = 'Paid'`, you can add that condition:
+                                //     return School::where('block_id', $blockId)
+                                //         ->whereHas('invoices', function ($query) {
+                                //             $query->where('payment_status', 'Paid');
+                                //         })
+                                //         ->pluck('name', 'id')
+                                //         ->toArray();
+                                // })
+
+
                                 ->options(function (callable $get) {
                                     $blockId = $get('block_id');
                                     if (!$blockId) {
                                         return [];
                                     }
-                                    return School::where('block_id', $blockId)->pluck('name', 'id')->toArray(); // Fetch schools using Eloquent
+
+                                    return School::where('block_id', $blockId)
+                                        ->whereHas('mou') // Just checks for existence of any related invoice
+                                        ->pluck('name', 'id')
+                                        ->toArray();
                                 })
+
+
                                 ->reactive()
                                 ->required()
                                 ->helperText('Select the school to which books will be shipped.'),
@@ -136,7 +187,7 @@ class BookShipmentResource extends Resource
             Forms\Components\Section::make('Books to Ship')
                 ->schema([
                     Repeater::make('details')
-                    ->relationship('details') // Refers to the books relationship in the model
+                        ->relationship('details') // Refers to the books relationship in the model
 
                         ->schema([
                             Select::make('book_id')

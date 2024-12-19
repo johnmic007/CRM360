@@ -11,6 +11,7 @@ use App\Filament\Resources\PaymentResource\RelationManagers\PaymentRelationManag
 use App\Helpers\InvoiceHelper;
 use App\Models\Invo;
 use App\Models\Invoice;
+use App\Models\Items;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -18,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\User;
 use App\Models\Role;
+use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\HasManyRepeater;
@@ -31,10 +33,14 @@ use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup as ActionsActionGroup;
+use Filament\Tables\Actions\GroupAction;
 
 class InvoResource extends Resource
 {
@@ -43,11 +49,11 @@ class InvoResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $label = 'MOU'; // Singular form
-protected static ?string $pluralLabel = 'MOUs'; 
+    protected static ?string $pluralLabel = 'MOUs';
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm', 'bda']);
+        return auth()->user()->hasRole(['admin', 'head', 'sales']);
     }
 
     public static function form(Form $form): Form
@@ -80,7 +86,7 @@ protected static ?string $pluralLabel = 'MOUs';
                                 ->disabled(), // Make the field non-editable
 
 
-                                TextInput::make('students_count')
+                            TextInput::make('students_count')
                                 ->label('No of students')
                                 ->numeric()
                                 ->default(0)
@@ -110,7 +116,7 @@ protected static ?string $pluralLabel = 'MOUs';
                                     // $totalBooks = array_sum(array_column($get('books') ?? [], 'books_count'));
                                     // $set('books_count', $totalBooks);
                                 }),
-                
+
 
                             DatePicker::make('issue_date')
                                 ->label('Issue Date')
@@ -139,38 +145,39 @@ protected static ?string $pluralLabel = 'MOUs';
                     HasManyRepeater::make('items')
                         ->relationship('items')
                         ->schema([
-                            TextInput::make('item_name')
-                                ->label('Item Name')
-                                ->required(),
+                            Select::make('item_id') // Change to a select input for items
+                                ->label('Item')
+                                ->options(Items::pluck('name', 'id')->toArray()) // Fetch items from the Items model
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(function (callable $set, $get, $state) {
+                                    $item = Items::find($state); // Find the selected item
+                                    if ($item) {
+                                        $set('price', $item->price); // Set the price from the selected item
+                                        // Update the total based on quantity and price
+                                        $quantity = $get('quantity') ?? 0;
+                                        $set('total', $quantity * $item->price);
+                                    }
+                                }),
 
-                            TextInput::make('description')
-                                ->label('Description')
-                                ->nullable(),
 
                             Grid::make(3)
                                 ->schema([
-                                    // TextInput::make('quantity')
-                                    //     ->label('Quantity')
-                                    //     ->numeric()
-                                    //     ->required()
-                                    //     ->reactive()
-                                    //     ->afterStateUpdated(function (callable $set, $get, $state) {
-                                    //         $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
-                                    //     }),
+
 
                                     TextInput::make('quantity')
-                                    ->label('Quantity')
-                                    ->numeric()
-                                    ->default(fn ($get) => $get('../../students_count') ?? 0)
-                                    ->readOnly()
-                                    ->reactive()
-                                    ->afterStateUpdated(function (callable $set, callable $get, $state) {
-                                        $price = $get('price') ?? 0;
-                                        $set('total', $state * $price);
-                                        // Recalculate total amount
-                                        $totalAmount = InvoiceHelper::calculateTotalAmount($get('../../items'), $get('../../books'));
-                                        $set('../../total_amount', $totalAmount);
-                                    }),
+                                        ->label('Quantity')
+                                        ->numeric()
+                                        ->default(fn($get) => $get('../../students_count') ?? 0)
+                                        ->readOnly()
+                                        ->reactive()
+                                        ->afterStateUpdated(function (callable $set, callable $get, $state) {
+                                            $price = $get('price') ?? 0;
+                                            $set('total', $state * $price);
+                                            // Recalculate total amount
+                                            $totalAmount = InvoiceHelper::calculateTotalAmount($get('../../items'), $get('../../books'));
+                                            $set('../../total_amount', $totalAmount);
+                                        }),
 
 
                                     TextInput::make('price')
@@ -235,10 +242,10 @@ protected static ?string $pluralLabel = 'MOUs';
                                         ->hidden()
                                         ->default(fn(callable $get) => $get('../../school_id')), // Get the parent `school_id`
 
-                                        TextInput::make('books_count')
+                                    TextInput::make('books_count')
                                         ->label('Quantity')
                                         ->numeric()
-                                        ->default(fn ($get) => $get('../../students_count') ?? 0)
+                                        ->default(fn($get) => $get('../../students_count') ?? 0)
                                         // ->disabled()
                                         ->reactive()
                                         ->afterStateUpdated(function (callable $set, callable $get, $state) {
@@ -248,15 +255,15 @@ protected static ?string $pluralLabel = 'MOUs';
                                             $set('../../books_count', $totalBooks);
                                         }),
 
-                                        // ->afterStateUpdated(function (callable $set, $get, $state) {
+                                    // ->afterStateUpdated(function (callable $set, $get, $state) {
 
-                                        //     $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
+                                    //     $set('total', InvoiceHelper::calculateTotalAmount($get('items')));
 
-                                        //     // Recalculate total based on quantity and price when quantity is updated
-                                        //     $quantity = $state;
-                                        //     $price = $get('price') ?? 0;
-                                        //     $set('total', $quantity * $price);
-                                        // }),
+                                    //     // Recalculate total based on quantity and price when quantity is updated
+                                    //     $quantity = $state;
+                                    //     $price = $get('price') ?? 0;
+                                    //     $set('total', $quantity * $price);
+                                    // }),
 
                                     // TextInput::make('price')
                                     //     ->label('Price')
@@ -305,7 +312,7 @@ protected static ?string $pluralLabel = 'MOUs';
                                 ->readOnly()
                                 ->default(0),
 
-                                TextInput::make('books_count')
+                            TextInput::make('books_count')
                                 ->label('Total no of Books')
                                 ->numeric()
                                 ->default(0)
@@ -317,9 +324,7 @@ protected static ?string $pluralLabel = 'MOUs';
                                     return $totalBooks;
                                 }),
 
-                            Toggle::make('trainer_required')
-                                ->label('Trainer Required')
-                                ->default(0),
+                            
 
                             DatePicker::make('validity_start')
                                 ->label('Validity Start')
@@ -330,17 +335,30 @@ protected static ?string $pluralLabel = 'MOUs';
                                 ->label('Validity End')
                                 ->required()
                                 ->placeholder('Select end date')
-                                ->afterOrEqual('validity_start')
+                                ->afterOrEqual('validity_start'),
+
+                                Toggle::make('trainer_required')
+                                ->label('Trainer Required')
+                                ->default(0),
 
                         ]),
 
                     Grid::make(1)
-                        ->schema([TextInput::make('total_amount')
-                            ->label('Total Amount')
-                            ->numeric()
-                            ->disabled()
-                            ->default(0)
-                            ->extraAttributes(['class' => 'text-xl font-bold']),])
+                        ->schema([
+                            TextInput::make('total_amount')
+                                ->label('Total Amount')
+                                ->numeric()
+                                ->readOnly()
+                                ->default(0)
+                                ->dehydrated() // Ensure it is saved
+                                ->reactive()
+                                ->formatStateUsing(function (callable $get) {
+                                    $items = $get('items') ?? [];
+                                    $totalAmount = InvoiceHelper::calculateTotalAmount($items);
+                                    return $totalAmount;
+                                })
+                                ->extraAttributes(['class' => 'text-xl font-bold']),
+                        ]),
 
 
 
@@ -381,6 +399,10 @@ protected static ?string $pluralLabel = 'MOUs';
                 ])
                 ->collapsible()
                 ->collapsed(false),
+
+                FileUpload::make('files')->multiple()
+
+
 
             // Payment Section
             // Section::make('Payment')
@@ -493,16 +515,25 @@ protected static ?string $pluralLabel = 'MOUs';
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('Download')
-                    ->label('Download PDF')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn(Invoice $record) => route('invoice.download', $record->id))
-                    ->openUrlInNewTab(),
-                // Tables\Actions\Action::make('View')
-                //     ->label('View')
-                //     ->url(fn (Invoice $record) => InvoResource::getUrl('view', ['record' => $record->id]))
-                //     ->icon('heroicon-o-eye')
-                //     ->openUrlInNewTab(),
+   
+                
+                ActionsActionGroup::make([
+              
+                        Action::make('Download PDF')
+                            ->label('Download Invoice PDF')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->url(fn(Invoice $record) => route('invoice.download', $record->id))
+                            ->openUrlInNewTab(),
+                        Action::make('Download Curriculum PDF')
+                            ->label('Download Curriculum PDF')
+                            ->icon('heroicon-o-arrow-down-tray')
+                            ->url(fn(Invoice $record) => route('invoice.downloadCurriculum', $record->id))
+                            ->openUrlInNewTab(),
+
+                ])
+                ->icon('heroicon-o-arrow-down-on-square-stack')
+                ->dropdownWidth(MaxWidth::ExtraSmall),
+                
 
 
                 Tables\Actions\Action::make('Pay')
@@ -626,7 +657,6 @@ protected static ?string $pluralLabel = 'MOUs';
             'index' => Pages\ListInvos::route('/'),
             'create' => Pages\CreateInvo::route('/create'),
             'edit' => Pages\EditInvo::route('/{record}/edit'),
-            'view' => Pages\ViewInvoice::route('/{record}/view'),
         ];
     }
 }

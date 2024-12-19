@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('isbn')->unique(); // ISBN
             $table->integer('published_year'); // Published year
             $table->integer('price'); // Published year
+            $table->integer('school_id'); // Published year
             $table->text('description')->nullable(); // Optional description
             $table->timestamps();
         });

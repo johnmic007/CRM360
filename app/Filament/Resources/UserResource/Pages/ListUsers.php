@@ -40,6 +40,8 @@ class ListUsers extends ListRecords
         // Fetch all subordinate IDs for the logged-in user
         $subordinateIds = $user->getAllSubordinateIds();
 
+        // dd($subordinateIds);
+
         // Always apply the filter for subordinates
         return $query->whereIn('id', $subordinateIds);
     }

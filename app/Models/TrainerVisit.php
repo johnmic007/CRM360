@@ -21,17 +21,22 @@ class TrainerVisit extends Model
         'travel_expense',
         'food_expense',
         'total_expense',
+        'description',
         'gps_photo',
         'travel_bill',
         'approved_by',
         'approval_status',
         'sales_role_evaluation',
+        'travel_type',
+        'travel_bill',
     ];
 
 
     protected $casts = [
         
         'school_id' => 'array', 
+        'travel_bill' => 'array', 
+
     ];
     // Calculate the travel expense based on the mode of transport
     public function calculateTravelExpense()
@@ -46,13 +51,22 @@ class TrainerVisit extends Model
         $foodExpenseRate = Setting::getFoodExpenseRate();
         $this->food_expense = $foodExpenseRate;
         $this->travel_expense = $this->calculateTravelExpense();
-        $this->total_expense = $this->travel_expense + $this->food_expense;
+        $this->total_expense = $this->travel_expense + $this->food_expense  ;
     }
 
     public function school()
     {
         return $this->belongsTo(School::class);
     }
+
+
+    public function schools()
+{
+    return School::whereIn('id', $this->school_id)->get();
+}
+
+
+    
 
     public function user()
     {

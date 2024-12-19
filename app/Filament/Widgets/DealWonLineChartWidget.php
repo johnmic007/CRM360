@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Auth;
 
 class DealWonLineChartWidget extends ChartWidget
 {
+
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'head', 'sales']);
+    }
+
+    
     protected static ?string $heading = 'Deal Status Chart';
     protected static ?int $sort = 2;  // Ensure it comes after WalletBalanceWidget
 

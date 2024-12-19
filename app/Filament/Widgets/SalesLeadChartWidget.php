@@ -7,9 +7,17 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\ChartWidget;
 use App\Models\SalesLeadManagement;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SalesLeadChartWidget extends ChartWidget
 {
+
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'head', 'sales']);
+    }
+
+
     protected static ?string $heading = 'Sales Lead Overview';
     protected static ?int $sort = 3;
 
@@ -40,7 +48,7 @@ class SalesLeadChartWidget extends ChartWidget
             'Deal Won' => 'deal_won',
             'Deal Lost' => 'deal_lost',
             'Demo Completed' => 'Demo Completed',
-            'Demo Rescheduled' => 'Demo reschedule',
+            'Demo scheduled' => 'Demo reschedule',
             'Lead Re-engaged' => 'Lead Re-engaged',
             'School Nurturing' => 'School Nurturing',
         ];
@@ -90,9 +98,9 @@ class SalesLeadChartWidget extends ChartWidget
                 $start = now()->startOfMonth();
                 $end = now()->endOfMonth();
                 break;
-            case 'custom':
-                // Custom logic, will need to handle custom date range if provided
-                return null; // You can add custom logic for date range inputs if needed
+            // case 'custom':
+            //     // Custom logic, will need to handle custom date range if provided
+            //     return null; // You can add custom logic for date range inputs if needed
             default:
                 return null; // No filter applied
         }
@@ -110,7 +118,6 @@ class SalesLeadChartWidget extends ChartWidget
             'today' => 'Today',
             'last7days' => 'Last 7 Days',
             'thisMonth' => 'This Month',
-            'custom' => 'Custom Date Range',
         ];
     }
 }

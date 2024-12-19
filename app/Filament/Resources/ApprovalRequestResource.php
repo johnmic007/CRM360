@@ -8,6 +8,7 @@ use App\Models\School;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -22,6 +23,25 @@ class ApprovalRequestResource extends Resource
 
     protected static ?string $navigationGroup = 'Approvals';
 
+    protected static ?string $navigationLabel = 'lead Approvals request';
+
+    protected static ?string $pluralLabel = 'lead Approvals request';
+
+
+    public static function getNavigationBadge(): ?string
+    {
+        // Check if the user has the required roles
+        if (!auth()->user()->hasRole(['admin', 'sales'])) {
+            return null; // Do not show the badge if the user is not an admin or sales role
+        }
+    
+        // Count pending approval requests
+        $pendingCount = ApprovalRequest::where('status', 'Pending')->count();
+    
+        return $pendingCount > 0 ? (string) $pendingCount : null;
+    }
+    
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
@@ -29,21 +49,21 @@ class ApprovalRequestResource extends Resource
             Hidden::make('company_id')
             ->default(auth()->user()->company_id) // Automatically assign the user's company_id
             ->required(),
-            Forms\Components\Select::make('manager_id')
+            Select::make('manager_id')
                 ->label('Manager')
                 ->options(User::pluck('name', 'id'))
                 ->searchable()
                 ->disabled()
                 ->required(),
 
-            Forms\Components\Select::make('user_id')
+            Select::make('user_id')
                 ->label('Requested By')
                 ->options(User::pluck('name', 'id'))
                 ->searchable()
                 ->disabled()
                 ->required(),
 
-            Forms\Components\Select::make('school_id')
+            Select::make('school_id')
                 ->label('School')
                 ->options(School::pluck('name', 'id'))
                 ->searchable()

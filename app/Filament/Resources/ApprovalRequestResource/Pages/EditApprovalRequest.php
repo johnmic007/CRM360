@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ApprovalRequestResource\Pages;
 
 use App\Filament\Resources\ApprovalRequestResource;
+use App\Models\SalesLeadManagement;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -26,14 +27,27 @@ class EditApprovalRequest extends EditRecord
                 ->modalHeading('Approve Request')
                 ->modalSubheading('Are you sure you want to approve this request?')
                 ->action(function () {
+                    // Update the status to Approved
                     $this->record->update(['status' => 'Approved']);
+                    
+                    // Create a new SalesLeadManagement record with correct data
+                    SalesLeadManagement::create([
+                        'school_id' => $this->record->school_id,
+                        'allocated_to' => $this->record->user_id, // Assign `user_id` to `allocated_to`
+                        'company_id' => $this->record->company_id,
+                        'status' => 'School Nurturing',
+                    ]);
+
+                    // Notify the user
                     Notification::make()
                         ->title('Request Approved')
                         ->success()
                         ->send();
+
+                    // Redirect back to the resource index
                     $this->redirect($this->getResource()::getUrl('index'));
                 })
-                ->visible(fn () => $this->record->status === 'Pending' && $user->id === $this->record->manager_id),
+                ->visible(fn () => $this->record->status === 'Pending'),
 
             // Reject button (Visible only to the manager)
             Action::make('Set to Rejected')

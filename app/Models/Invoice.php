@@ -16,6 +16,7 @@ class Invoice extends Model
         'school_id',
         'company_id',
         'issue_date',
+        'files',
         'total',
         'due_date',
         'paid',
@@ -29,7 +30,14 @@ class Invoice extends Model
         'books_count',
         'closed_by',
         'description',
+        'created_at',
     ];
+
+
+    protected $casts = [
+        'file' => 'array',
+    ];
+
 
     public function school()
     {
@@ -37,8 +45,16 @@ class Invoice extends Model
     }
 
 
+    public function closedBy()
+    {
+        return $this->belongsTo(User::class , 'closed_by');
+    }
 
     
+
+
+
+
 
 
 
@@ -51,7 +67,7 @@ class Invoice extends Model
     //         ->withTimestamps();
     // }
 
-    
+
 
 
     public function books()
@@ -85,33 +101,40 @@ class Invoice extends Model
 
     protected static function booted()
     {
-
         static::addGlobalScope(new CompanyScope());
 
         static::saved(function ($invoice) {
-            // Ensure the school is associated
+            // Update the payment status of the invoice itself
+            if ($invoice->paid == 0) {
+                $invoice->payment_status = 'Pending'; // Default status if nothing is paid
+            } elseif ($invoice->paid == $invoice->total_amount) {
+                $invoice->payment_status = 'Paid';
+            } elseif ($invoice->paid < $invoice->total_amount) {
+                $invoice->payment_status = 'Partially Paid';
+            }
+
+            if ($invoice->isDirty('payment_status')) {
+                $invoice->saveQuietly();
+            }
+
+            // Ensure the school is associated and update its payment status
             $school = $invoice->school;
-
-
             if ($school) {
-                // Update school status based on the invoice `paid` and `total_amount`
+                // Check if all related invoices are fully paid
+                $allInvoicesPaid = $school->invoices()->where('payment_status', '<>', 'Paid')->doesntExist();
 
-                // dd($school);
-
-                if ($invoice->paid == 0) {
-                    // Do not update the school status
-                    return;
-                } elseif ($invoice->paid == $invoice->total_amount) {
+                if ($allInvoicesPaid) {
                     $school->payment_status = 'Paid';
-                } elseif ($invoice->paid < $invoice->total_amount) {
-                    $school->payment_status = 'Partially Paid';
+                } else {
+                    // If any invoice is partially paid, mark the school as "Partially Paid"
+                    $school->payment_status = $school->invoices()->where('payment_status', 'Partially Paid')->exists() ? 'Partially Paid' : null;
                 }
 
                 $school->save();
             }
         });
     }
-    
+
 
     protected static function boot()
     {
@@ -122,11 +145,15 @@ class Invoice extends Model
                 $invoice->company_id = Auth::user()->company_id; // Set the user's company_id
             }
         });
-      
+
+
+        // Trigger the total calculation before saving or updating
+        static::saving(function ($invoice) {
+
+        //     $items = $invoice->items()->get();
+        // $invoice->total_amount = $items->sum(fn($item) => $item->quantity * $item->price);
         
-          // Trigger the total calculation before saving or updating
-          static::saving(function ($invoice) {
-            $totalAmount = 0;
+            $totalAmount = $invoice->total_amount;
 
             // Ensure relationships are loaded if using them
             $invoice->load(['books', 'items']); // Eager load books and items relationships
@@ -150,9 +177,9 @@ class Invoice extends Model
             // Set the due amount
             $invoice->due_amount = $dueAmount;
         });
-    
 
-   
+
+
 
         static::created(function ($invoice) {
             static::withoutEvents(function () use ($invoice) {
@@ -181,7 +208,4 @@ class Invoice extends Model
             });
         });
     }
-
-
-    
 }

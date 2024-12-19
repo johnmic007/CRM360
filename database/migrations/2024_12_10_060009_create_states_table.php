@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('invoice_logs', function (Blueprint $table) {
+        Schema::create('states', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoice_id')->constrained()->cascadeOnDelete(); // Link to Invoice
-            $table->string('type'); // e.g., 'created', 'edited', 'payment'
-            $table->text('description')->nullable();
+            $table->string('name')->unique(); // State name
+            $table->string('code')->unique(); // State code (e.g., 'MH' for Maharashtra)
             $table->timestamps();
         });
-        
     }
 
     /**
@@ -26,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('invoice_logs');
+        Schema::dropIfExists('states');
     }
 };

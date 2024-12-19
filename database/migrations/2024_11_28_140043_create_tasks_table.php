@@ -13,11 +13,18 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('title'); // Title of the task
-            $table->text('description')->nullable(); // Task description
-            $table->dateTime('start_date'); // Start date of the task
-            $table->dateTime('end_date'); // End date of the task
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // User relationship
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->unsignedBigInteger('user_id');
+            $table->string('task_type');
+            $table->unsignedBigInteger('school_id')->nullable();
+            $table->unsignedBigInteger('company_id');
+            $table->string('status')->default('pending');
+            $table->time('time')->nullable();
+            $table->unsignedBigInteger('district_id')->nullable();
+            $table->unsignedBigInteger('block_id')->nullable();
             $table->timestamps();
         });
     }
