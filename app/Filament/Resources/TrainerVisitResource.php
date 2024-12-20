@@ -66,29 +66,29 @@ class TrainerVisitResource extends Resource
                         Hidden::make('user_id')
                             ->default(auth()->id())
                             ->required(),
-    
+
                         Hidden::make('company_id')
                             ->default(fn() => auth()->user()->company_id)
                             ->required(),
-    
+
                         Select::make('user_id')
                             ->label('Name')
                             ->disabled()
                             ->relationship('user', 'name')
                             ->required(),
-    
+
                         Select::make('school_id')
                             ->label('School')
                             ->multiple()
                             ->preload()
                             ->relationship('school', 'name')
                             ->required(),
-    
+
                         DatePicker::make('visit_date')
                             ->label('Visit Date')
                             ->default(now())
                             ->required(),
-    
+
                         Select::make('travel_type')
                             ->label('Travel Type')
                             ->options([
@@ -117,7 +117,7 @@ class TrainerVisitResource extends Resource
                     ])
                     ->columns(2)
                     ->columnSpan('full'),
-    
+
                 // Fields for "Travel by Own Vehicle"
                 Forms\Components\Section::make('Own Vehicle Details')
                     ->description('Provide details about your travel using your own vehicle.')
@@ -130,8 +130,8 @@ class TrainerVisitResource extends Resource
                             ])
                             ->reactive()
                             ->required(),
-    
-                            FileUpload::make('starting_meter_photo')
+
+                        FileUpload::make('starting_meter_photo')
                             ->label('Starting Meter Photo')
                             ->image()
                             ->visibility('public') // Ensures the file is publicly accessible.
@@ -139,8 +139,8 @@ class TrainerVisitResource extends Resource
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->previewable(true)
                             ->required(),
-                            
-    
+
+
                         TextInput::make('starting_km')
                             ->label('Starting Kilometer')
                             ->numeric()
@@ -151,7 +151,7 @@ class TrainerVisitResource extends Resource
                                 if ($endingKm !== null && $state !== null) {
                                     $distance = max(0, $endingKm - $state);
                                     $set('distance_traveled', $distance);
-    
+
                                     // Calculate travel expense
                                     $travelMode = $get('travel_mode');
                                     $rate = $travelMode === 'car'
@@ -160,11 +160,10 @@ class TrainerVisitResource extends Resource
                                     $set('travel_expense', $rate * $distance);
                                 }
                             }),
-    
+
                         FileUpload::make('ending_meter_photo')
-                            ->label('Ending Meter Photo')
-                            ,
-    
+                            ->label('Ending Meter Photo'),
+
                         TextInput::make('ending_km')
                             ->label('Ending Kilometer')
                             ->numeric()
@@ -175,37 +174,50 @@ class TrainerVisitResource extends Resource
                                 if ($startingKm !== null && $state !== null) {
                                     $distance = max(0, $state - $startingKm);
                                     $set('distance_traveled', $distance);
-    
+
                                     // Calculate travel expense
                                     $travelMode = $get('travel_mode');
                                     $rate = $travelMode === 'car'
                                         ? Setting::getCarRate()
                                         : Setting::getBikeRate();
+                                        $travelExpense = $rate * $distance;
+
                                     $set('travel_expense', $rate * $distance);
+
+                                    $foodExpense = Setting::getFoodExpenseRate();
+
+                                    // Update total expense
+                                    $set('total_expense', $travelExpense + $foodExpense);
+
+
                                 }
                             }),
-    
+
                         TextInput::make('distance_traveled')
                             ->label('Distance Traveled')
                             ->numeric()
                             ->readOnly()
                             ->default(0),
-    
+
                         TextInput::make('travel_expense')
                             ->label('Travel Expense')
                             ->numeric()
                             ->readOnly()
                             ->default(0),
-    
+
                         TextInput::make('food_expense')
                             ->label('Food Expense')
                             ->numeric()
                             ->readOnly()
                             ->default(Setting::getFoodExpenseRate()),
+
+                            TextInput::make('total_expense')
+                            ->numeric()
+                            ->readOnly(),
                     ])
                     ->columns(2)
                     ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
-    
+
                 // Fields for "Travel with Colleague"
                 Forms\Components\Section::make('Colleague Vehicle Details')
                     ->description('Provide details about your travel with a colleague.')
@@ -214,24 +226,28 @@ class TrainerVisitResource extends Resource
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
                             ->helperText('Upload the bill for bus/train travel.'),
-    
+
                         TextInput::make('travel_expense')
                             ->label('Travel Expense')
                             ->numeric()
                             ->required()
                             ->helperText('Enter the expense amount for colleague travel.'),
-    
+
                         TextInput::make('food_expense')
                             ->label('Food Expense')
                             ->numeric()
                             ->readOnly()
                             ->default(Setting::getFoodExpenseRate()),
+
+                        TextInput::make('total_expense')
+                            ->numeric()
+                            ->readOnly(),
                     ])
                     ->columns(2)
                     ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
             ]);
     }
-    
+
     public static function table(Table $table): Table
     {
         return $table
@@ -245,14 +261,14 @@ class TrainerVisitResource extends Resource
                 TextColumn::make('distance_traveled')->label('Distance (km)'),
                 TextColumn::make('total_expense')->label('Total Expense')->money('INR'),
                 TextColumn::make('approval_status')
-                ->label('Status')
-                ->badge()
-                ->colors([
-                    'primary' => 'Pending',
-                    'success' => 'approved',
-                    'danger' => 'rejected',
-                ])
-                ->sortable(),
+                    ->label('Status')
+                    ->badge()
+                    ->colors([
+                        'primary' => 'Pending',
+                        'success' => 'approved',
+                        'danger' => 'rejected',
+                    ])
+                    ->sortable(),
 
                 TextColumn::make('approved_by')->label('Approved By')
                     ->formatStateUsing(fn($state) => $state ? User::find($state)->name : 'Pending'),
@@ -262,15 +278,14 @@ class TrainerVisitResource extends Resource
                 Tables\Actions\Action::make('Download PDF')
                     ->label('Download PDF')
                     ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn (TrainerVisit $record) => route('trainer-visit.download', $record->id))
+                    ->url(fn(TrainerVisit $record) => route('trainer-visit.download', $record->id))
                     ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkAction::make('downloadPdf')
                     ->label('Download as PDF')
-                    ->action(fn ($records) => self::downloadPdf($records)),
+                    ->action(fn($records) => self::downloadPdf($records)),
             ]);
-           
     }
 
     public static function getRelations(): array
@@ -280,27 +295,27 @@ class TrainerVisitResource extends Resource
 
 
     public static function downloadPdf($records)
-{
-    $data = $records->map(function ($record) {
-        return [
-            'Name' => $record->user->name,
-            'Visit Date' => $record->visit_date,
-            'Travel Mode' => $record->travel_mode,
-            'Starting KM' => $record->starting_km,
-            'Ending KM' => $record->ending_km,
-            'Distance' => $record->distance_traveled,
-            'Total Expense' => $record->total_expense,
-            'Status' => $record->approval_status,
-            'Approved By' => $record->approved_by ? User::find($record->approved_by)->name : 'Pending',
-            // 'Starting Meter Photo' => $record->starting_meter_photo ? base64_encode(file_get_contents(storage_path('app/public/' . $record->starting_meter_photo))) : null,
-            // 'Ending Meter Photo' => $record->ending_meter_photo ? base64_encode(file_get_contents(storage_path('app/public/' . $record->ending_meter_photo))) : null,
-            // 'Travel Bill' => $record->travel_bill ? base64_encode(file_get_contents(storage_path('app/public/' . $record->travel_bill))) : null,
-        ];
-    });
+    {
+        $data = $records->map(function ($record) {
+            return [
+                'Name' => $record->user->name,
+                'Visit Date' => $record->visit_date,
+                'Travel Mode' => $record->travel_mode,
+                'Starting KM' => $record->starting_km,
+                'Ending KM' => $record->ending_km,
+                'Distance' => $record->distance_traveled,
+                'Total Expense' => $record->total_expense,
+                'Status' => $record->approval_status,
+                'Approved By' => $record->approved_by ? User::find($record->approved_by)->name : 'Pending',
+                // 'Starting Meter Photo' => $record->starting_meter_photo ? base64_encode(file_get_contents(storage_path('app/public/' . $record->starting_meter_photo))) : null,
+                // 'Ending Meter Photo' => $record->ending_meter_photo ? base64_encode(file_get_contents(storage_path('app/public/' . $record->ending_meter_photo))) : null,
+                // 'Travel Bill' => $record->travel_bill ? base64_encode(file_get_contents(storage_path('app/public/' . $record->travel_bill))) : null,
+            ];
+        });
 
-    $pdf = Pdf::loadView('pdf.trainer-visits', ['data' => $data]);
-    return $pdf->download('trainer-visits.pdf');
-}
+        $pdf = Pdf::loadView('pdf.trainer-visits', ['data' => $data]);
+        return $pdf->download('trainer-visits.pdf');
+    }
 
 
     public static function getPages(): array
