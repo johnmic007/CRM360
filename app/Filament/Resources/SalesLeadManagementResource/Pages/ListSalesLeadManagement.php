@@ -37,7 +37,7 @@ class ListSalesLeadManagement extends ListRecords
     public function getTabs(): array
     {
         $user = auth()->user();
-        $userCompanyId = $user->company_id;
+        $userCompanyId = $user->company_id ?? 0;
 
 
         if ($user->hasRole('admin')) {
@@ -48,14 +48,14 @@ class ListSalesLeadManagement extends ListRecords
                 'deal_won' => Tab::make('Deal Won')
                     ->modifyQueryUsing(
                         fn(Builder $query) =>
-                        $query->whereIn('status', 'deal_won')
+                        $query->where('status', 'deal_won')
                         
                     ),
 
                     'deal_lost' => Tab::make('Deal Lost')
                     ->modifyQueryUsing(
                         fn(Builder $query) =>
-                        $query->whereIn('status', 'deal_lost')
+                        $query->where('status', 'deal_lost')
                         
                     )
             ];
