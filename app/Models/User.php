@@ -23,8 +23,12 @@ class User extends Authenticatable
         'manager_id', // To define the reporting hierarchy
         'company_id',
         'allocated_districts',
+        'allocated_states',
         'allocated_blocks',
-        'wallet_balance'
+        'wallet_balance',
+        'total_amount_given',
+        'total_amount_closed',
+        'amount_to_close',
     ];
 
     /**
@@ -47,6 +51,8 @@ class User extends Authenticatable
         'password' => 'hashed',
         'allocated_districts' => 'array',
         'allocated_blocks' => 'array',
+        'allocated_states' => 'array',
+
     ];
 
     /**
@@ -76,6 +82,11 @@ class User extends Authenticatable
         return $this->hasMany(Invoice::class, 'closed_by');
     }
 
+
+    public function closureLogs()
+    {
+        return $this->hasMany(ClosureAmountLog::class, 'user_id');
+    }
 
     public function bookLogs()
     {

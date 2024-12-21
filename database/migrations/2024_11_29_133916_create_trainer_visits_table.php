@@ -20,8 +20,11 @@ return new class extends Migration
             $table->string('travel_mode', 100)->nullable();
             $table->string('description')->nullable();
             $table->string('travel_type', 100)->nullable();
-
-
+            $table->timestamp('approved_at')->nullable(); 
+            $table->timestamp('verified_at')->nullable(); 
+            $table->unsignedBigInteger('verify_by')->nullable(); 
+            $table->string('verify_status')->default('pending'); 
+            $table->string('files')->nullable(); 
             $table->string('starting_meter_photo')->nullable();
             $table->decimal('starting_km', 10, 2)->nullable();
             $table->string('ending_meter_photo')->nullable();

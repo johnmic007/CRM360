@@ -79,10 +79,21 @@ class TrainerVisitResource extends Resource
 
                         Select::make('school_id')
                             ->label('School')
+                            ->options(function () {
+                                $userId = auth()->id();
+
+                                // Fetch schools where the authenticated user is in visited_by and created today
+                                return \App\Models\SalesLeadStatus::query()
+                                    ->where('visited_by', $userId)
+                                    ->whereDate('created_at', now()->toDateString())
+                                    ->with('school') // Ensure the school relationship is loaded
+                                    ->get()
+                                    ->pluck('school.name', 'school.id'); // Adjust according to your relationships
+                            })
+                            ->required()
                             ->multiple()
-                            ->preload()
-                            ->relationship('school', 'name')
-                            ->required(),
+                            ->helperText('Only shows schools visited today.')
+                            ->preload(),
 
                         DatePicker::make('visit_date')
                             ->label('Visit Date')
@@ -180,7 +191,7 @@ class TrainerVisitResource extends Resource
                                     $rate = $travelMode === 'car'
                                         ? Setting::getCarRate()
                                         : Setting::getBikeRate();
-                                        $travelExpense = $rate * $distance;
+                                    $travelExpense = $rate * $distance;
 
                                     $set('travel_expense', $rate * $distance);
 
@@ -188,8 +199,6 @@ class TrainerVisitResource extends Resource
 
                                     // Update total expense
                                     $set('total_expense', $travelExpense + $foodExpense);
-
-
                                 }
                             }),
 
@@ -211,7 +220,7 @@ class TrainerVisitResource extends Resource
                             ->readOnly()
                             ->default(Setting::getFoodExpenseRate()),
 
-                            TextInput::make('total_expense')
+                        TextInput::make('total_expense')
                             ->numeric()
                             ->readOnly(),
                     ])
@@ -226,12 +235,18 @@ class TrainerVisitResource extends Resource
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
                             ->helperText('Upload the bill for bus/train travel.'),
+                            
 
                         TextInput::make('travel_expense')
                             ->label('Travel Expense')
                             ->numeric()
                             ->required()
-                            ->helperText('Enter the expense amount for colleague travel.'),
+                            ->helperText('Enter the expense amount for colleague travel.')
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // $state here is the updated 'travel_expense'
+                                // Add it to the food expense rate and set 'total_expense'
+                                $set('total_expense', $state + Setting::getFoodExpenseRate());
+                            }),
 
                         TextInput::make('food_expense')
                             ->label('Food Expense')
@@ -245,6 +260,17 @@ class TrainerVisitResource extends Resource
                     ])
                     ->columns(2)
                     ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
+
+
+                    Forms\Components\FileUpload::make('files')
+                    ->label('Upload School Images') // Clear and descriptive label
+                    ->required() // Makes the field mandatory
+                    ->multiple() // Allows multiple files to be uploaded
+                    ->directory('school-images') // Define the upload directory
+                    ->maxFiles(10) // Limit the maximum number of files (optional, adjust as needed)
+                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg']) // Restrict file types (optional)
+                    ->helperText('Upload up to 10 school images in JPEG or PNG format.'), // Enhanced helper text
+                
             ]);
     }
 

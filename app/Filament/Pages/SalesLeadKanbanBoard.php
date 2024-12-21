@@ -7,6 +7,7 @@ use App\Models\SalesLeadManagement;
 use App\Models\District;
 use App\Models\Block;
 use App\Models\School;
+use App\Models\State;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
@@ -30,6 +31,8 @@ class SalesLeadKanbanBoard extends KanbanBoard
     protected static string $recordTitleAttribute = 'school_id';
 
     protected static string $recordStatusAttribute = 'status';
+
+    
 
 
 
@@ -112,12 +115,18 @@ class SalesLeadKanbanBoard extends KanbanBoard
             Forms\Components\Fieldset::make('General Information')
                 ->schema([
                     Forms\Components\Select::make('school_id')
-                        ->label('School')
-                        ->options(School::pluck('name', 'id'))
-                        ->reactive()
-                        ->required()
-                        ->disabled()
-                        ->helperText('Select the school for this lead.'),
+                    ->label('School')
+                    ->relationship('school', 'name') // Assuming a school relationship exists
+                    ->reactive()
+                    ->required()
+                    ->disabled()
+                    ->searchable() // Add a search bar to filter options
+                    ->getSearchResultsUsing(fn (string $query) => 
+                        School::query()
+                            ->where('name', 'like', "%{$query}%")
+                            ->limit(10) // Fetch only 10 results at a time
+                            ->pluck('name', 'id')
+                ),
 
 
                     // Forms\Components\Select::make('status')
@@ -139,12 +148,19 @@ class SalesLeadKanbanBoard extends KanbanBoard
                 Forms\Components\Fieldset::make('General Information')
                     ->schema([
                         Forms\Components\Select::make('school_id')
-                            ->label('School')
-                            ->options(School::pluck('name', 'id'))
-                            ->reactive()
-                            ->required()
-                            ->disabled()
-                            ->helperText('Select the school for this lead.'),
+                        ->label('School')
+                        ->relationship('school', 'name') // Assuming a school relationship exists
+                        ->reactive()
+                        ->required()
+                        ->disabled()
+                        ->searchable() // Add a search bar to filter options
+                        ->getSearchResultsUsing(fn (string $query) => 
+                            School::query()
+                                ->where('name', 'like', "%{$query}%")
+                                ->limit(10) // Fetch only 10 results at a time
+                                ->pluck('name', 'id')
+                    ),
+                    
 
 
                         Forms\Components\Select::make('status')
@@ -168,12 +184,18 @@ class SalesLeadKanbanBoard extends KanbanBoard
                 Forms\Components\Fieldset::make('General Information')
                     ->schema([
                         Forms\Components\Select::make('school_id')
-                            ->label('School')
-                            ->options(School::pluck('name', 'id'))
-                            ->reactive()
-                            ->required()
-                            ->disabled()
-                            ->helperText('Select the school for this lead.'),
+                        ->label('School')
+                        ->relationship('school', 'name') // Assuming a school relationship exists
+                        ->reactive()
+                        ->required()
+                        ->disabled()
+                        ->searchable() // Add a search bar to filter options
+                        ->getSearchResultsUsing(fn (string $query) => 
+                            School::query()
+                                ->where('name', 'like', "%{$query}%")
+                                ->limit(10) // Fetch only 10 results at a time
+                                ->pluck('name', 'id')
+                    ),
 
 
                         Forms\Components\Select::make('status')
@@ -407,16 +429,42 @@ class SalesLeadKanbanBoard extends KanbanBoard
                     // ->reactive()
                     // ->required(),
 
+                    Forms\Components\Select::make('state_id')
+                                ->label('State')
+                                ->options(function () {
+                                    // Fetch only the blocks allocated to the user
+                                    $allocatedStates = auth()->user()->allocated_states ?? [];
+                                    return State::whereIn('id', $allocatedStates) // Filter by user's allocated blocks
+                                        ->pluck('name', 'id');
+                                })                                ->reactive()
+                                ->required()
+                                ->afterStateUpdated(fn(callable $set) => $set('district_id', null)),
+
+
+                    Forms\Components\Select::make('district_id')
+                    ->label('District')
+                    ->options(function () {
+                        // Fetch only the blocks allocated to the user
+                        $allocatedDistricts = auth()->user()->allocated_districts ?? [];
+                        return District::whereIn('id', $allocatedDistricts) // Filter by user's allocated blocks
+                            ->pluck('name', 'id');
+                    })
+                    ->reactive()
+                    ->required(),
+
+
                     Forms\Components\Select::make('block_id')
-                        ->label('Block')
-                        ->options(function () {
-                            // Fetch only the blocks allocated to the user
-                            $allocatedBlocks = auth()->user()->allocated_blocks ?? [];
-                            return Block::whereIn('id', $allocatedBlocks) // Filter by user's allocated blocks
-                                ->pluck('name', 'id');
-                        })
-                        ->reactive()
-                        ->required(),
+                                ->label('Block')
+                                ->options(function (callable $get) {
+                                    $districtId = $get('district_id');
+                                    if (!$districtId) {
+                                        return [];
+                                    }
+                                    return Block::where('district_id', $districtId)->pluck('name', 'id')->toArray(); // Fetch blocks using Eloquent
+                                })
+                                ->reactive()
+                                ->required(),
+
 
                     Forms\Components\Select::make('school_id')
                         ->label('School')

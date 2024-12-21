@@ -18,6 +18,13 @@ class WalletLogResource extends Resource
     
     protected static ?string $navigationLabel = 'Wallet Logs';
 
+    
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales' , 'trainer']);
+    }
+
+
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table

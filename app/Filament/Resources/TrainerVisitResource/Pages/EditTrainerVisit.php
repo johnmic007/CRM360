@@ -3,12 +3,14 @@
 namespace App\Filament\Resources\TrainerVisitResource\Pages;
 
 use App\Filament\Resources\TrainerVisitResource;
+use App\Models\TrainerVisit;
 use App\Models\User;
 use App\Models\WalletLog;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
 use Filament\Pages\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
-
-use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\Auth;
 
 class EditTrainerVisit extends EditRecord
 {
@@ -17,75 +19,201 @@ class EditTrainerVisit extends EditRecord
     protected function getActions(): array
     {
         return [
-            Action::make('approve')
-                ->label(fn () => $this->record->approved_by ? 'Approved' : 'Approve Visit')
-                ->icon(fn () => $this->record->approved_by ? 'heroicon-o-check' : 'heroicon-o-check-circle')
-                ->color(fn () => $this->record->approved_by ? 'success' : 'primary')
-                ->disabled(fn () => (bool) $this->record->approved_by)
-                ->visible(fn () => auth()->user()->hasAnyRole(['admin', 'sales']))
-                ->requiresConfirmation(fn () => !$this->record->approved_by)
+            // 1. SALES VERIFY
+
+            Action::make('verif')
+            ->label('Sales Verified')
+            ->color('success')
+            ->icon('heroicon-o-check-circle')
+            ->visible(fn () => Auth::user()->hasRole('sales'))
+            ->hidden(fn () => $this->record->verify_status !== 'verified') // Only show when `verify_status` is 'verified'
+            ->requiresConfirmation(),
+
+
+            Action::make('re')
+            ->label('Requested For Clarification')
+            ->color('warning')
+            ->icon('heroicon-o-question-mark-circle')
+            ->visible(fn () => Auth::user()->hasRole('sales'))
+            ->hidden(fn () => $this->record->verify_status !== 'clarification'), // Only show when `verify_status` is 'verified'
+        
+            
+            Action::make('verifyBySales')
+                ->label('Sales Verify')
+                ->color('success')
+                ->icon('heroicon-o-check-circle')
+                ->visible(fn () => Auth::user()->hasRole('sales'))
+                ->hidden(fn () => in_array($this->record->verify_status, ['verified', 'rejected' , 'clarification']))
+                ->requiresConfirmation()
                 ->action(function () {
-                    // Check if already approved
-                    if ($this->record->approved_by) {
+                    // If already verified, do nothing
+                    if ($this->record->verify_status === 'verified') {
                         Notification::make()
-                            ->title('Already Approved')
-                            ->body('This visit has already been approved.')
+                            ->title('Already Verified')
                             ->warning()
                             ->send();
                         return;
                     }
 
-                    $record = $this->record;
+                    // Mark as verified
+                    $this->record->verify_status = 'verified';
+                    $this->record->verified_by = Auth::id();
+                    $this->record->verified_at = now();
+                    $this->record->save();
 
-                    // Ensure the user exists
-                    $user = User::find($record->user_id);
-                    if (!$user) {
+                    Notification::make()
+                        ->title('Verified Successfully')
+                        ->success()
+                        ->send();
+                }),
+
+            // 2. SALES REQUEST CLARIFICATION
+            Action::make('requestClarification')
+            ->label('Request Clarification')
+            ->color('warning')
+            ->icon('heroicon-o-question-mark-circle')
+            ->visible(fn () => Auth::user()->hasRole('sales'))
+            ->hidden(fn () => in_array($this->record->verify_status, ['verified', 'rejected', 'clarification']))
+            ->form([
+                Textarea::make('clarification_question')
+                    ->label('Clarification Question')
+                    ->placeholder('Enter the clarification question...')
+                    ->required(),
+            ])
+            ->requiresConfirmation()
+            ->action(function (array $data) {
+                // Update the record with clarification status and question
+                $this->record->verify_status = 'clarification';
+                $this->record->clarification_question = $data['clarification_question']; // Assuming the column exists in the database
+                $this->record->verified_by = Auth::id();
+                $this->record->verified_at = now();
+                $this->record->save();
+        
+                Notification::make()
+                    ->title('Clarification Requested')
+                    ->body('Your clarification question has been submitted.')
+                    ->warning()
+                    ->send();
+            }),
+        
+
+            // 3. ACCOUNTS APPROVE
+            Action::make('approveByAccounts')
+                ->label('Accounts Approve')
+                ->icon('heroicon-o-check')
+                ->color('primary')
+                ->visible(fn () => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+                ->disabled(fn () => (
+                    // Disable if not verified by Sales yet or already approved
+                    $this->record->verify_status !== 'verified' ||
+                    $this->record->approval_status === 'approved' ||
+                    $this->record->approval_status === 'rejected'
+                ))
+                ->requiresConfirmation(fn () => $this->record->approval_status !== 'approved')
+                ->action(function () {
+                    // Must be verified by Sales first
+                    if ($this->record->verify_status !== 'verified') {
                         Notification::make()
-                            ->title('Error')
-                            ->body('User not found.')
+                            ->title('Not Verified')
                             ->danger()
+                            ->body('Sales has not yet verified this visit.')
                             ->send();
                         return;
                     }
 
-                    // Calculate the total expenses
-                    $totalExpense = $record->total_expense ;
+                    // If already approved, do nothing
+                    if ($this->record->approval_status === 'approved') {
+                        Notification::make()
+                            ->title('Already Approved')
+                            ->warning()
+                            ->send();
+                        return;
+                    }
+
+                    // Deduct from wallet
+                    $record = $this->record;
+                    $user = User::find($record->user_id);
+                    $totalExpense = $record->total_expense;
+
+                    if (!$user) {
+                        Notification::make()
+                            ->title('User Not Found')
+                            ->danger()
+                            ->send();
+                        return;
+                    }
 
                     // Check wallet balance
                     if ($user->wallet_balance < $totalExpense) {
                         Notification::make()
                             ->title('Insufficient Balance')
-                            ->body('The user does not have enough balance in their wallet.')
                             ->danger()
+                            ->body('The user does not have enough balance.')
                             ->send();
                         return;
                     }
 
-                    // Deduct expenses and approve
+                    // Deduct wallet
                     $user->wallet_balance -= $totalExpense;
                     $user->save();
 
+                    // Log this deduction
                     WalletLog::create([
-                        'user_id' => $record->user_id,
+                        'user_id' => $user->id,
                         'amount' => $totalExpense,
                         'type' => 'debit',
-                        'description' => 'Trainer visit expenses approved',
-                        'approved_by' => auth()->id(),
+                        'description' => 'Trainer visit expenses approved by Accounts',
+                        'approved_by' => Auth::id(),
                     ]);
 
-                    $record->approved_by = auth()->id();
+                    // Update approval fields
                     $record->approval_status = 'approved';
+                    $record->approved_by = Auth::id();
+                    $record->approved_at = now();
                     $record->save();
 
                     Notification::make()
                         ->title('Approval Successful')
-                        ->body('The visit has been approved and wallet updated.')
+                        ->body('This visit has been fully approved, and the wallet has been updated.')
                         ->success()
                         ->send();
-                })
-                ->modalHeading('Approve Visit')
-                ->modalSubheading('This will deduct the expenses from the user\'s wallet.')
-                ->modalButton('Confirm Approval'),
+                }),
+
+            // 4. ACCOUNTS REJECT
+            Action::make('rejectByAccounts')
+                ->label('Accounts Reject')
+                ->icon('heroicon-o-x-circle')
+                ->color('danger')
+                ->visible(fn () => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+                ->disabled(fn () => (
+                    // Disable if not verified yet or already final-approved/rejected
+                    $this->record->verify_status !== 'verified' ||
+                    $this->record->approval_status === 'approved' ||
+                    $this->record->approval_status === 'rejected'
+                ))
+                ->requiresConfirmation()
+                ->action(function () {
+                    if ($this->record->verify_status !== 'verified') {
+                        Notification::make()
+                            ->title('Cannot Reject')
+                            ->danger()
+                            ->body('Sales has not verified this visit, so it can’t be rejected by Accounts yet.')
+                            ->send();
+                        return;
+                    }
+
+                    // Mark as rejected
+                    $this->record->approval_status = 'rejected';
+                    $this->record->approved_by = Auth::id();
+                    $this->record->approved_at = now();
+                    $this->record->save();
+
+                    Notification::make()
+                        ->title('Visit Rejected')
+                        ->warning()
+                        ->body('This visit has been rejected by Accounts.')
+                        ->send();
+                }),
         ];
     }
 }

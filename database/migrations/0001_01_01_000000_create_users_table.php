@@ -18,6 +18,10 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->integer('wallet_balance');
+            $table->integer('total_amount_given');
+            $table->integer('total_amount_closed');
+            $table->integer('amount_to_close');
+            $table->string('allocated_states');
             $table->string('allocated_districts');
             $table->string('allocated_blocks');
             $table->string('company_id');

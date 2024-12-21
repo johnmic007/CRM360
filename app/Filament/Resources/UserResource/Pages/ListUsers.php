@@ -31,6 +31,10 @@ class ListUsers extends ListRecords
             return $query; // Show all users for admins
         }
 
+        if ($user->roles()->where('name', 'accounts_head')->exists()) {
+            return $query; // Show all users for admins
+        }
+
 
         if ($user->roles()->where('name', 'sales')->exists()) {
             return $query->where('company_id', $user->company_id);

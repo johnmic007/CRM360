@@ -102,6 +102,9 @@ class LeadStatusesRelationManager extends RelationManager
                         ->when($data['end'], fn($query, $date) => $query->whereDate('visited_date', '<=', $date));
                 })
                 ->label('Visited Date'),
+            ])
+            ->headerActions([
+                Tables\Actions\CreateAction::make(), // Enable the Create action
             ]);
     }
 }

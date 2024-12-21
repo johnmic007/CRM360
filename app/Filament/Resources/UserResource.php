@@ -10,9 +10,11 @@ use App\Filament\Resources\UserResource\RelationManagers\SchoolCopyRelationManag
 use App\Filament\Resources\UserResource\RelationManagers\WalletPaymentLogsRelationManager;
 use App\Filament\Resources\WalletLogsResource\RelationManagers\UserRelationManager;
 use App\Filament\Resources\WalletLogsResource\RelationManagers\WalletLogsRelationManager;
+use App\Models\District;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\State;
 use App\Models\WalletLog;
 use App\Models\WalletPaymentLogs;
 use Filament\Forms;
@@ -39,7 +41,7 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales', 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
+        return auth()->user()->hasRole(['admin', 'sales', 'accounts_head' , 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
     }
 
 
@@ -109,14 +111,33 @@ class UserResource extends Resource
                 //     ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
                 //     ->helperText('Select the districts to allocate to this user.'),
 
-                Forms\Components\Select::make('allocated_blocks')
-                    ->label('Allocate Blocks')
-                    ->options(\App\Models\Block::pluck('name', 'id'))
+
+                Forms\Components\Select::make('allocated_states')
+                    ->label('Allocate States')
+                    ->options(State::pluck('name', 'id'))
                     ->multiple()
                     ->preload()
                     ->required()
                     ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
+                    ->helperText('Select the blocks to allocate to this user.')
+                    ->afterStateUpdated(fn(callable $set) => $set('allocated_districts', null)), // Reset district when state changes
+
+
+                Forms\Components\Select::make('allocated_districts')
+                    ->label('Allocate Districts')
+                    ->options(function (callable $get) {
+                        $stateId = $get('allocated_states');
+                        if (!$stateId) {
+                            return [];
+                        }
+                        // Fetch districts for the chosen state
+                        return \App\Models\District::where('state_id', $stateId)->pluck('name', 'id')->toArray();
+                    })->multiple()
+                    ->preload()
+                    ->required()
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
                     ->helperText('Select the blocks to allocate to this user.'),
+
 
 
 
@@ -289,7 +310,7 @@ class UserResource extends Resource
                     ->label('Top-Up Wallet')
                     ->icon('heroicon-o-plus-circle')
                     ->color('success')
-                    ->visible(fn(User $record) => auth()->user()->hasRole('admin') || auth()->user()->hasRole('sales'))
+                    ->visible(fn(User $record) => auth()->user()->hasRole('accounts_head') )
                     ->modalHeading('Top-Up Wallet')
                     ->form([
                         TextInput::make('amount')
@@ -334,6 +355,11 @@ class UserResource extends Resource
 
                         // Update the user's wallet balance
                         $record->wallet_balance += $amount;
+
+                        $record->total_amount_given += $amount;
+
+                        $record->amount_to_close += $amount;
+
                         $record->save();
 
                         // Log the wallet top-up transaction

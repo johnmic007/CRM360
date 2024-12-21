@@ -21,10 +21,11 @@ class SalesLeadManagementResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-clipboard';
 
 
-    // public static function canViewAny(): bool
-    // {
-    //     return auth()->user()->hasRole(['admin' , 'sales' ]);
-    // }
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales']);
+    }
+
 
     public static function form(Forms\Form $form): Forms\Form
     {

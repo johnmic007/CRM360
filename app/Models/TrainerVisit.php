@@ -25,10 +25,17 @@ class TrainerVisit extends Model
         'gps_photo',
         'travel_bill',
         'approved_by',
+        'approved_at',
         'approval_status',
+        'verify_by',
+        'verify_status',
+        'clarification_question',
+        'clarification_answer',
+        'verified_at',
         'sales_role_evaluation',
         'travel_type',
         'travel_bill',
+        'files',
     ];
 
 
@@ -36,6 +43,8 @@ class TrainerVisit extends Model
         
         'school_id' => 'array', 
         'travel_bill' => 'array', 
+        'files' => 'array', 
+
 
     ];
     // Calculate the travel expense based on the mode of transport
