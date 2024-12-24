@@ -30,6 +30,37 @@ class EditTrainerVisit extends EditRecord
             ->requiresConfirmation(),
 
 
+            
+
+
+            Action::make('answerClarification')
+    ->label('Answer Clarification')
+    ->color('info')
+    ->icon('heroicon-o-pencil')
+    ->visible(fn () => Auth::id() === $this->record->user_id && $this->record->verify_status === 'clarification')
+    ->modalHeading(fn () => 'Clarification: ' . $this->record->clarification_question) // Display the question in the modal heading
+    ->modalWidth('lg') // Set a wider modal for better visibility
+    ->form([
+        Textarea::make('clarification_answer')
+            ->label('Your Answer')
+            ->placeholder('Provide your answer...')
+            ->required()
+            ->rows(6), // Adjust rows for better readability
+    ])
+    ->requiresConfirmation()
+    ->action(function (array $data) {
+        $this->record->clarification_answer = $data['clarification_answer'];
+        $this->record->verify_status = 'answered';
+        $this->record->save();
+
+        Notification::make()
+            ->title('Clarification Answered')
+            ->body('Your answer has been submitted ')
+            ->success()
+            ->send();
+    }),
+
+
             Action::make('re')
             ->label('Requested For Clarification')
             ->color('warning')

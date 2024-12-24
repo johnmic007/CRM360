@@ -28,6 +28,12 @@ class ApprovalRequestResource extends Resource
     protected static ?string $pluralLabel = 'lead Approvals request';
 
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales']);
+    }
+
+
     public static function getNavigationBadge(): ?string
     {
         // Check if the user has the required roles

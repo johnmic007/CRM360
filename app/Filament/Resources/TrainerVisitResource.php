@@ -34,6 +34,10 @@ class TrainerVisitResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
+
+        if (!auth()->user()->hasRole(['admin', 'sales'])) {
+            return null; // Do not show the badge if the user is not an admin or sales role
+        }
         // Count trainer visits where 'approved_by' is null
         $pendingApprovals = TrainerVisit::whereNull('approved_by')->count();
 
@@ -56,13 +60,68 @@ class TrainerVisitResource extends Resource
     }
 
 
+    
+
+
 
     public static function form(Forms\Form $form): Forms\Form
     {
+        $user = auth()->user();
+
         return $form
             ->schema([
+                Select::make('verify_status')
+                ->label('Verification Status ')
+                ->options([
+                    'pending' => 'Pending',
+                    'clarification' => 'Need Clarification',
+                    'completed' => 'Completed',
+                ])
+                ->default('pending')
+                ->disabled()
+                ->reactive()
+                ->live()
+                ->extraAttributes(function (callable $get) use ($user) {
+                    $statusColors = [
+                        'pending' => 'background-color: #ffeb3b; color: #000;',
+                        'clarification' => 'background-color: #ff9800; color: #fff;',
+                        'completed' => 'background-color: #4caf50; color: #fff;',
+                    ];
+
+                    $status = $get('verify_status') ?? 'pending';
+                    $baseStyle = $statusColors[$status] ?? 'background-color: #f8f9fa; color: #000;';
+
+                    if ($user->hasAnyRole(['admin', 'sales'])) {
+                        $baseStyle .= ' border: 2px solid #4CAF50; font-weight: bold;';
+                    }
+
+                    return ['style' => $baseStyle];
+                }),
+
+            // Section for Clarification
+            Forms\Components\Section::make('Clarification Details')
+                ->description('Provide clarification .')
+                ->schema([
+                    TextInput::make('clarification_question')
+                        ->label('Clarification Question')
+                        ->placeholder('Enter the clarification question...')
+                        ->disabled()
+                        ->visible(fn($get) => $get('verify_status') === 'clarification'),
+
+                    TextInput::make('clarification_answer')
+                        ->label('Clarification Answer')
+                        ->placeholder('Provide your answer...')
+                        ->required(fn($get) => $get('verify_status') === 'clarification')
+                        ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                ])
+                ->hidden(fn($get) => $get('verify_status') !== 'clarification'),
+
+
                 Forms\Components\Card::make()
                     ->schema([
+
+
+
                         Hidden::make('user_id')
                             ->default(auth()->id())
                             ->required(),
@@ -295,6 +354,11 @@ class TrainerVisitResource extends Resource
                         'danger' => 'rejected',
                     ])
                     ->sortable(),
+
+
+                    TextColumn::make('verify_status')
+                    ->label('Status')
+                    ->badge(),
 
                 TextColumn::make('approved_by')->label('Approved By')
                     ->formatStateUsing(fn($state) => $state ? User::find($state)->name : 'Pending'),
