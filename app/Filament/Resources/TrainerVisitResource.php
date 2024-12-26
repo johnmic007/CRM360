@@ -88,7 +88,7 @@ class TrainerVisitResource extends Resource
                     ->options([
                         'pending' => 'Pending',
                         'clarification' => 'Need Clarification',
-                        'completed' => 'Completed',
+                        'verified' => 'verified',
                     ])
                     ->default('pending')
                     ->disabled()
@@ -98,7 +98,7 @@ class TrainerVisitResource extends Resource
                         $statusColors = [
                             'pending' => 'background-color: #ffeb3b; color: #000;',
                             'clarification' => 'background-color: #ff9800; color: #fff;',
-                            'completed' => 'background-color: #4caf50; color: #fff;',
+                            'verified' => 'background-color: #4caf50; color: #fff;',
                         ];
 
                         $status = $get('verify_status') ?? 'pending';
