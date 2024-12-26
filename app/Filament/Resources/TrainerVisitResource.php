@@ -46,6 +46,13 @@ class TrainerVisitResource extends Resource
     }
 
 
+    public static function canEdit($record): bool
+    {
+        // Allow edit only if the user is the owner of the record
+        return $record->user_id === auth()->id();
+    }
+
+
     public static function getModelLabel(): string
     {
         $user = auth()->user();
@@ -60,7 +67,13 @@ class TrainerVisitResource extends Resource
     }
 
 
-    
+    public static function canCreate(): bool
+    {
+        return !auth()->user()->hasAnyRole(['admin', 'sales', 'head_trainer']);
+    }
+
+
+
 
 
 
@@ -71,50 +84,50 @@ class TrainerVisitResource extends Resource
         return $form
             ->schema([
                 Select::make('verify_status')
-                ->label('Verification Status ')
-                ->options([
-                    'pending' => 'Pending',
-                    'clarification' => 'Need Clarification',
-                    'completed' => 'Completed',
-                ])
-                ->default('pending')
-                ->disabled()
-                ->reactive()
-                ->live()
-                ->extraAttributes(function (callable $get) use ($user) {
-                    $statusColors = [
-                        'pending' => 'background-color: #ffeb3b; color: #000;',
-                        'clarification' => 'background-color: #ff9800; color: #fff;',
-                        'completed' => 'background-color: #4caf50; color: #fff;',
-                    ];
+                    ->label('Verification Status ')
+                    ->options([
+                        'pending' => 'Pending',
+                        'clarification' => 'Need Clarification',
+                        'completed' => 'Completed',
+                    ])
+                    ->default('pending')
+                    ->disabled()
+                    ->reactive()
+                    ->live()
+                    ->extraAttributes(function (callable $get) use ($user) {
+                        $statusColors = [
+                            'pending' => 'background-color: #ffeb3b; color: #000;',
+                            'clarification' => 'background-color: #ff9800; color: #fff;',
+                            'completed' => 'background-color: #4caf50; color: #fff;',
+                        ];
 
-                    $status = $get('verify_status') ?? 'pending';
-                    $baseStyle = $statusColors[$status] ?? 'background-color: #f8f9fa; color: #000;';
+                        $status = $get('verify_status') ?? 'pending';
+                        $baseStyle = $statusColors[$status] ?? 'background-color: #f8f9fa; color: #000;';
 
-                    if ($user->hasAnyRole(['admin', 'sales'])) {
-                        $baseStyle .= ' border: 2px solid #4CAF50; font-weight: bold;';
-                    }
+                        if ($user->hasAnyRole(['admin', 'sales'])) {
+                            $baseStyle .= ' border: 2px solid #4CAF50; font-weight: bold;';
+                        }
 
-                    return ['style' => $baseStyle];
-                }),
+                        return ['style' => $baseStyle];
+                    }),
 
-            // Section for Clarification
-            Forms\Components\Section::make('Clarification Details')
-                ->description('Provide clarification .')
-                ->schema([
-                    TextInput::make('clarification_question')
-                        ->label('Clarification Question')
-                        ->placeholder('Enter the clarification question...')
-                        ->disabled()
-                        ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                // Section for Clarification
+                Forms\Components\Section::make('Clarification Details')
+                    ->description('Provide clarification .')
+                    ->schema([
+                        TextInput::make('clarification_question')
+                            ->label('Clarification Question')
+                            ->placeholder('Enter the clarification question...')
+                            ->disabled()
+                            ->visible(fn($get) => $get('verify_status') === 'clarification'),
 
-                    TextInput::make('clarification_answer')
-                        ->label('Clarification Answer')
-                        ->placeholder('Provide your answer...')
-                        ->required(fn($get) => $get('verify_status') === 'clarification')
-                        ->visible(fn($get) => $get('verify_status') === 'clarification'),
-                ])
-                ->hidden(fn($get) => $get('verify_status') !== 'clarification'),
+                        TextInput::make('clarification_answer')
+                            ->label('Clarification Answer')
+                            ->placeholder('Provide your answer...')
+                            ->required(fn($get) => $get('verify_status') === 'clarification')
+                            ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                    ])
+                    ->hidden(fn($get) => $get('verify_status') !== 'clarification'),
 
 
                 Forms\Components\Card::make()
@@ -135,28 +148,48 @@ class TrainerVisitResource extends Resource
                             ->disabled()
                             ->relationship('user', 'name')
                             ->required(),
+                            
 
-                        Select::make('school_id')
+                            Select::make('school_id')
                             ->label('School')
-                            ->options(function () {
+                            ->options(function ($record) {
                                 $userId = auth()->id();
-
-                                // Fetch schools where the authenticated user is in visited_by and created today
-                                return \App\Models\SalesLeadStatus::query()
+                                $todayVisitedSchools = \App\Models\SalesLeadStatus::query()
                                     ->where('visited_by', $userId)
                                     ->whereDate('created_at', now()->toDateString())
-                                    ->with('school') // Ensure the school relationship is loaded
+                                    ->with('school') // Load the school relationship
                                     ->get()
-                                    ->pluck('school.name', 'school.id'); // Adjust according to your relationships
+                                    ->pluck('school.name', 'school.id'); // Get today's visited schools
+                        
+                                if ($record && $record->school_id) {
+                                    // Include the selected school even if it wasn't visited today
+                                    $selectedSchool = \App\Models\School::query()
+                                        ->where('id', $record->school_id)
+                                        ->pluck('name', 'id');
+                        
+                                    return $selectedSchool->union($todayVisitedSchools);
+                                }
+                        
+                                return $todayVisitedSchools;
                             })
                             ->required()
+                            ->searchable()
                             ->multiple()
+                            ->helperText('Select a school. Shows today\'s visited schools but includes already selected schools if editing.')
+                        
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified')
                             ->helperText('Only shows schools visited today.')
-                            ->preload(),
+                            ->preload()
+                            ->default(fn($record) => $record && $record->school_id ? [$record->school_id] : []), // Pre-select school if editing
+
+                        
+
+
 
                         DatePicker::make('visit_date')
                             ->label('Visit Date')
                             ->default(now())
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                             ->required(),
 
                         Select::make('travel_type')
@@ -167,6 +200,8 @@ class TrainerVisitResource extends Resource
                             ])
                             ->reactive()
                             ->required()
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->helperText('Select how you traveled. Additional fields will appear based on your choice.')
                             ->afterStateUpdated(function ($state, $set) {
                                 // Reset all related fields when travel_type changes
@@ -199,15 +234,16 @@ class TrainerVisitResource extends Resource
                                 'bike' => 'Bike',
                             ])
                             ->reactive()
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->required(),
 
                         FileUpload::make('starting_meter_photo')
                             ->label('Starting Meter Photo')
-                            ->image()
-                            ->visibility('public') // Ensures the file is publicly accessible.
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->directory('trainer-visits') // Specify the directory for uploads.
                             ->helperText('Upload a clear photo of the starting meter.')
-                            ->previewable(true)
                             ->required(),
 
 
@@ -216,6 +252,8 @@ class TrainerVisitResource extends Resource
                             ->numeric()
                             ->required()
                             ->reactive()
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->afterStateUpdated(function ($state, $set, $get) {
                                 $endingKm = $get('ending_km');
                                 if ($endingKm !== null && $state !== null) {
@@ -232,6 +270,10 @@ class TrainerVisitResource extends Resource
                             }),
 
                         FileUpload::make('ending_meter_photo')
+                            ->directory('trainer-visits') // Specify the directory for uploads.
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
+
                             ->label('Ending Meter Photo'),
 
                         TextInput::make('ending_km')
@@ -239,6 +281,8 @@ class TrainerVisitResource extends Resource
                             ->numeric()
                             ->required()
                             ->reactive()
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->afterStateUpdated(function ($state, $set, $get) {
                                 $startingKm = $get('starting_km');
                                 if ($startingKm !== null && $state !== null) {
@@ -265,6 +309,8 @@ class TrainerVisitResource extends Resource
                             ->label('Distance Traveled')
                             ->numeric()
                             ->readOnly()
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->default(0),
 
                         TextInput::make('travel_expense')
@@ -293,13 +339,17 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('travel_bill')
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
                             ->helperText('Upload the bill for bus/train travel.'),
-                            
+
 
                         TextInput::make('travel_expense')
                             ->label('Travel Expense')
                             ->numeric()
                             ->required()
+                            ->disabled(fn($record) => $record->verify_status === 'verified') // Disable if verify_status is 'verified'
+
                             ->helperText('Enter the expense amount for colleague travel.')
                             ->afterStateUpdated(function ($state, callable $set) {
                                 // $state here is the updated 'travel_expense'
@@ -321,15 +371,15 @@ class TrainerVisitResource extends Resource
                     ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
 
 
-                    Forms\Components\FileUpload::make('files')
+                Forms\Components\FileUpload::make('files')
                     ->label('Upload School Images') // Clear and descriptive label
                     ->required() // Makes the field mandatory
                     ->multiple() // Allows multiple files to be uploaded
+                    ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                     ->directory('school-images') // Define the upload directory
                     ->maxFiles(10) // Limit the maximum number of files (optional, adjust as needed)
-                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/jpg']) // Restrict file types (optional)
                     ->helperText('Upload up to 10 school images in JPEG or PNG format.'), // Enhanced helper text
-                
+
             ]);
     }
 
@@ -356,9 +406,11 @@ class TrainerVisitResource extends Resource
                     ->sortable(),
 
 
-                    TextColumn::make('verify_status')
-                    ->label('Status')
-                    ->badge(),
+                TextColumn::make('verify_status')
+                    ->label('Verification Status')
+                    ->badge()
+                    ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head'])),
+
 
                 TextColumn::make('approved_by')->label('Approved By')
                     ->formatStateUsing(fn($state) => $state ? User::find($state)->name : 'Pending'),
@@ -414,6 +466,8 @@ class TrainerVisitResource extends Resource
             'index' => Pages\ListTrainerVisits::route('/'),
             'create' => Pages\CreateTrainerVisit::route('/create'),
             'edit' => Pages\EditTrainerVisit::route('/{record}/edit'),
+            'view' => Pages\ViewTrainerVisit::route('/{record}'),
+
         ];
     }
 }
