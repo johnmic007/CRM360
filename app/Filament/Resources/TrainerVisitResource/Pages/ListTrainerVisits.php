@@ -45,8 +45,8 @@ class ListTrainerVisits extends ListRecords
 
                     FileUpload::make('travel_bill')
                         ->label('Images')
-                        ->multiple()                        
-                        ->image(),
+                        ->required()
+                        ->multiple(),                        
                 ])
                 ->action(function (array $data): void {
                     // Save the extra expense data
