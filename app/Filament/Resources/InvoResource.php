@@ -401,7 +401,7 @@ class InvoResource extends Resource
                 ->collapsible()
                 ->collapsed(false),
 
-                FileUpload::make('school')->multiple()
+                FileUpload::make('files')->multiple()
 
 
 

@@ -15,13 +15,9 @@ class SalesLeadManagement extends Model
         'state_id ',
         'school_id',
         'status',
-        'feedback',
         'allocated_to',
         'company_id',
-        'remarks',
-        'contacted_person',
-        'contacted_person_designation',
-        'follow_up_date',
+       
     ];
 
     public function allocatedUser()
@@ -112,7 +108,6 @@ class SalesLeadManagement extends Model
 
 
             if (!auth()->user()->hasRole('admin')) {
-                $model->allocated_to = auth()->id(); // Assign the current user's ID to 'allocated_to'
                 $model->company_id = auth()->user()->company_id; // Assign the current user's company_id to 'company_id'
             }
         });

@@ -348,7 +348,7 @@ class TrainerVisitResource extends Resource
                             ->label('Travel Expense')
                             ->numeric()
                             ->required()
-                            ->disabled(fn($record) => $record->verify_status === 'verified') // Disable if verify_status is 'verified'
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->helperText('Enter the expense amount for colleague travel.')
                             ->afterStateUpdated(function ($state, callable $set) {

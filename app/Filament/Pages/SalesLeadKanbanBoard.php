@@ -466,6 +466,11 @@ class SalesLeadKanbanBoard extends KanbanBoard
                                 ->required(),
 
 
+                                Forms\Components\Hidden::make('allocated_to')
+    ->default(fn () => Auth::id()) // Automatically set to the authenticated user's ID
+    ->required(),
+
+
                     Forms\Components\Select::make('school_id')
                         ->label('School')
                         ->options(function (callable $get) {
@@ -478,6 +483,8 @@ class SalesLeadKanbanBoard extends KanbanBoard
                         ->reactive()
                         ->searchable()
                         ->required(),
+
+
 
                     Forms\Components\Placeholder::make('school_assigned_message')
                         ->label('')
