@@ -7,6 +7,7 @@ use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -41,12 +42,10 @@ class LeadStatusesRelationManager extends RelationManager
                 ->required()
                 ->placeholder('Enter the designation (e.g., Principal, Teacher).'),
 
-                Select::make('visited_by')
-                ->label('Visited By')
-                ->options(User::pluck('name', 'id')->toArray()) // Fetch all users
-                ->required()
-                ->searchable()
-                ->placeholder('Select the user who visited the lead.'), // Handle the state directly
+                Hidden::make('visited_by')
+
+                ->default(auth()->id()), // Set default to the current user's ID
+
 
             DatePicker::make('visited_date')
                 ->label('Visited Date')

@@ -29,6 +29,8 @@ class EditApprovalRequest extends EditRecord
                 ->action(function () {
                     // Update the status to Approved
                     $this->record->update(['status' => 'Approved']);
+
+                    
                     
                     // Create a new SalesLeadManagement record with correct data
                     SalesLeadManagement::create([

@@ -4,6 +4,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class TrainerVisit extends Model
 {
@@ -36,6 +37,7 @@ class TrainerVisit extends Model
         'travel_type',
         'travel_bill',
         'files',
+        'visit_entry_id',
     ];
 
 
@@ -52,6 +54,12 @@ class TrainerVisit extends Model
     {
         $rate = $this->travel_mode == 'car' ? Setting::getCarRate() : Setting::getBikeRate();
         return $this->distance_traveled * $rate;
+    }
+
+
+    public function visitEntry()
+    {
+        return $this->belongsTo(VisitEntry::class);
     }
 
     // Calculate the total expense including food
@@ -95,24 +103,43 @@ class TrainerVisit extends Model
 
 
     protected static function boot()
-    {
-        parent::boot();
+{
+    parent::boot();
 
-        static::saving(function ($trainerVisit) {
-            // Ensure travel_mode and distance_traveled are set
-            if ($trainerVisit->travel_mode && $trainerVisit->distance_traveled) {
-                $rate = $trainerVisit->travel_mode === 'car'
-                    ? Setting::getCarRate() // Fetch car rate from settings
-                    : Setting::getBikeRate(); // Fetch bike rate from settings
+    static::saving(function ($trainerVisit) {
+        // Set the user_id for the trainer visit
+        if (Auth::check()) {
+            $trainerVisit->user_id = Auth::id();
+        }
 
-                $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
-            } else {
-                $trainerVisit->travel_expense = 0; // Default to 0 if data is incomplete
+        // Calculate distance_traveled by subtracting starting_km from ending_km
+        if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
+            $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
+
+            // Ensure the distance is not negative
+            if ($trainerVisit->distance_traveled < 0) {
+                throw new \Exception('Ending KM must be greater than or equal to Starting KM.');
             }
+        }
 
+        // Calculate travel expense based on travel_mode
+        if ($trainerVisit->travel_mode && $trainerVisit->distance_traveled) {
+            $rate = $trainerVisit->travel_mode === 'car'
+                ? Setting::getCarRate() // Fetch car rate from settings
+                : Setting::getBikeRate(); // Fetch bike rate from settings;
 
-            $trainerVisit->food_expense = Setting::getFoodExpenseRate();
-        });
-    }
+            $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
+        } else {
+            $trainerVisit->travel_expense = 0; // Default to 0 if data is incomplete
+        }
+
+        // Set the food expense from settings
+        $trainerVisit->food_expense = Setting::getFoodExpenseRate();
+
+        // Calculate total expense
+        $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
+    });
+}
+
     
 }
