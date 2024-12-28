@@ -91,22 +91,19 @@ class ListTrainerVisits extends ListRecords
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),
 
                     'pending' => Tab::make('pending')
-                    
+
             ];
         }else{
 
             return[
                 'all' => Tab::make('All Visits')
-                    ->modifyQueryUsing(fn (Builder $query) => $query)
-                    ->badge(fn () => $this->getVerifiedVisitsCount()),
+                    ->modifyQueryUsing(fn (Builder $query) => $query),
 
                     'approved' => Tab::make('approved')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved'))
-                    ->badge(fn () => $this->accountsApprovalCount()),
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),
 
                     'pending' => Tab::make('pending')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'pending'))
-                    ->badge(fn () => $this->accountsPendingCount())
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'pending')),
 
              
             ];
