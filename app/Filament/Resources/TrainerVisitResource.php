@@ -242,7 +242,6 @@ class TrainerVisitResource extends Resource
                             ->label('Starting Meter Photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
-                            ->directory('trainer-visits') // Specify the directory for uploads.
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->required(),
 
@@ -270,7 +269,6 @@ class TrainerVisitResource extends Resource
                             }),
 
                         FileUpload::make('ending_meter_photo')
-                            ->directory('trainer-visits') // Specify the directory for uploads.
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
 
@@ -280,6 +278,7 @@ class TrainerVisitResource extends Resource
                             ->label('Ending Kilometer')
                             ->numeric()
                             ->required()
+                            
                             ->reactive()
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
@@ -376,7 +375,6 @@ class TrainerVisitResource extends Resource
                     ->required() // Makes the field mandatory
                     ->multiple() // Allows multiple files to be uploaded
                     ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-                    ->directory('school-images') // Define the upload directory
                     ->maxFiles(10) // Limit the maximum number of files (optional, adjust as needed)
                     ->helperText('Upload up to 10 school images in JPEG or PNG format.'), // Enhanced helper text
 

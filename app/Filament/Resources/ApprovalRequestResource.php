@@ -108,23 +108,26 @@ class ApprovalRequestResource extends Resource
 
     public static function table(Tables\Table $table): Tables\Table
     {
+        // Get the authenticated user
+        $user = auth()->user();
+    
         return $table
             ->columns([
                 TextColumn::make('manager.name')
                     ->label('Manager')
                     ->sortable()
                     ->searchable(),
-
+    
                 TextColumn::make('user.name')
                     ->label('Requested By')
                     ->sortable()
                     ->searchable(),
-
+    
                 TextColumn::make('school.name')
                     ->label('School')
                     ->sortable()
                     ->searchable(),
-
+    
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -134,13 +137,13 @@ class ApprovalRequestResource extends Resource
                         'danger' => 'Rejected',
                     ])
                     ->sortable(),
-
+    
                 TextColumn::make('created_at')
                     ->label('Requested At')
                     ->dateTime()
                     ->sortable(),
             ])
-            ->filters([
+            ->filters(array_filter([
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options([
@@ -148,20 +151,19 @@ class ApprovalRequestResource extends Resource
                         'Approved' => 'Approved',
                         'Rejected' => 'Rejected',
                     ]),
-
-                SelectFilter::make('manager_id')
-                    ->label('Manager')
-                    ->options(User::pluck('name', 'id')),
-
-                SelectFilter::make('user_id')
-                    ->label('Requested By')
-                    ->options(User::pluck('name', 'id')),
-            ])
+    
+                // Add manager_id filter only if user has the required roles
+                $user && $user->hasRole(['admin', 'sales', 'head'])
+                    ? SelectFilter::make('manager_id')
+                        ->label('Manager')
+                        ->options(User::pluck('name', 'id')->toArray())
+                    : null, // Exclude null values
+            ]))
             ->actions([
                 Tables\Actions\EditAction::make(),
             ]);
-            
     }
+    
 
     public static function getRelations(): array
     {

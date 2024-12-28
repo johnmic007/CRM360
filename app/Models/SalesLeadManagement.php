@@ -75,19 +75,25 @@ class SalesLeadManagement extends Model
         static::saved(function ($model) {
             // Define an array of statuses and their corresponding actions
             $statuses = [
-                'Demo Completed' => 'Demo Scheduled',
-                'deal_won' => 'deal_won',
-                'deal_lost' => 'deal_lost',
+                'School Nurturing' => 'School Nurturing',
+                'Demo reschedule'  => 'Demo reschedule',
+                'Demo Completed'   => 'Demo Completed',
+                'deal_won'         => 'Deal Won',
+                'deal_lost'        => 'Deal Lost',
+                'support'   => 'Support',
+
             ];
         
-            // Check if the current status exists in the defined statuses
-            if (array_key_exists($model->status, $statuses)) {
-                \App\Models\SalesLeadStatus::create([
-                    'sales_lead_management_id' => $model->id, // Assuming the relationship exists
-                    'status' => $statuses[$model->status],
-                    'visited_by' => auth()->id(), // Ensure auth is available in your context
-                ]);
-            }
+            if (!\App\Models\SalesLeadStatus::where('sales_lead_management_id', $model->id)
+            ->where('status', $statuses[$model->status])
+            ->exists()) {
+           \App\Models\SalesLeadStatus::create([
+               'sales_lead_management_id' => $model->id,
+               'status' => $statuses[$model->status],
+               'visited_by' => auth()->id(),
+           ]);
+       }
+       
         });
         
 

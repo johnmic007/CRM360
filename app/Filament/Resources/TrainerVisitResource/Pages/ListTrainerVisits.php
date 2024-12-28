@@ -77,26 +77,21 @@ class ListTrainerVisits extends ListRecords
         if (!$user->hasRole(['admin', 'accounts', 'accounts_head'])) {
             return [
                 'all' => Tab::make('All Visits')
-                    ->modifyQueryUsing(fn (Builder $query) => $query)
-                    ->badge(fn () => $this->getAllVisitsCount()),
+                    ->modifyQueryUsing(fn (Builder $query) => $query),
 
                 'verified' => Tab::make('Verified Visits')
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'verified'))
-                    ->badge(fn () => $this->getVerifiedVisitsCount())
                     ->badgeColor('success'),
 
                 'unverified' => Tab::make('Unverified Visits')
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'unverified'))
-                    ->badge(fn () => $this->getUnverifiedVisitsCount())
                     ->badgeColor('danger'),
 
                     'approved' => Tab::make('approved')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved'))
-                    ->badge(fn () => $this->accountsApprovalCount()),
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),
 
                     'pending' => Tab::make('pending')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'pending'))
-                    ->badge(fn () => $this->accountsPendingCount())
+                    
             ];
         }else{
 

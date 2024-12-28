@@ -6,6 +6,8 @@ use App\Filament\Resources\VisitEntryResource;
 use App\Models\VisitEntry;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Carbon;
+
 
 class ListVisitEntries extends ListRecords
 {
@@ -16,10 +18,11 @@ class ListVisitEntries extends ListRecords
         parent::mount();
 
         $userId = Auth::id();
+        $todayDate = Carbon::now()->toDateString(); // Get only the current date (YYYY-MM-DD)
 
-        // Fetch today's entry for the logged-in user
+        // Fetch today's entry for the logged-in user based on the date
         $todayEntry = VisitEntry::where('user_id', $userId)
-            ->whereDate('start_time', now())
+            ->whereDate('start_time', $todayDate)
             ->first();
 
         // If no entry exists, create one

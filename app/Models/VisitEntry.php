@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VisitEntry extends Model
 {
+    
     use HasFactory;
 
     protected $fillable = [
@@ -35,6 +36,12 @@ public function leadStatuses()
 {
     return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
 }
+
+public function schoolEntries()
+{
+    return $this->hasMany(SchoolEntry::class);
+}
+
 
 
 protected static function boot()

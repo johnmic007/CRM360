@@ -21,6 +21,7 @@ class SalesLeadStatus extends Model
         'visited_by', 
         'status', 
         'remarks',
+        'image',
         'reschedule_date',
         'contacted_person', 
         'contacted_person_designation', 

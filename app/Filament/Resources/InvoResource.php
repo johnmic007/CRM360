@@ -375,17 +375,20 @@ class InvoResource extends Resource
                         ->options(function () {
                             $currentUser = auth()->user();
 
+
                             // Get subordinates with specific roles (BDA and BDM) and the same company_id
                             $subordinates = User::query()
-                                ->viewableBy($currentUser) // Assuming this scope limits to viewable users
                                 ->where('company_id', $currentUser->company_id) // Filter by the same company_id
                                 ->whereHas('roles', function ($query) {
                                     $query->whereIn('name', ['BDA', 'BDM']); // Filter roles to BDA and BDM
                                 })
                                 ->pluck('name', 'id');
 
+
+
                             return $subordinates;
                         })
+                        ->preload()
                         ->required()
                         ->searchable(),
 

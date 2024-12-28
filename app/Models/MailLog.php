@@ -27,6 +27,7 @@ class MailLog extends Model
         'to_emails',
         'cc_emails',
         'company_id',
+        'mail_template_id',
         'subject',
         'content',
         'status',
@@ -39,6 +40,12 @@ class MailLog extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+
+    public function mail_template(): BelongsTo
+    {
+        return $this->belongsTo(MailTemplate::class);
     }
 
     /**

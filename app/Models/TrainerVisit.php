@@ -112,6 +112,10 @@ class TrainerVisit extends Model
             $trainerVisit->user_id = Auth::id();
         }
 
+        if (empty($trainerVisit->visit_date)) {
+            $trainerVisit->visit_date = now();
+        }
+
         // Calculate distance_traveled by subtracting starting_km from ending_km
         if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
             $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
