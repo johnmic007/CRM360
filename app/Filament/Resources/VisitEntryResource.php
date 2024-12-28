@@ -55,6 +55,18 @@ class VisitEntryResource extends Resource
                 ->default(fn() => auth()->id()),
 
 
+
+                Forms\Components\TextInput::make('start_time')
+                ->label('Start Time')
+                ->visible(fn ($record) => $record && $record->start_time) // Show only if start_time has a value
+                ->default(fn ($record) => $record ? $record->start_time : null)
+                ->disabled(), // Make the field read-only
+    
+            Forms\Components\TextInput::make('end_time')
+                ->label('End Time')
+                ->visible(fn ($record) => $record && $record->end_time) // Show only if end_time has a value
+                ->default(fn ($record) => $record ? $record->end_time : null)
+                ->disabled(), 
           
            
                 
