@@ -13,7 +13,11 @@ class CalendarWidget extends BaseCalendarWidget
 
     protected static ?int $sort = 2;
 
-    
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' ]);
+    }
+
     
 
 

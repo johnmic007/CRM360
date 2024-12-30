@@ -79,8 +79,7 @@ class ListSalesLeadManagement extends ListRecords
                     $query->whereIn('allocated_to', $accessibleUserIds)
                         ->where('status', 'deal_won')
                         ->where('company_id', $userCompanyId)
-                )
-                ->badge(fn() => $this->getDealWonCount($accessibleUserIds, $userCompanyId)),
+                ),
 
             'deal_lost' => Tab::make('Deal Lost')
                 ->modifyQueryUsing(
@@ -88,8 +87,7 @@ class ListSalesLeadManagement extends ListRecords
                     $query->whereIn('allocated_to', $accessibleUserIds)
                         ->where('status', 'deal_lost')
                         ->where('company_id', $userCompanyId)
-                )
-                ->badge(fn() => $this->getDealLostCount($accessibleUserIds, $userCompanyId)),
+                ),
 
             'demo_completed' => Tab::make('Demo Completed')
                 ->modifyQueryUsing(
@@ -97,8 +95,7 @@ class ListSalesLeadManagement extends ListRecords
                     $query->whereIn('allocated_to', $accessibleUserIds)
                         ->where('status', 'Demo Completed')
                         ->where('company_id', $userCompanyId)
-                )
-                ->badge(fn() => $this->getDemoCompletedCount($accessibleUserIds, $userCompanyId)),
+                ),
 
             'school_nurturing' => Tab::make('School Nurturing')
                 ->modifyQueryUsing(
@@ -106,8 +103,7 @@ class ListSalesLeadManagement extends ListRecords
                     $query->whereIn('allocated_to', $accessibleUserIds)
                         ->where('status', 'School Nurturing')
                         ->where('company_id', $userCompanyId)
-                )
-                ->badge(fn() => $this->getSchoolNurturingCount($accessibleUserIds, $userCompanyId)),
+                ),
         ];
     }
 

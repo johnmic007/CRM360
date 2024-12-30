@@ -35,7 +35,6 @@ class TrainerVisit extends Model
         'verified_at',
         'sales_role_evaluation',
         'travel_type',
-        'travel_bill',
         'files',
         'visit_entry_id',
     ];
@@ -127,21 +126,23 @@ class TrainerVisit extends Model
         }
 
         // Calculate travel expense based on travel_mode
-        if ($trainerVisit->travel_mode && $trainerVisit->distance_traveled) {
-            $rate = $trainerVisit->travel_mode === 'car'
+        if (
+            $trainerVisit->travel_mode &&
+            $trainerVisit->distance_traveled &&
+            !$trainerVisit->travel_expense
+        ) {
+            $rate = ($trainerVisit->travel_mode === 'car')
                 ? Setting::getCarRate() // Fetch car rate from settings
-                : Setting::getBikeRate(); // Fetch bike rate from settings;
-
+                : Setting::getBikeRate(); // Fetch bike rate from settings
+        
             $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
-        } else {
-            $trainerVisit->travel_expense = 0; // Default to 0 if data is incomplete
         }
-
+        
         // Set the food expense from settings
         $trainerVisit->food_expense = Setting::getFoodExpenseRate();
 
         // Calculate total expense
-        $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
+        $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense ;
     });
 }
 
