@@ -25,7 +25,7 @@ class SettingResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation', ]);
+        return auth()->user()->hasRole(['admin', 'sales_operation','sales_operation_head' , ]);
     }
 
 
@@ -34,15 +34,15 @@ class SettingResource extends Resource
         return $form
             ->schema([
                 TextInput::make('car_rate')
-                ->label('Car Rate per km')
+                ->label('Car expense')
                 ->numeric()
                 ->required(),
             TextInput::make('bike_rate')
-                ->label('Bike Rate per km')
+                ->label('Bike expense')
                 ->numeric()
                 ->required(),
             TextInput::make('food_expense_rate')
-                ->label('Food Expense per Visit')
+                ->label('Food expense')
                 ->numeric()
                 ->required(),
             ]);
