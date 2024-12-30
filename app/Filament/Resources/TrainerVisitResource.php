@@ -32,19 +32,8 @@ class TrainerVisitResource extends Resource
 
     protected static ?string $navigationGroup = 'Approvals';
 
-    public static function getNavigationBadge(): ?string
-    {
-
-        if (!auth()->user()->hasRole(['admin', 'sales'])) {
-            return null; // Do not show the badge if the user is not an admin or sales role
-        }
-        // Count trainer visits where 'approved_by' is null
-        $pendingApprovals = TrainerVisit::whereNull('approved_by')->count();
-
-        // Return the count or null if no pending approvals
-        return $pendingApprovals > 0 ? (string) $pendingApprovals : null;
-    }
-
+   
+    
 
     public static function canEdit($record): bool
     {
