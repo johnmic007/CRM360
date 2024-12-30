@@ -28,8 +28,18 @@ class ViewTrainerVisit extends ViewRecord
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->visible(fn() => Auth::user()->hasRole('sales'))
-                ->hidden(fn() => $this->record->verify_status !== 'verified') // Only show when `verify_status` is 'verified'
-                ->requiresConfirmation(),
+                ->hidden(fn() => $this->record->verify_status !== 'verified'), // Only show when `verify_status` is 'verified'
+
+
+                Action::make('approved')
+                
+                ->color('success')
+                ->icon('heroicon-o-check-circle')
+                ->hidden(fn() => $this->record->approval_status !== 'approved' ), // Only show when `verify_status` is 'verified'
+
+
+            
+
 
 
 
@@ -132,10 +142,12 @@ class ViewTrainerVisit extends ViewRecord
 
             // 3. ACCOUNTS APPROVE
             Action::make('approveByAccounts')
-                ->label('Accounts Approve')
+                ->label(' Approve')
                 ->icon('heroicon-o-check')
                 ->color('primary')
                 ->visible(fn() => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+                ->hidden(fn() => $this->record->approval_status === 'approved' )   // Only show when `verify_status` is 'verified'
+
                 ->disabled(fn() => (
                     // Disable if not verified by Sales yet or already approved
                     $this->record->verify_status !== 'verified' ||
@@ -214,10 +226,12 @@ class ViewTrainerVisit extends ViewRecord
 
             // 4. ACCOUNTS REJECT
             Action::make('rejectByAccounts')
-                ->label('Accounts Reject')
+                ->label('Reject')
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->visible(fn() => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+                ->hidden(fn() => $this->record->approval_status === 'approved' )   // Only show when `verify_status` is 'verified'
+
                 ->disabled(fn() => (
                     // Disable if not verified yet or already final-approved/rejected
                     $this->record->verify_status !== 'verified' ||

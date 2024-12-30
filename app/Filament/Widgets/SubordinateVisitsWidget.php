@@ -14,6 +14,14 @@ class SubordinateVisitsWidget extends BaseWidget
 
     protected int | string | array $columnSpan = 'full';
 
+
+    public static function canView(): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'head' , 'bdm' , 'zonal_manager' , 'regional_manager' ]);
+    }
+
+    
+
     /**
      * Returns the query for the table.
      */
@@ -57,13 +65,19 @@ class SubordinateVisitsWidget extends BaseWidget
                 ->label('End Time')
                 ->dateTime(),
 
-            Tables\Columns\TextColumn::make('trainerVisit.starting_km')
-                ->label('Starting KM'),
+                Tables\Columns\TextColumn::make('working_hours')
+                ->label('Working Hours')
+                ->getStateUsing(function ($record) {
+                    if ($record->start_time && $record->end_time) {
+                        $start = Carbon::parse($record->start_time);
+                        $end = Carbon::parse($record->end_time);
+                        $duration = $start->diff($end);
 
-            
+                        return sprintf('%02d:%02d:%02d', $duration->h, $duration->i, $duration->s);
+                    }
+                    return 'N/A'; // If start or end time is missing
+                }),
 
-            Tables\Columns\TextColumn::make('trainerVisit.ending_km')
-                ->label('Ending KM'),
 
             Tables\Columns\BooleanColumn::make('completed')
                 ->label('Visit Completed')

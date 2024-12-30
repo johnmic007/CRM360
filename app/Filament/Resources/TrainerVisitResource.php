@@ -82,23 +82,7 @@ class TrainerVisitResource extends Resource
                     ->default('pending')
                     ->disabled()
                     ->reactive()
-                    ->live()
-                    ->extraAttributes(function (callable $get) use ($user) {
-                        $statusColors = [
-                            'pending' => 'background-color: #ffeb3b; color: #000;',
-                            'clarification' => 'background-color: #ff9800; color: #fff;',
-                            'verified' => 'background-color: #4caf50; color: #fff;',
-                        ];
-
-                        $status = $get('verify_status') ?? 'pending';
-                        $baseStyle = $statusColors[$status] ?? 'background-color: #f8f9fa; color: #000;';
-
-                        if ($user->hasAnyRole(['admin', 'sales'])) {
-                            $baseStyle .= ' border: 2px solid #4CAF50; font-weight: bold;';
-                        }
-
-                        return ['style' => $baseStyle];
-                    }),
+                    ->live(),
 
                 // Section for Clarification
                 Forms\Components\Section::make('Clarification Details')
@@ -383,7 +367,6 @@ class TrainerVisitResource extends Resource
                 TextColumn::make('distance_traveled')->label('Distance (km)'),
                 TextColumn::make('total_expense')->label('Total Expense')->money('INR'),
                 TextColumn::make('approval_status')
-                    ->label('Status')
                     ->badge()
                     ->colors([
                         'primary' => 'Pending',
@@ -393,10 +376,16 @@ class TrainerVisitResource extends Resource
                     ->sortable(),
 
 
-                TextColumn::make('verify_status')
+                    Tables\Columns\TextColumn::make('verify_status')
                     ->label('Verification Status')
-                    ->badge()
-                    ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head'])),
+                    ->badge() // Adds the badge styling
+                    ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head']))
+                    ->Colors([
+                        'danger' => 'pending',           // Red for 'Pending'
+                        'warning' => 'clarification',   // Yellow for 'Need Clarification'
+                        'success' => 'verified',        // Green for 'Verified'
+                    ]),                
+                
 
 
                 TextColumn::make('approved_by')->label('Approved By')

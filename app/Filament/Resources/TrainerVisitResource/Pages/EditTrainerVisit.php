@@ -26,8 +26,7 @@ class EditTrainerVisit extends EditRecord
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->visible(fn() => Auth::user()->hasRole('sales'))
-                ->hidden(fn() => $this->record->verify_status !== 'verified') // Only show when `verify_status` is 'verified'
-                ->requiresConfirmation(),
+                ->hidden(fn() => $this->record->verify_status !== 'verified'), // Only show when `verify_status` is 'verified'
 
 
 
