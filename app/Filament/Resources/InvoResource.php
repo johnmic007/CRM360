@@ -9,6 +9,7 @@ use App\Filament\Resources\InvoResource\Pages;
 use App\Filament\Resources\InvoResource\RelationManagers;
 use App\Filament\Resources\InvoResource\Widgets\InvoiceStats;
 use App\Helpers\InvoiceHelper;
+use App\Models\Block;
 use App\Models\Invo;
 use App\Models\Invoice;
 use App\Models\Items;
@@ -19,6 +20,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\User;
 use App\Models\Role;
+use App\Models\School;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
@@ -53,7 +55,7 @@ class InvoResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales_operation']);
+        return auth()->user()->hasRole(['admin', 'head', 'sales_operation' , 'sales_operation_head' , ]);
     }
 
     public static function form(Form $form): Form
@@ -69,12 +71,63 @@ class InvoResource extends Resource
                 ->schema([
                     Grid::make(2)
                         ->schema([
-                            Select::make('school_id')
+                            Forms\Components\Select::make('state_id')
+                                ->label('State')
+                                ->options(\App\Models\State::pluck('name', 'id')->toArray()) // Fetch states using Eloquent
+                                ->reactive()
+                                ->required()
+                                ->afterStateUpdated(fn(callable $set) => $set('district_id', null)), // Reset district when state changes
+
+                            Forms\Components\Select::make('district_id')
+                                ->label('District')
+                                ->options(function (callable $get) {
+                                    $stateId = $get('state_id');
+                                    if (!$stateId) {
+                                        return [];
+                                    }
+                                    // Fetch districts for the chosen state
+                                    return \App\Models\District::where('state_id', $stateId)->pluck('name', 'id')->toArray();
+                                })
+                                ->reactive()
+                                ->required()
+                                ->afterStateUpdated(fn(callable $set) => $set('block_id', null)),
+
+                            Forms\Components\Select::make('block_id')
+                                ->label('Block')
+                                ->options(function (callable $get) {
+                                    $districtId = $get('district_id');
+                                    if (!$districtId) {
+                                        return [];
+                                    }
+                                    return Block::where('district_id', $districtId)->pluck('name', 'id')->toArray(); // Fetch blocks using Eloquent
+                                })
+                                ->reactive()
+                                ->required(),
+
+                            Forms\Components\Select::make('school_id')
                                 ->label('School')
-                                ->relationship('school', 'name')
+                               
+                                ->options(function (callable $get) {
+                                    $blockId = $get('block_id');
+                                    if (!$blockId) {
+                                        return [];
+                                    }
+                                    return School::where('block_id', $blockId)->pluck('name', 'id');
+                                })
+
+                                ->reactive()
+                                ->required()
+                                ->helperText('Select the school to which books will be shipped.'),
+
+                            Select::make('mode_of_transport')
+                                ->label('Mode of Transport')
+                                ->options([
+                                    'own' => 'Own Delivery',
+                                    'courier' => 'Courier',
+                                ])
                                 ->required()
                                 ->reactive()
-                                ->searchable()
+                                ->helperText('Choose the transport mode.')
                                 ->default(fn() => request()->query('school_id')), // Set default value from query parameter
 
 
