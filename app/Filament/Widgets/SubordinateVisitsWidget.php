@@ -86,6 +86,13 @@ class SubordinateVisitsWidget extends BaseWidget
             Tables\Columns\TextColumn::make('lead_count')
                 ->label('Lead Count')
                 ->getStateUsing(fn($record) => $record->leadStatuses()->count()),
+
+
+                Tables\Columns\TextColumn::make('potential_meet_count')
+                ->label('Potential Meets')
+                ->getStateUsing(function ($record) {
+                    return $record->leadStatuses()->sum('potential_meet');
+                }),
         ];
     }
 
