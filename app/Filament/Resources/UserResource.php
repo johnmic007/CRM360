@@ -41,7 +41,7 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales' , 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
+        return auth()->user()->hasRole(['admin', 'sales_operation' ,   'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
     }
 
 
@@ -101,14 +101,14 @@ class UserResource extends Resource
                     ->hidden(fn() => !auth()->user()->roles()->where('name', 'admin')->exists()) // Hide if not admin
                     ->helperText('This field is visible only to Admin users.'),
 
-                // District and Block allocation fields for admin and sales roles
+                // District and Block allocation fields for admin and sales_operation roles
                 // Forms\Components\Select::make('districts')
                 //     ->label('Allocate Districts')
                 //     ->options(\App\Models\District::pluck('name', 'id'))
                 //     ->multiple()
                 //     ->preload()
                 //     ->required()
-                //     ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
+                //     ->visible(fn() => auth()->user()->hasRole(['admin', 'sales_operation']))
                 //     ->helperText('Select the districts to allocate to this user.'),
 
 
@@ -118,7 +118,7 @@ class UserResource extends Resource
                     ->multiple()
                     ->preload()
                     ->required()
-                    ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'sales_operation']))
                     ->helperText('Select the blocks to allocate to this user.')
                     ->afterStateUpdated(fn(callable $set) => $set('allocated_districts', null)), // Reset district when state changes
 
@@ -135,7 +135,7 @@ class UserResource extends Resource
                     })->multiple()
                     ->preload()
                     ->required()
-                    ->visible(fn() => auth()->user()->hasRole(['admin', 'sales']))
+                    ->visible(fn() => auth()->user()->hasRole(['admin', 'sales_operation']))
                     ->helperText('Select the blocks to allocate to this user.'),
 
 

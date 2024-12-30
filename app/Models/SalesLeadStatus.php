@@ -49,6 +49,10 @@ class SalesLeadStatus extends Model
         return $this->belongsTo(User::class, 'visited_by');
     }
 
+
+ 
+
+
     protected static function boot()
     {
         parent::boot();

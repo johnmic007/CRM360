@@ -19,7 +19,7 @@ class ListApprovalRequests extends ListRecords
         $user = Auth::user();
     
         // Admin and Sales roles see all requests for their company_id
-        if ($user->hasRole(['admin', 'sales'])) {
+        if ($user->hasRole(['admin', 'sales_operation'])) {
             return ApprovalRequest::query()
                 ->whereHas('user', function ($query) use ($user) {
                     $query->where('company_id', $user->company_id);

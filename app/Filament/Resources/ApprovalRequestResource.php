@@ -30,22 +30,11 @@ class ApprovalRequestResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales']);
+        return auth()->user()->hasRole(['admin' , 'bda' , 'sales_operation_head' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
     }
 
 
-    public static function getNavigationBadge(): ?string
-    {
-        // Check if the user has the required roles
-        if (!auth()->user()->hasRole(['admin', 'sales'])) {
-            return null; // Do not show the badge if the user is not an admin or sales role
-        }
-    
-        // Count pending approval requests
-        $pendingCount = ApprovalRequest::where('status', 'Pending')->count();
-    
-        return $pendingCount > 0 ? (string) $pendingCount : null;
-    }
+
     
 
     public static function form(Forms\Form $form): Forms\Form
@@ -153,7 +142,7 @@ class ApprovalRequestResource extends Resource
                     ]),
     
                 // Add manager_id filter only if user has the required roles
-                $user && $user->hasRole(['admin', 'sales', 'head'])
+                $user && $user->hasRole(['admin', 'sales_operation', 'head'])
                     ? SelectFilter::make('manager_id')
                         ->label('Manager')
                         ->options(User::pluck('name', 'id')->toArray())

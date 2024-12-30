@@ -36,7 +36,7 @@ class ListUsers extends ListRecords
         }
 
 
-        if ($user->roles()->where('name', 'sales')->exists()) {
+        if ($user->roles()->where('name', 'sales_operation')->exists()) {
             return $query->where('company_id', $user->company_id);
         }
 

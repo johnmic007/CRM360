@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class VisitEntry extends Model
 {
-    
+
     use HasFactory;
 
     protected $fillable = [
@@ -18,6 +18,8 @@ class VisitEntry extends Model
         'starting_meter_photo',
         'ending_meter_photo',
         'travel_type',
+        'travel_bill',
+        'travel_expense',
         'starting_km',
         'ending_km',
         'travel_mode',
@@ -25,6 +27,16 @@ class VisitEntry extends Model
 
     ];
 
+
+    public function user()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
+
+public function roles()
+{
+    return $this->user->roles(); // Delegate roles relationship to the user
+}
 
     public function trainerVisit()
     {
@@ -37,10 +49,7 @@ public function leadStatuses()
     return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
 }
 
-public function schoolEntries()
-{
-    return $this->hasMany(SchoolEntry::class);
-}
+
 
 
 
@@ -50,17 +59,59 @@ protected static function boot()
 
     // After saving a VisitEntry, update or create the corresponding TrainerVisit
     static::saved(function ($visitEntry) {
-        TrainerVisit::updateOrCreate(
-            ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
-            [
-                'starting_meter_photo' => $visitEntry->starting_meter_photo,
-                'starting_km' => $visitEntry->starting_km,
-                'ending_km' => $visitEntry->ending_km,
-                'ending_meter_photo' => $visitEntry->ending_meter_photo,
-                'travel_type' => $visitEntry->travel_type,
-                'travel_mode' => $visitEntry->travel_mode,
-            ]
-        );
+
+
+
+
+        if (
+            $visitEntry->user_id &&
+            $visitEntry->travel_type &&
+            $visitEntry->starting_meter_photo &&
+            $visitEntry->starting_km &&
+            $visitEntry->ending_km &&
+            $visitEntry->ending_meter_photo &&
+            $visitEntry->travel_mode
+        ) {
+
+            TrainerVisit::updateOrCreate(
+                ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
+                [
+                    'starting_meter_photo' => $visitEntry->starting_meter_photo,
+                    'starting_km' => $visitEntry->starting_km,
+                    'ending_km' => $visitEntry->ending_km,
+                    'ending_meter_photo' => $visitEntry->ending_meter_photo,
+                    'travel_type' => $visitEntry->travel_type,
+                    'travel_mode' => $visitEntry->travel_mode,
+                ]
+            );
+
+        }
+
+
+
+
+        if (
+            $visitEntry->user_id &&
+            $visitEntry->travel_type &&
+            $visitEntry->travel_bill &&
+            $visitEntry->travel_expense 
+
+            
+        ) {
+
+            TrainerVisit::updateOrCreate(
+                ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
+                [
+                    'travel_type' => $visitEntry->travel_type,
+                    'travel_bill' => $visitEntry->travel_bill,
+                    'travel_expense' => $visitEntry->travel_expense,
+
+                ]
+            );
+
+
+        }
+      
     });
 }
 

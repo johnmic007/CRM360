@@ -45,7 +45,7 @@ class TaskResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()->hasAnyRole(['admin', 'sales' , 'head_trainer']);
+        return auth()->user()->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']);
     }
 
 
@@ -70,7 +70,7 @@ class TaskResource extends Resource
                         'completed' => 'Completed',
                     ])
                     ->default('pending')
-                    ->disabled($user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                    ->disabled($user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                     ->reactive()
                     ->live()
                     ->extraAttributes(function (callable $get) use ($user) {
@@ -84,7 +84,7 @@ class TaskResource extends Resource
                         $status = $get('status') ?? 'pending'; // Get the current status dynamically
                         $baseStyle = $statusColors[$status] ?? 'background-color: #f8f9fa; color: #000;';
 
-                        if ($user->hasAnyRole(['admin', 'sales'])) {
+                        if ($user->hasAnyRole(['admin', 'sales_operation'])) {
                             $baseStyle .= ' border: 2px solid #4CAF50; font-weight: bold;';
                         }
 
@@ -102,27 +102,27 @@ class TaskResource extends Resource
                                 TextInput::make('total_students')
                                     ->label('Total Students Attended')
                                     ->numeric()
-                                    ->disabled($user->hasAnyRole(['admin', 'sales', 'head_trainer']))
+                                    ->disabled($user->hasAnyRole(['admin', 'sales_operation', 'head_trainer']))
                                     ->placeholder('Enter the number of students')
                                     ->required(),
 
                                 Textarea::make('topics_covered')
                                     ->label('Topics Covered')
-                                    ->disabled($user->hasAnyRole(['admin', 'sales', 'head_trainer']))
+                                    ->disabled($user->hasAnyRole(['admin', 'sales_operation', 'head_trainer']))
                                     ->placeholder('List the topics covered during the session')
                                     ->rows(4)
                                     ->required(),
 
                                 Textarea::make('remarks')
                                     ->label('Remarks')
-                                    ->disabled($user->hasAnyRole(['admin', 'sales', 'head_trainer']))
+                                    ->disabled($user->hasAnyRole(['admin', 'sales_operation', 'head_trainer']))
                                     ->placeholder('Add any additional remarks')
                                     ->rows(3)
                                     ->helperText('Optional: Add notes or feedback for this session.'),
 
                                 FileUpload::make('image')
                                     ->label('Upload Image')
-                                    ->disabled($user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                                    ->disabled($user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->image()
                                     ->directory('task-images')
                                     ->helperText('Optional: Upload an image related to this task.'),
@@ -144,7 +144,7 @@ class TaskResource extends Resource
                                     ->label('Task Title')
                                     ->placeholder('Enter the task title (e.g., Demo Presentation)')
                                     ->required()
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->columnSpan(2)
                                     ->helperText('This is the primary title of the task.'),
 
@@ -152,7 +152,7 @@ class TaskResource extends Resource
                                     ->label('Task Description')
                                     ->placeholder('Provide a detailed description about the task...')
                                     ->rows(4)
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->helperText('Optional: Add any additional notes or requirements.'),
                             ]),
                     ])
@@ -166,13 +166,13 @@ class TaskResource extends Resource
                                 DatePicker::make('start_date')
                                     ->label('Start Date')
                                     ->required()
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer' ]))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer' ]))
                                     ->helperText('Select the date when the task starts.'),
 
                                 DatePicker::make('end_date')
                                     ->label('End Date')
                                     ->required()
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->helperText('Select the date when the task ends.'),
                                 Select::make('task_type')
                                     ->options([
@@ -180,12 +180,12 @@ class TaskResource extends Resource
                                         'training' => 'Training',
                                     ])
                                     ->label('Task Type')
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->placeholder('Select the type of task')
                                     ->helperText('Choose the most relevant category for this task.'),
 
                                 TextInput::make('time')
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer' ]))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer' ]))
                                     ->label('Estimated Time (Hours)')
                                     ->placeholder('e.g., 2.5')
                                     ->helperText('Enter the estimated duration in hours.'),
@@ -207,12 +207,12 @@ class TaskResource extends Resource
                                     ->placeholder('Select a district')
                                     ->reactive()
                                     ->required()
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->helperText('Select the district where the task is located.'),
 
                                 Select::make('block_id')
                                     ->label('Block')
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer' ]))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer' ]))
                                     ->options(function (callable $get) {
                                         $districtId = $get('district_id');
                                         if (!$districtId) {
@@ -227,7 +227,7 @@ class TaskResource extends Resource
 
                                 Select::make('school_id')
                                     ->label('School')
-                                    ->disabled(!$user->hasAnyRole(['admin', 'sales', 'head_trainer']))
+                                    ->disabled(!$user->hasAnyRole(['admin', 'sales_operation', 'head_trainer']))
                                     ->options(function (callable $get) {
                                         $blockId = $get('block_id');
                                         if (!$blockId) {
@@ -259,11 +259,11 @@ class TaskResource extends Resource
                             ->preload()                            ->searchable()
                             ->placeholder('Assign this task to a user')
                             ->required()
-                            ->hidden(!$user->hasAnyRole(['admin', 'sales', 'head_trainer']))
+                            ->hidden(!$user->hasAnyRole(['admin', 'sales_operation', 'head_trainer']))
 
                             ->helperText('Search and select a user to assign this task.'),
                     ])
-                    ->hidden(!$user->hasAnyRole(['admin', 'sales' , 'head_trainer']))
+                    ->hidden(!$user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
 
                     ->collapsible(),
             ])

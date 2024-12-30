@@ -20,4 +20,23 @@ class TrainerVisitController extends Controller
 
 
     }
+
+
+
+    public function downloadSchoolPDF($id)
+    {
+        $trainerVisit = TrainerVisit::findOrFail($id);
+
+        $data = [
+            'start_time' => $trainerVisit->visitEntry->start_time ?? 'N/A',
+            'end_time' => $trainerVisit->visitEntry->end_time ?? 'N/A',
+            'starting_km' => $trainerVisit->starting_km ?? 'N/A',
+            'ending_km' => $trainerVisit->ending_km ?? 'N/A',
+            'travel_mode' => $trainerVisit->travel_mode ?? 'N/A',
+        ];
+
+        $pdf = Pdf::loadView('trainer_visit.pdf', $data);
+
+        return $pdf->download("visit_details_{$trainerVisit->id}.pdf");
+    }
 }

@@ -10,7 +10,7 @@ class SalesAnalysisWidget extends LineChartWidget
 {
     public static function canView(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales']);
+        return auth()->user()->hasRole(['admin', 'head', 'sales_operation']);
     }
 
     protected static ?int $sort = 3;

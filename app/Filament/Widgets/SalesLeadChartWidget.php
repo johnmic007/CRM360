@@ -14,7 +14,7 @@ class SalesLeadChartWidget extends ChartWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales']);
+        return auth()->user()->hasRole(['admin', 'head', 'sales_operation']);
     }
 
 

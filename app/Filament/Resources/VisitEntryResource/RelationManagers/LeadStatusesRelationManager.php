@@ -10,6 +10,8 @@ use App\Models\State;
 use Filament\Forms;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -229,24 +231,44 @@ class SchoolVisitRelationManager extends RelationManager
                     ->helperText('Upload image')
                     ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
 
+                    Forms\Components\TextInput::make('contacted_person_designation')
+                        ->label('Contacted Person Designation')
+                        ->placeholder('e.g., Principal, Teacher')
+                        ->required()
+                        ->helperText('Designation of the person contacted for this status.')
+                        ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
+
+
+
                 Forms\Components\TextInput::make('contacted_person')
                     ->label('Contacted Person')
                     ->required()
-                    ->visible(fn(callable $get) => $get('status') === ['School Nurturing', 'support']),
+                    ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
+
+
+                    Forms\Components\DatePicker::make('follow_up_date')
+                        ->label('Follow-Up Date')
+                        ->helperText('Specify the follow-up date for this status.')
+
+                        ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
+
 
                 Forms\Components\TextInput::make('contacted_person_designation')
                     ->label('Contacted Person Designation')
                     ->visible(fn(callable $get) => $get('status') === ['School Nurturing', 'support']),
 
-                Forms\Components\Toggle::make('potential_meet')
-                    ->label('Potential Meet')
-                    ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'support' ])),
+
 
                 Forms\Components\DatePicker::make('visited_date')
                     ->label('Visited Date')
                     ->default(now())
                     ->required()
                     ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'support' , 'deal_won' , 'deal_lost'])),
+
+
+                    Forms\Components\Toggle::make('potential_meet')
+                    ->label('Potential Meet')
+                    ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'support' ])),
 
                 Forms\Components\DatePicker::make('follow_up_date')
                     ->label('Follow-Up Date')
@@ -265,6 +287,46 @@ class SchoolVisitRelationManager extends RelationManager
                     ->required()
                     ->helperText('Select whether the deal was won or lost.')
                     ->visible(fn(callable $get) => $get('status') === 'Demo Completed'),
+
+
+                    Forms\Components\Toggle::make('is_book_issued')
+                        ->label('Was a book issued during this visit?')
+                        ->reactive()
+                        ->helperText('Check if demo books were provided to the school.'),
+
+
+                        Forms\Components\Repeater::make('issued_books_log')
+                        ->label('Books Issued/Returned')
+                        ->relationship('issuedBooksLog')
+                        ->schema([
+
+                                Forms\Components\Hidden::make('school_id')
+                                ->label('scl')
+                                ->default(fn ($get) => $get('../school_id')), // Fetch school_id dynamically from parent
+
+                            Select::make('book_id')
+                                ->label('Book')
+                                ->options(\App\Models\Book::pluck('title', 'id'))
+                                ->required(),
+                            Select::make('action')
+                                ->label('Action')
+                                ->options([
+                                    'issued' => 'Issued',
+                                    'returned' => 'Returned',
+                                ])
+                                ->required(),
+                            TextInput::make('count')
+                                ->label('Count')
+                                ->numeric()
+                                ->minValue(1)
+                                ->required()
+                                ->helperText('Enter the number of books issued or returned.'),
+                        ])
+                        ->columns(2)
+                        // ->disableItemEditing() // This disables editing of items
+                        ->disableItemDeletion()
+                        ->visible(fn($get) => $get('is_book_issued')),
+
             ]);
     }
 

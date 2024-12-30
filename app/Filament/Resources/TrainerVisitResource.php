@@ -32,19 +32,8 @@ class TrainerVisitResource extends Resource
 
     protected static ?string $navigationGroup = 'Approvals';
 
-    public static function getNavigationBadge(): ?string
-    {
-
-        if (!auth()->user()->hasRole(['admin', 'sales'])) {
-            return null; // Do not show the badge if the user is not an admin or sales role
-        }
-        // Count trainer visits where 'approved_by' is null
-        $pendingApprovals = TrainerVisit::whereNull('approved_by')->count();
-
-        // Return the count or null if no pending approvals
-        return $pendingApprovals > 0 ? (string) $pendingApprovals : null;
-    }
-
+   
+    
 
     public static function canEdit($record): bool
     {
@@ -58,7 +47,7 @@ class TrainerVisitResource extends Resource
         $user = auth()->user();
 
         // Check if user has BDA or BDM role
-        if (!$user->hasRole(['admin', 'sales'])) {
+        if (!$user->hasRole(['admin', 'sales_operation'])) {
             return 'Expenses Logs';
         }
 
@@ -69,7 +58,7 @@ class TrainerVisitResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasAnyRole(['admin', 'sales', 'head_trainer']);
+        return !auth()->user()->hasAnyRole(['admin', 'sales_operation', 'head_trainer']);
     }
 
 
@@ -93,23 +82,7 @@ class TrainerVisitResource extends Resource
                     ->default('pending')
                     ->disabled()
                     ->reactive()
-                    ->live()
-                    ->extraAttributes(function (callable $get) use ($user) {
-                        $statusColors = [
-                            'pending' => 'background-color: #ffeb3b; color: #000;',
-                            'clarification' => 'background-color: #ff9800; color: #fff;',
-                            'verified' => 'background-color: #4caf50; color: #fff;',
-                        ];
-
-                        $status = $get('verify_status') ?? 'pending';
-                        $baseStyle = $statusColors[$status] ?? 'background-color: #f8f9fa; color: #000;';
-
-                        if ($user->hasAnyRole(['admin', 'sales'])) {
-                            $baseStyle .= ' border: 2px solid #4CAF50; font-weight: bold;';
-                        }
-
-                        return ['style' => $baseStyle];
-                    }),
+                    ->live(),
 
                 // Section for Clarification
                 Forms\Components\Section::make('Clarification Details')
@@ -394,7 +367,6 @@ class TrainerVisitResource extends Resource
                 TextColumn::make('distance_traveled')->label('Distance (km)'),
                 TextColumn::make('total_expense')->label('Total Expense')->money('INR'),
                 TextColumn::make('approval_status')
-                    ->label('Status')
                     ->badge()
                     ->colors([
                         'primary' => 'Pending',
@@ -404,10 +376,16 @@ class TrainerVisitResource extends Resource
                     ->sortable(),
 
 
-                TextColumn::make('verify_status')
+                    Tables\Columns\TextColumn::make('verify_status')
                     ->label('Verification Status')
-                    ->badge()
-                    ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head'])),
+                    ->badge() // Adds the badge styling
+                    ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head']))
+                    ->Colors([
+                        'danger' => 'pending',           // Red for 'Pending'
+                        'warning' => 'clarification',   // Yellow for 'Need Clarification'
+                        'success' => 'verified',        // Green for 'Verified'
+                    ]),                
+                
 
 
                 TextColumn::make('approved_by')->label('Approved By')

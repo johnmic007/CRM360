@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use App\Filament\Widgets\CalendarWidget;
 use App\Filament\Widgets\DealWonLineChartWidget;
 use App\Filament\Widgets\SalesLeadChartWidget;
+use App\Filament\Widgets\SubordinateVisitsWidget;
 use App\Filament\Widgets\WalletBalanceWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -33,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
         // ];
         
         // // Conditionally add the DealWonLineChartWidget and SalesLeadChartWidget
-        // if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales'])) {
+        // if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales_operation'])) {
         //     $widgets[] = DealWonLineChartWidget::class;
         //     $widgets[] = SalesLeadChartWidget::class;
         // }
@@ -56,6 +57,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
+                SubordinateVisitsWidget::class,
                 WalletBalanceWidget::class,
                 CalendarWidget::class,
                 SalesLeadChartWidget::class,

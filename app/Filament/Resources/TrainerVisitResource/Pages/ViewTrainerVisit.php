@@ -27,9 +27,19 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Sales Verified')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
-                ->hidden(fn() => $this->record->verify_status !== 'verified') // Only show when `verify_status` is 'verified'
-                ->requiresConfirmation(),
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
+                ->hidden(fn() => $this->record->verify_status !== 'verified'), // Only show when `verify_status` is 'verified'
+
+
+                Action::make('approved')
+                
+                ->color('success')
+                ->icon('heroicon-o-check-circle')
+                ->hidden(fn() => $this->record->approval_status !== 'approved' ), // Only show when `verify_status` is 'verified'
+
+
+            
+
 
 
 
@@ -67,7 +77,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Requested For Clarification')
                 ->color('warning')
                 ->icon('heroicon-o-question-mark-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => $this->record->verify_status !== 'clarification'), // Only show when `verify_status` is 'verified'
 
 
@@ -75,7 +85,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Sales Verify')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => in_array($this->record->verify_status, ['verified', 'rejected', 'clarification']))
                 ->requiresConfirmation()
                 ->action(function () {
@@ -105,7 +115,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Request Clarification')
                 ->color('warning')
                 ->icon('heroicon-o-question-mark-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => in_array($this->record->verify_status, ['verified', 'rejected', 'clarification']))
                 ->form([
                     Textarea::make('clarification_question')
@@ -132,10 +142,12 @@ class ViewTrainerVisit extends ViewRecord
 
             // 3. ACCOUNTS APPROVE
             Action::make('approveByAccounts')
-                ->label('Accounts Approve')
+                ->label(' Approve')
                 ->icon('heroicon-o-check')
                 ->color('primary')
                 ->visible(fn() => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+                ->hidden(fn() => $this->record->approval_status === 'approved' )   // Only show when `verify_status` is 'verified'
+
                 ->disabled(fn() => (
                     // Disable if not verified by Sales yet or already approved
                     $this->record->verify_status !== 'verified' ||
@@ -214,10 +226,12 @@ class ViewTrainerVisit extends ViewRecord
 
             // 4. ACCOUNTS REJECT
             Action::make('rejectByAccounts')
-                ->label('Accounts Reject')
+                ->label('Reject')
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
                 ->visible(fn() => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+                ->hidden(fn() => $this->record->approval_status === 'approved' )   // Only show when `verify_status` is 'verified'
+
                 ->disabled(fn() => (
                     // Disable if not verified yet or already final-approved/rejected
                     $this->record->verify_status !== 'verified' ||

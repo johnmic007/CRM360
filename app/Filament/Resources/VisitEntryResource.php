@@ -31,6 +31,11 @@ class VisitEntryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole([ 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm' , 'bda']);
+    }
+
 
 
     public static function getActions(): array

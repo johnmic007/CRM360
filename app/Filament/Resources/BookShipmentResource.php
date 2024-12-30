@@ -30,7 +30,7 @@ class BookShipmentResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales']);
+        return auth()->user()->hasRole(['admin', 'sales_operation', 'sales_operation_head' ,]);
     }
 
     public static function form(Form $form): Form
@@ -75,43 +75,14 @@ class BookShipmentResource extends Resource
 
                             Forms\Components\Select::make('school_id')
                                 ->label('School')
-                                // ->options(function (callable $get) {
-                                //     $blockId = $get('block_id');
-                                //     if (!$blockId) {
-                                //         return [];
-                                //     }
-                                //     return School::where('block_id', $blockId)->pluck('name', 'id')->toArray(); // Fetch schools using Eloquent
-                                // })
-
-                                // ->options(function (callable $get) {
-                                //     $blockId = $get('block_id');
-                                //     if (!$blockId) {
-                                //         return [];
-                                //     }
-
-                                //     // Adjust the condition inside whereHas based on how you define "invoice signed."
-                                //     // For example, if "signed invoice" means `payment_status = 'Paid'`, you can add that condition:
-                                //     return School::where('block_id', $blockId)
-                                //         ->whereHas('invoices', function ($query) {
-                                //             $query->where('payment_status', 'Paid');
-                                //         })
-                                //         ->pluck('name', 'id')
-                                //         ->toArray();
-                                // })
-
-
+                               
                                 ->options(function (callable $get) {
                                     $blockId = $get('block_id');
                                     if (!$blockId) {
                                         return [];
                                     }
-
-                                    return School::where('block_id', $blockId)
-                                        ->whereHas('mou') // Just checks for existence of any related invoice
-                                        ->pluck('name', 'id')
-                                        ->toArray();
+                                    return School::where('block_id', $blockId)->pluck('name', 'id');
                                 })
-
 
                                 ->reactive()
                                 ->required()

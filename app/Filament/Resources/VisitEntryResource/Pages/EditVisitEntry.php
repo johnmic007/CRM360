@@ -24,7 +24,7 @@ class EditVisitEntry extends EditRecord
     public function getRelationManagers(): array
     {
         // Only load relation managers if `start_time` is set
-        if ($this->record && $this->record->start_time) {
+        if ($this->record && $this->record->start_time && $this->record->travel_type === 'own_vehicle' )  {
             return [
                 SchoolVisitRelationManager::class,
                 // Add other relation managers here if needed
@@ -82,14 +82,8 @@ class EditVisitEntry extends EditRecord
                         ->reactive()
                         ->required(),
 
-                    Forms\Components\FileUpload::make('travel_bill')
-                        ->label('Upload Travel Bill (Bus/Train)')
-                        ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
-
-                    Forms\Components\TextInput::make('travel_expense')
-                        ->label('Travel Expense')
-                        ->numeric()
-                        ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
+                    
+                        
 
                     Forms\Components\TextInput::make('starting_km')
                         ->label('Starting KM')
@@ -130,12 +124,26 @@ class EditVisitEntry extends EditRecord
                         ->numeric()
                         ->required()
                         ->helperText('Enter the ending kilometers.')
+                        ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
                     Forms\Components\FileUpload::make('ending_meter_photo')
                         ->label('Ending Meter Photo')
                         ->required()
                         ->helperText('Upload a photo of the ending meter.')
+                        ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
+
+
+                        Forms\Components\TextInput::make('travel_expense')
+            ->label('Travel Expense')
+            ->numeric()
+            ->helperText('Provide the travel expense incurred.')
+            ->visible(fn() => $this->record->travel_type === 'with_colleague'), // Only show if travel type is 'with_colleague'
+
+        Forms\Components\FileUpload::make('travel_bill')
+            ->label('Travel Bill (Bus/Train)')
+            ->helperText('Upload the travel bill.')
+            ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])
                 ->action(fn(array $data) => $this->submitStopVisit($data))
                 ->visible(fn() => $this->record->start_time && !$this->record->end_time)
@@ -155,7 +163,6 @@ class EditVisitEntry extends EditRecord
         $this->record->update([
             'travel_type' => $data['travel_type'] ?? null,
             'travel_expense' => $data['travel_expense'] ?? null,
-            'travel_bill' => $data['travel_bill'][0] ?? null, // Assuming the first uploaded file
             'starting_km' => $data['starting_km'] ?? null,
 
                 'starting_meter_photo' => $data['starting_meter_photo'] ?? null, // Save raw array
@@ -172,23 +179,33 @@ class EditVisitEntry extends EditRecord
             ->send();
     }
 
+
     public function submitStopVisit(array $data)
     {
-        // Save the provided data directly into the current VisitEntry record
-        $this->record->update([
-            'ending_km' => $data['ending_km'] ?? null,
-            'ending_meter_photo' => $data['ending_meter_photo'] ?? null, // Save raw array
 
+        // Combine start and stop data and save everything together
+        $this->record->update([
+            // Data collected during 'start'
+            'travel_type' => $data['travel_type'] ?? $this->record->travel_type,
+            'travel_expense' => $data['travel_expense'] ?? null,
+            'travel_bill' => $data['travel_bill'] ?? null, // Assuming the first uploaded file
+            'starting_km' => $data['starting_km'] ?? $this->record->starting_km,
+            'starting_meter_photo' => $data['starting_meter_photo'] ?? $this->record->starting_meter_photo,
+            'travel_mode' => $data['travel_mode'] ?? $this->record->travel_mode,
+            
+            // Data collected during 'stop'
+            'ending_km' => $data['ending_km'] ?? null,
+            'ending_meter_photo' => $data['ending_meter_photo'] ?? null,
             'end_time' => now(), // Set the end time
         ]);
-
+    
         Notification::make()
             ->title('Visit Stopped')
             ->success()
             ->body('The visit has been stopped successfully with the provided ending details.')
             ->send();
     }
-
+    
 
     protected function getWorkingHoursLabel(): string
     {

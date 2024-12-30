@@ -30,7 +30,7 @@ class SchoolResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales']);
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' ,]);
     }
 
 
@@ -52,12 +52,12 @@ class SchoolResource extends Resource
                 ->placeholder('Select a district')
                 ->reactive()
                 ->required()
-                // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+                // ->disabled(!$user->hasAnyRole(['admin', 'sales_operation']))
                 ->helperText('Select the district where the task is located.'),
 
             Select::make('block_id')
                 ->label('Block')
-                // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+                // ->disabled(!$user->hasAnyRole(['admin', 'sales_operation']))
                 ->options(function (callable $get) {
                     $districtId = $get('district_id');
                     if (!$districtId) {
@@ -72,7 +72,7 @@ class SchoolResource extends Resource
 
             // Select::make('school_id')
             //     ->label('School')
-            //     // ->disabled(!$user->hasAnyRole(['admin', 'sales']))
+            //     // ->disabled(!$user->hasAnyRole(['admin', 'sales_operation']))
             //     ->options(function (callable $get) {
             //         $blockId = $get('block_id');
             //         if (!$blockId) {
