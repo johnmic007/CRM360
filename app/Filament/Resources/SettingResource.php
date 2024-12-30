@@ -53,11 +53,11 @@ class SettingResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('car_rate')
-                ->label('Food Expense per Visit by car'),
+                ->label('Car expense'),
                 TextColumn::make('bike_rate')
-                ->label('Food Expense per Visit by bike'),
+                ->label('Bike expense'),
                 TextColumn::make('food_expense_rate')
-                ->label('Food Expense per Visit')
+                ->label('Food Expense ')
             ])
             ->filters([
                 //
