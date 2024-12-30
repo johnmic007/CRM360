@@ -22,30 +22,33 @@ class SubordinateVisitsWidget extends BaseWidget
 
     
 
-    /**
-     * Returns the query for the table.
-     */
-    protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder
-    {
-        $user = auth()->user();
+/**
+ * Returns the query for the table.
+ */
+protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder
+{
+    $user = auth()->user();
 
-        // Fetch visits based on user role
-        if ($user->roles()->where('name', 'admin')->exists() || $user->roles()->where('name', 'accounts_head')->exists()) {
-            return VisitEntry::query()->with(['user', 'trainerVisit', 'leadStatuses']);
-        }
+    // Base query to include only records where start_time is not null
+    $query = VisitEntry::query()
+        ->whereNotNull('start_time') // Only include records with a non-null start_time
+        ->with(['user', 'trainerVisit', 'leadStatuses']);
 
-        if ($user->roles()->where('name', 'sales')->exists()) {
-            return VisitEntry::query()
-                ->whereHas('user', fn($query) => $query->where('company_id', $user->company_id))
-                ->with(['user', 'trainerVisit', 'leadStatuses']);
-        }
-
-        $subordinateIds = $user->getAllSubordinateIds();
-
-        return VisitEntry::query()
-            ->whereIn('user_id', $subordinateIds)
-            ->with(['user', 'trainerVisit', 'leadStatuses']);
+    // Fetch visits based on user role
+    if ($user->roles()->where('name', 'admin')->exists() || $user->roles()->where('name', 'accounts_head')->exists()) {
+        return $query;
     }
+
+    if ($user->roles()->where('name', 'sales')->exists()) {
+        return $query
+            ->whereHas('user', fn($query) => $query->where('company_id', $user->company_id));
+    }
+
+    $subordinateIds = $user->getAllSubordinateIds();
+
+    return $query
+        ->whereIn('user_id', $subordinateIds);
+}
 
     /**
      * Defines the table columns.
