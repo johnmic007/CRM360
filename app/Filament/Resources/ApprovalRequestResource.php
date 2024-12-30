@@ -34,18 +34,7 @@ class ApprovalRequestResource extends Resource
     }
 
 
-    public static function getNavigationBadge(): ?string
-    {
-        // Check if the user has the required roles
-        if (!auth()->user()->hasRole(['admin', 'sales'])) {
-            return null; // Do not show the badge if the user is not an admin or sales role
-        }
-    
-        // Count pending approval requests
-        $pendingCount = ApprovalRequest::where('status', 'Pending')->count();
-    
-        return $pendingCount > 0 ? (string) $pendingCount : null;
-    }
+
     
 
     public static function form(Forms\Form $form): Forms\Form
