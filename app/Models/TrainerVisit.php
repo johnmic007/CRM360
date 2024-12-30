@@ -76,6 +76,14 @@ class TrainerVisit extends Model
     }
 
 
+    public function visitedSchool()
+{
+    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
+}
+
+
+
+
     public function schools()
 {
     return School::whereIn('id', $this->school_id)->get();
@@ -121,7 +129,7 @@ class TrainerVisit extends Model
         }
     });
 
-    
+
     static::saving(function ($trainerVisit) {
     
         
