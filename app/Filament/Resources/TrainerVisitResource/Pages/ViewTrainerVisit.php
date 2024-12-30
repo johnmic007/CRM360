@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\TrainerVisitResource\Pages;
 
 use App\Filament\Resources\TrainerVisitResource;
+use Filament\Resources\Pages\ViewRecord;
+
 use App\Models\TrainerVisit;
 use App\Models\User;
 use App\Models\WalletLog;
@@ -12,7 +14,7 @@ use Filament\Pages\Actions\Action;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Auth;
 
-class EditTrainerVisit extends EditRecord
+class ViewTrainerVisit extends ViewRecord
 {
     protected static string $resource = TrainerVisitResource::class;
 

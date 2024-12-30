@@ -10,13 +10,19 @@ class SalesLeadStatus extends Model
 {
     protected $fillable = [
         'sales_lead_management_id', 
+        'visit_entry_id',
         'potential_meet',
         'created_by',
         'is_book_issued',
+        'state_id',
+        'district_id',
+        'block_id',
         'school_id', 
         'visited_by', 
         'status', 
-        'remarks', 
+        'remarks',
+        'image',
+        'reschedule_date',
         'contacted_person', 
         'contacted_person_designation', 
         'follow_up_date', 
@@ -46,6 +52,9 @@ class SalesLeadStatus extends Model
     protected static function boot()
     {
         parent::boot();
+
+
+        
 
         static::creating(function ($status) {
             // Fetch the status from SalesLeadManagement if sales_lead_management_id is set

@@ -41,7 +41,7 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales', 'accounts_head' , 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
+        return auth()->user()->hasRole(['admin', 'sales' , 'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
     }
 
 
@@ -391,7 +391,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            WalletLogsRelationManager::class,
+            // WalletLogsRelationManager::class,
             IssuedBooksRelationManager::class,
             SchoolCopyRelationManager::class,
             LeadStatusesRelationManager::class,

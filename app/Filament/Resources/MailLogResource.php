@@ -55,6 +55,8 @@ class MailLogResource extends Resource
                             if ($template) {
                                 $set('content', $template->content); // Set email content
                                 $set('cc_emails', $template->additional_emails); // Set additional emails
+                                $set('subject', $template->subject); // Set additional emails
+
                             }
                         } else {
                             // Clear the fields when no template is selected
@@ -71,6 +73,11 @@ class MailLogResource extends Resource
                     ->required()
                     ->columnSpanFull(),
 
+                    TextInput::make('subject')
+                    ->label('Subject of the  Emails')
+                    ->required(),
+
+                    
                 TextInput::make('to_emails')
                     ->label('Recipient Emails')
                     ->required()

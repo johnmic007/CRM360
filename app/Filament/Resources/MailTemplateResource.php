@@ -50,6 +50,11 @@ class MailTemplateResource extends Resource
                             ->placeholder('Enter a meaningful template name')
                             ->columnSpanFull(),
 
+
+                            TextInput::make('subject')
+                            ->label('Subject of the  Emails')
+                            ->required(),
+
                         Select::make('selected_users')
                             ->label('Select Users')
                             ->multiple()

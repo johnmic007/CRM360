@@ -45,7 +45,6 @@ class BookResource extends Resource
 
             TextInput::make('isbn')
                 ->label('ISBN')
-                ->required()
                 ->unique(Book::class, 'isbn')
                 ->maxLength(13),
 

@@ -43,23 +43,19 @@ class ListApprovalRequests extends ListRecords
         return [
             Tab::make('all')
                 ->label('All Requests')
-                ->query(fn (Builder $query) => $query) // Show all requests
-                ->badge(fn () => ApprovalRequest::query()->orWhere('user_id', $user->id)->count()),
+                ->query(fn (Builder $query) => $query) ,// Show all requests
 
             Tab::make('pending')
                 ->label('Pending Requests')
-                ->query(fn (Builder $query) => $query->where('status', 'Pending'))
-                ->badge(fn () => ApprovalRequest::query()->where('status', 'Pending')->where('user_id', $user->id)->count()),
+                ->query(fn (Builder $query) => $query->where('status', 'Pending')),
 
             Tab::make('approved')
                 ->label('Approved Requests')
-                ->query(fn (Builder $query) => $query->where('status', 'Approved'))
-                ->badge(fn () => ApprovalRequest::query()->where('status', 'Approved')->where('user_id', $user->id)->count()),
+                ->query(fn (Builder $query) => $query->where('status', 'Approved')),
 
             Tab::make('rejected')
                 ->label('Rejected Requests')
-                ->query(fn (Builder $query) => $query->where('status', 'Rejected'))
-                ->badge(fn () => ApprovalRequest::query()->where('status', 'Rejected')->where('user_id', $user->id)->count()),
+                ->query(fn (Builder $query) => $query->where('status', 'Rejected')),
         ];
     }
 }
