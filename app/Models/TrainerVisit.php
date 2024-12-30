@@ -105,15 +105,26 @@ class TrainerVisit extends Model
 {
     parent::boot();
 
-    static::saving(function ($trainerVisit) {
-        // Set the user_id for the trainer visit
+
+    static::creating(function ($trainerVisit) {
+        // Set the user_id from the authenticated user
         if (Auth::check()) {
             $trainerVisit->user_id = Auth::id();
+            
+            // Set the company_id from the related user
+            $trainerVisit->company_id = Auth::user()->company_id;
         }
 
+        // Set the visit_date if it's not already provided
         if (empty($trainerVisit->visit_date)) {
             $trainerVisit->visit_date = now();
         }
+    });
+
+    
+    static::saving(function ($trainerVisit) {
+    
+        
 
         // Calculate distance_traveled by subtracting starting_km from ending_km
         if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
