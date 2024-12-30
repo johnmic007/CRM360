@@ -30,7 +30,7 @@ class BookShipmentResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales']);
+        return auth()->user()->hasRole(['admin', 'sales_operation']);
     }
 
     public static function form(Form $form): Form

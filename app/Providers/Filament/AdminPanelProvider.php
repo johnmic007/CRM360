@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
         // ];
         
         // // Conditionally add the DealWonLineChartWidget and SalesLeadChartWidget
-        // if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales'])) {
+        // if (auth()->check() && auth()->user()->hasAnyRole(['admin', 'sales_operation'])) {
         //     $widgets[] = DealWonLineChartWidget::class;
         //     $widgets[] = SalesLeadChartWidget::class;
         // }

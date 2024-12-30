@@ -49,7 +49,7 @@ class IssuedBook extends Model
     }
 
     /**
-     * The user who issued the books (sales team).
+     * The user who issued the books (sales_operation team).
      */
     public function issuer()
     {

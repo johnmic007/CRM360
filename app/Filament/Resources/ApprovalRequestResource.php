@@ -30,7 +30,7 @@ class ApprovalRequestResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales']);
+        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
     }
 
 
@@ -142,7 +142,7 @@ class ApprovalRequestResource extends Resource
                     ]),
     
                 // Add manager_id filter only if user has the required roles
-                $user && $user->hasRole(['admin', 'sales', 'head'])
+                $user && $user->hasRole(['admin', 'sales_operation', 'head'])
                     ? SelectFilter::make('manager_id')
                         ->label('Manager')
                         ->options(User::pluck('name', 'id')->toArray())

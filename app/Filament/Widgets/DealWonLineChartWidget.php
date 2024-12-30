@@ -11,7 +11,7 @@ class DealWonLineChartWidget extends ChartWidget
 
     public static function canView(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales']);
+        return auth()->user()->hasRole(['admin', 'head', 'sales_operation']);
     }
 
     
@@ -37,7 +37,7 @@ class DealWonLineChartWidget extends ChartWidget
         $dateRange = $this->applyFilter($filter);
         $userCompanyId = Auth::user()->company_id;
 
-        // Query the database for sales data within the date range
+        // Query the database for sales_operation data within the date range
         $query = SalesLeadManagement::query()
             ->where('company_id', $userCompanyId);
 

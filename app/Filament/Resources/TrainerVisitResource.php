@@ -47,7 +47,7 @@ class TrainerVisitResource extends Resource
         $user = auth()->user();
 
         // Check if user has BDA or BDM role
-        if (!$user->hasRole(['admin', 'sales'])) {
+        if (!$user->hasRole(['admin', 'sales_operation'])) {
             return 'Expenses Logs';
         }
 
@@ -58,7 +58,7 @@ class TrainerVisitResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasAnyRole(['admin', 'sales', 'head_trainer']);
+        return !auth()->user()->hasAnyRole(['admin', 'sales_operation', 'head_trainer']);
     }
 
 

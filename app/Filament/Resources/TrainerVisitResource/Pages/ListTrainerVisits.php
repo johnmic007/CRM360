@@ -163,8 +163,8 @@ class ListTrainerVisits extends ListRecords
             return TrainerVisit::query();
         }
 
-        // For sales, show records for their company
-        if ($user->hasRole('sales')) {
+        // For sales_operation, show records for their company
+        if ($user->hasRole('sales_operation')) {
             return TrainerVisit::where('company_id', $user->company_id);
         }
 

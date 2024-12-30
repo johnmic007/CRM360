@@ -19,7 +19,7 @@ class ListWalletLogs extends ListRecords
     {
         $userId = auth()->id();
         $companyId = auth()->user()->company_id;
-        $isAdminOrSales = auth()->user()->hasAnyRole(['admin', 'sales']);
+        $isAdminOrSales = auth()->user()->hasAnyRole(['admin', 'sales_operation']);
 
         return parent::getTableQuery()
             ->when(
@@ -33,7 +33,7 @@ class ListWalletLogs extends ListRecords
     {
         $userId = auth()->id();
         $companyId = auth()->user()->company_id;
-        $isAdminOrSales = auth()->user()->hasAnyRole(['admin', 'sales']);
+        $isAdminOrSales = auth()->user()->hasAnyRole(['admin', 'sales_operation']);
 
         return [
             'all' => Tab::make('All Logs')

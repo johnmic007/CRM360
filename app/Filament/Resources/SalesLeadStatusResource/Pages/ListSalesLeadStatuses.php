@@ -34,7 +34,7 @@ class ListSalesLeadStatuses extends ListRecords
         return $query;
     }
 
-    if ($user->roles()->where('name', 'sales')->exists()) {
+    if ($user->roles()->where('name', 'sales_operation')->exists()) {
         return $query
             ->whereHas('user', fn($query) => $query->where('company_id', $user->company_id));
     }

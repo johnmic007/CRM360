@@ -24,7 +24,7 @@ class CustomerResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales', 'head', 'zonal_manager', 'regional _manager', 'senior_manager']);
+        return auth()->user()->hasRole(['admin', 'sales_operation', 'head', 'zonal_manager', 'regional _manager', 'senior_manager']);
     }
 
 

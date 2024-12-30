@@ -27,7 +27,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Sales Verified')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => $this->record->verify_status !== 'verified'), // Only show when `verify_status` is 'verified'
 
 
@@ -77,7 +77,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Requested For Clarification')
                 ->color('warning')
                 ->icon('heroicon-o-question-mark-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => $this->record->verify_status !== 'clarification'), // Only show when `verify_status` is 'verified'
 
 
@@ -85,7 +85,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Sales Verify')
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => in_array($this->record->verify_status, ['verified', 'rejected', 'clarification']))
                 ->requiresConfirmation()
                 ->action(function () {
@@ -115,7 +115,7 @@ class ViewTrainerVisit extends ViewRecord
                 ->label('Request Clarification')
                 ->color('warning')
                 ->icon('heroicon-o-question-mark-circle')
-                ->visible(fn() => Auth::user()->hasRole('sales'))
+                ->visible(fn() => Auth::user()->hasRole('sales_operation'))
                 ->hidden(fn() => in_array($this->record->verify_status, ['verified', 'rejected', 'clarification']))
                 ->form([
                     Textarea::make('clarification_question')
