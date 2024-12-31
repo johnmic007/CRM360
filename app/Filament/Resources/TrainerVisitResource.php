@@ -88,22 +88,23 @@ class TrainerVisitResource extends Resource
                     ->live(),
 
                 // Section for Clarification
-                Forms\Components\Section::make('Clarification Details')
-                    ->description('Provide clarification .')
-                    ->schema([
-                        TextInput::make('clarification_question')
-                            ->label('Clarification Question')
-                            ->placeholder('Enter the clarification question...')
-                            ->disabled()
-                            ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                // Forms\Components\Section::make('Clarification Details')
+                //     ->description('Provide clarification .')
+                //     ->schema([
+                //         TextInput::make('clarification_question')
+                //             ->label('Clarification Question')
+                //             ->placeholder('Enter the clarification question...')
+                //             ->disabled()
+                //             ->visible(fn($get) => $get('verify_status') === 'clarification'),
 
-                        TextInput::make('clarification_answer')
-                            ->label('Clarification Answer')
-                            ->placeholder('Provide your answer...')
-                            ->required(fn($get) => $get('verify_status') === 'clarification')
-                            ->visible(fn($get) => $get('verify_status') === 'clarification'),
-                    ])
-                    ->hidden(fn($get) => $get('verify_status') !== 'clarification'),
+                //         TextInput::make('clarification_answer')
+                //             ->label('Clarification Answer')
+                //             ->placeholder('Provide your answer...')
+                //             ->read
+                //             ->required(fn($get) => $get('verify_status') === 'clarification')
+                //             ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                //     ])
+                //     ->hidden(fn($get) => $get('verify_status') !== 'clarification'),
 
 
                 Forms\Components\Card::make()

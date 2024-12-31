@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('wallet_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('company_id')->nullable();
-            $table->decimal('amount', 10, 2);
-            $table->string('payment_method', 100);
-            $table->date('payment_date');
-            $table->string('payment_proof')->nullable();
-            $table->string('reference_number', 100)->unique();
-            $table->enum('type', ['debit', 'credit']); // Debit or credit transaction
-            $table->string('description')->nullable(); // Description of the transaction
-            $table->unsignedBigInteger('approved_by')->nullable(); // Who approved the transaction
-            $table->timestamps();
+    $table->unsignedBigInteger('user_id')->nullable();
+    $table->unsignedBigInteger('company_id')->nullable();
+    $table->decimal('amount', 10, 2)->nullable();
+    $table->string('payment_method')->nullable();
+    $table->timestamp('payment_date')->nullable();
+    $table->string('payment_proof')->nullable();
+    $table->string('reference_number')->nullable();
+    $table->string('type')->nullable();
+    $table->text('description')->nullable();
+    $table->unsignedBigInteger('approved_by')->nullable();
+    $table->timestamps();
 
            
         });

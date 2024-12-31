@@ -13,19 +13,19 @@ return new class extends Migration
     {
         Schema::create('tasks', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->text('description')->nullable();
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->unsignedBigInteger('user_id');
-            $table->string('task_type');
-            $table->unsignedBigInteger('school_id')->nullable();
-            $table->unsignedBigInteger('company_id');
-            $table->string('status')->default('pending');
-            $table->time('time')->nullable();
-            $table->unsignedBigInteger('district_id')->nullable();
-            $table->unsignedBigInteger('block_id')->nullable();
-            $table->timestamps();
+    $table->string('title')->nullable();
+    $table->text('description')->nullable();
+    $table->date('start_date')->nullable();
+    $table->date('end_date')->nullable();
+    $table->unsignedBigInteger('user_id')->nullable();
+    $table->string('task_type')->nullable();
+    $table->unsignedBigInteger('school_id')->nullable();
+    $table->unsignedBigInteger('company_id')->nullable();
+    $table->string('status')->nullable();
+    $table->time('time')->nullable();
+    $table->unsignedBigInteger('district_id')->nullable();
+    $table->unsignedBigInteger('block_id')->nullable();
+    $table->timestamps();
         });
     }
 

@@ -13,16 +13,16 @@ return new class extends Migration
     {
         Schema::create('invoice_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('invoice_id');
-            $table->string('type');
+            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->string('type')->nullable();
             $table->text('description')->nullable();
             $table->unsignedBigInteger('head_id')->nullable();
             $table->string('payment_method')->nullable();
             $table->string('reference_number')->nullable();
-            $table->decimal('paid_amount', 15, 2)->nullable();
+            $table->decimal('paid_amount', 10, 2)->nullable();
             $table->date('payment_date')->nullable();
             $table->string('transaction_reference')->nullable();
-            $table->string('payment_proof')->nullable();
+            $table->text('payment_proof')->nullable();
             $table->unsignedBigInteger('school_id')->nullable();
             $table->unsignedBigInteger('company_id')->nullable();
             $table->timestamps();

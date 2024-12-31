@@ -17,20 +17,20 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->integer('wallet_balance');
-            $table->integer('total_amount_given');
-            $table->integer('total_amount_closed');
-            $table->integer('amount_to_close');
-            $table->string('allocated_states');
-            $table->string('allocated_districts');
-            $table->string('allocated_blocks');
-            $table->string('company_id');
-            $table->string('manager_id');
-
-
+            $table->integer('wallet_balance')->nullable(); // Default null
+            $table->integer('total_amount_given')->nullable(); // Default null
+            $table->integer('total_amount_closed')->nullable(); // Default null
+            $table->integer('amount_to_close')->nullable(); // Default null
+            $table->string('allocated_states')->nullable(); // Default null
+            $table->string('allocated_districts')->nullable(); // Default null
+            $table->string('allocated_blocks')->nullable(); // Default null
+            $table->string('company_id')->nullable(); // Default null
+            $table->string('manager_id')->nullable(); // Default null
+        
             $table->rememberToken();
             $table->timestamps();
         });
+        
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

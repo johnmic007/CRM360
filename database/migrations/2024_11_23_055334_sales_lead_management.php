@@ -9,20 +9,16 @@ return new class extends Migration {
     {
         Schema::create('sales_lead_management', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('district_id');
-            $table->unsignedBigInteger('block_id');
-            $table->unsignedBigInteger('state_id');
-            $table->unsignedBigInteger('school_id');
+            $table->unsignedBigInteger('district_id')->nullable();
+            $table->unsignedBigInteger('block_id')->nullable();
+            $table->unsignedBigInteger('state_id')->nullable();
+            $table->unsignedBigInteger('school_id')->nullable();
             $table->string('status')->default('pending');
             $table->text('feedback')->nullable();
             $table->unsignedBigInteger('allocated_to')->nullable();
-            $table->unsignedBigInteger('company_id');
-            $table->text('remarks')->nullable();
-            $table->string('contacted_person')->nullable();
-            $table->string('contacted_person_designation')->nullable();
-            $table->date('follow_up_date')->nullable();
+            $table->unsignedBigInteger('company_id')->nullable();
             $table->timestamps();
-            $table->softDeletes(); // Created at and Updated at timestamps
+            $table->softDeletes();
         });
     }
 

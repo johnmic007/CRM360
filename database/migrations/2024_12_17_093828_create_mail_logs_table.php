@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('mail_logs', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id'); 
-            $table->integer('company_id'); 
-            $table->string('to_emails'); 
-            $table->string('cc_emails')->nullable(); 
-            $table->string('subject'); // Email Subject
-            $table->text('content'); // Email Content
-            $table->string('status')->default('sent'); // Status: 'sent' or 'failed'
-            $table->text('error_message')->nullable(); // Error Message in case of failure
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->text('to_emails')->nullable();
+            $table->text('cc_emails')->nullable();
+            $table->unsignedBigInteger('company_id')->nullable();
+            $table->unsignedBigInteger('mail_template_id')->nullable();
+            $table->string('subject')->nullable();
+            $table->text('content')->nullable();
+            $table->string('status')->nullable();
+            $table->text('error_message')->nullable();
             $table->timestamps();
         });
     }

@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('approval_requests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('manager_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('school_id')->constrained('schools')->onDelete('cascade');
-            $table->integer('company_id');
-            $table->string('message')->unique(); // State name
-            $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending');
+            $table->unsignedBigInteger('manager_id')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('school_id')->nullable();
+            $table->integer('company_id')->nullable();
+            $table->string('message')->unique()->nullable();
+            $table->enum('status', ['Pending', 'Approved', 'Rejected'])->default('Pending')->nullable();
             $table->timestamps();
         });
+        
     }
 
     /**

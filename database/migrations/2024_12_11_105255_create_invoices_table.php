@@ -10,26 +10,28 @@ class CreateInvoicesTable extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_number');
-            $table->string('file');
-            $table->unsignedBigInteger('school_id');
-            $table->unsignedBigInteger('company_id');
+            $table->string('invoice_number')->nullable();
+            $table->unsignedBigInteger('state_id')->nullable();
+            $table->unsignedBigInteger('district_id')->nullable();
+            $table->unsignedBigInteger('block_id')->nullable();
+            $table->unsignedBigInteger('school_id')->nullable();
+            $table->unsignedBigInteger('company_id')->nullable();
             $table->date('issue_date')->nullable();
-            $table->decimal('total', 10, 2)->default(0.00);
+            $table->text('files')->nullable();
+            $table->decimal('total', 10, 2)->nullable();
             $table->date('due_date')->nullable();
-            $table->boolean('paid')->default(false);
-            $table->decimal('total_amount', 10, 2)->default(0.00);
-            $table->decimal('due_amount', 10, 2)->default(0.00);
-            $table->string('payment_status')->default('pending');
-            $table->integer('students_count')->default(0);
-            $table->boolean('trainer_required')->default(false);
+            $table->boolean('paid')->default(false)->nullable();
+            $table->decimal('total_amount', 10, 2)->nullable();
+            $table->decimal('due_amount', 10, 2)->nullable();
+            $table->string('payment_status')->nullable();
+            $table->integer('students_count')->nullable();
+            $table->boolean('trainer_required')->default(false)->nullable();
             $table->date('validity_start')->nullable();
             $table->date('validity_end')->nullable();
-            $table->integer('books_count')->default(0);
+            $table->integer('books_count')->nullable();
             $table->unsignedBigInteger('closed_by')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
