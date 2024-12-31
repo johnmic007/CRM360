@@ -13,24 +13,25 @@ return new class extends Migration
     {
         Schema::create('issued_books', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('book_id');
-            $table->integer('count');
-            $table->integer('issued_by');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('book_id')->nullable();
+            $table->integer('count')->nullable();
+            $table->integer('stock_count')->nullable();
+            $table->unsignedBigInteger('issued_by')->nullable();
             $table->timestamps();
         });
 
         Schema::create('test_book_logs', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('lead_id');
-            $table->integer('book_id');
-            $table->integer('school_id');
-            $table->enum('action', ['issued', 'returned']);
-            $table->integer('count');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('school_id')->nullable();
+            $table->unsignedBigInteger('lead_id')->nullable();
+            $table->unsignedBigInteger('book_id')->nullable();
+            $table->string('action')->nullable();
+            $table->integer('count')->nullable();
             $table->text('remarks')->nullable();
             $table->date('follow_up_date')->nullable();
-            $table->integer('created_by');
+            $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamps();
         });
         

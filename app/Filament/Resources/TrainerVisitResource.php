@@ -3,6 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TrainerVisitResource\Pages;
+use App\Filament\Resources\TrainerVisitResource\RelationManagers\PostsRelationManager;
+use App\Filament\Resources\VisitEntryResource\RelationManagers\SchoolVisitRelationManager;
 use App\Models\TrainerVisit;
 use App\Models\User;
 use App\Models\Setting;
@@ -78,6 +80,7 @@ class TrainerVisitResource extends Resource
                         'pending' => 'Pending',
                         'clarification' => 'Need Clarification',
                         'verified' => 'verified',
+                        'answered' => 'anwered'
                     ])
                     ->default('pending')
                     ->disabled()
@@ -92,13 +95,14 @@ class TrainerVisitResource extends Resource
                             ->label('Clarification Question')
                             ->placeholder('Enter the clarification question...')
                             ->disabled()
-                            ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                            ->visible(fn($get) => $get('verify_status') === 'answered'),
 
                         TextInput::make('clarification_answer')
                             ->label('Clarification Answer')
                             ->placeholder('Provide your answer...')
-                            ->required(fn($get) => $get('verify_status') === 'clarification')
-                            ->visible(fn($get) => $get('verify_status') === 'clarification'),
+                            ->readOnly()
+                            ->required(fn($get) => $get('verify_status') === 'answered')
+                            ->visible(fn($get) => $get('verify_status') === 'answered'),
                     ])
                     ->hidden(fn($get) => $get('verify_status') !== 'clarification'),
 
@@ -148,6 +152,8 @@ class TrainerVisitResource extends Resource
                             ->required()
                             ->searchable()
                             ->multiple()
+                            ->visible(fn($record) => $record === null) // Only visible when creating a new record
+
                             ->helperText('Select a school. Shows today\'s visited schools but includes already selected schools if editing.')
                         
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified')
@@ -408,9 +414,11 @@ class TrainerVisitResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
-    }
+        return [
+            PostsRelationManager::class,
 
+        ];
+    }
 
     public static function downloadPdf($records)
     {

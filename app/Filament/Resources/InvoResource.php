@@ -119,16 +119,16 @@ class InvoResource extends Resource
                                 ->required()
                                 ->helperText('Select the school to which books will be shipped.'),
 
-                            Select::make('mode_of_transport')
-                                ->label('Mode of Transport')
-                                ->options([
-                                    'own' => 'Own Delivery',
-                                    'courier' => 'Courier',
-                                ])
-                                ->required()
-                                ->reactive()
-                                ->helperText('Choose the transport mode.')
-                                ->default(fn() => request()->query('school_id')), // Set default value from query parameter
+                            // Select::make('mode_of_transport')
+                            //     ->label('Mode of Transport')
+                            //     ->options([
+                            //         'own' => 'Own Delivery',
+                            //         'courier' => 'Courier',
+                            //     ])
+                            //     ->required()
+                            //     ->reactive()
+                            //     ->helperText('Choose the transport mode.')
+                            //     ->default(fn() => request()->query('school_id')), // Set default value from query parameter
 
 
                             Select::make('company_id')

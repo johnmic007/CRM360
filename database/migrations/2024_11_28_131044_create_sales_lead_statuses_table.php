@@ -13,13 +13,20 @@ return new class extends Migration
     {
         Schema::create('sales_lead_statuses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('sales_lead_management_id');
-            $table->boolean('potential_meet')->default(false);
-            $table->unsignedBigInteger('created_by');
-            $table->unsignedBigInteger('school_id');
+            $table->unsignedBigInteger('sales_lead_management_id')->nullable();
+            $table->unsignedBigInteger('visit_entry_id')->nullable();
+            $table->integer('potential_meet')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->boolean('is_book_issued')->default(false)->nullable();
+            $table->unsignedBigInteger('state_id')->nullable();
+            $table->unsignedBigInteger('district_id')->nullable();
+            $table->unsignedBigInteger('block_id')->nullable();
+            $table->unsignedBigInteger('school_id')->nullable();
             $table->unsignedBigInteger('visited_by')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('status')->nullable();
             $table->text('remarks')->nullable();
+            $table->string('image')->nullable();
+            $table->date('reschedule_date')->nullable();
             $table->string('contacted_person')->nullable();
             $table->string('contacted_person_designation')->nullable();
             $table->date('follow_up_date')->nullable();

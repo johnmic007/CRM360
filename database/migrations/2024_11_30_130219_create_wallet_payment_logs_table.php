@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('wallet_payment_logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Relate to users table
-            $table->decimal('amount', 10, 2); // Store the top-up amount
-            $table->string('transaction_type'); // e.g., 'topup'
-            $table->string('description')->nullable(); // Description of the transaction
-            $table->string('payment_method'); // Payment method (cash, bank_transfer, etc.)
-            $table->string('reference_number')->nullable(); // Optional reference number for payment
-            $table->string('payment_proof')->nullable(); // Path to payment proof file (optional)
-            $table->date('payment_date'); // Date of the payment
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->decimal('amount', 10, 2)->nullable();
+            $table->string('transaction_type')->nullable();
+            $table->text('description')->nullable();
+            $table->string('payment_method')->nullable();
+            $table->timestamp('payment_date')->nullable();
+            $table->string('reference_number')->nullable();
+            $table->string('payment_proof')->nullable();
             $table->timestamps();
         });
     }

@@ -12,15 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('book_logs', function (Blueprint $table) {
-            $table->id(); // Auto-increment ID
-            $table->string('book_id'); // Book ID
-            $table->string('school_id'); // School ID
-            $table->string('event'); // Event description
-            $table->string('status')->default('pending'); // Status
-            $table->string('gate_pass_image')->nullable(); // Gate pass image path
-            $table->text('notes')->nullable(); // Additional notes
+            $table->id();
+            $table->string('book_id')->nullable();
+            $table->string('school_id')->nullable();
+            $table->string('event')->nullable();
+            $table->string('status')->default('pending')->nullable();
+            $table->string('gate_pass_image')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
+        
     }
 
     /**

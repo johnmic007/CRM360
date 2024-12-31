@@ -13,14 +13,13 @@ return new class extends Migration
     {
         Schema::create('school_book', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('book_id');
-            $table->unsignedBigInteger('invoice_id');
-            $table->unsignedBigInteger('school_id');
-            $table->string('payment_status');
-            $table->integer('books_count')->default(0);
-            $table->decimal('price', 10, 2)->default(0.00);
-            $table->decimal('total', 10, 2)->default(0.00);
-            $table->integer('issued_books_count')->default(0);
+            $table->unsignedBigInteger('book_id')->nullable();
+            $table->unsignedBigInteger('invoice_id')->nullable();
+            $table->unsignedBigInteger('school_id')->nullable();
+            $table->integer('books_count')->nullable();
+            $table->decimal('price', 10, 2)->nullable();
+            $table->decimal('total', 10, 2)->nullable();
+            $table->integer('issued_books_count')->nullable();
             $table->timestamps();
         });
     }

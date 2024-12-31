@@ -13,12 +13,13 @@ return new class extends Migration
     {
         Schema::create('closure_amount_logs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); 
-            $table->unsignedBigInteger('closed_by_id'); 
-            $table->decimal('amount_closed', 10, 2); 
-            $table->timestamp('closed_at'); 
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('closed_by_id')->nullable();
+            $table->decimal('amount_closed', 10, 2)->nullable();
+            $table->timestamp('closed_at')->nullable();
             $table->timestamps();
         });
+        
     }
 
     /**
