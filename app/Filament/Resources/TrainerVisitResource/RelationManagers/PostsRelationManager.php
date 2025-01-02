@@ -55,6 +55,9 @@ class PostsRelationManager extends RelationManager
                 FileUpload::make('image')
                 ->label('images')
                 ->required()
+                ->disk('s3')
+                ->visibility('public')
+                ->directory('MGC_CRM')
                 ->helperText('Upload image'),
             ]);
     }

@@ -135,8 +135,9 @@ class InvoicesRelationManager  extends RelationManager
                         //     ->nullable(),
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
-                            ->image()  // Specify that this is an image
-                            ->directory('payment_proofs')  // Store the image in a specific directory
+                            ->disk('s3')
+                            ->visibility('public')
+                            ->directory('MGC_CRM')  // Store the image in a specific directory
                             ->nullable(),
                     ])
                     ->action(function (array $data, Invoice $record) {

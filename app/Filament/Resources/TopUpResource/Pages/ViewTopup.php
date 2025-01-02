@@ -53,8 +53,9 @@ class ViewTopUp extends ViewRecord
 
                     FileUpload::make('payment_proof')
                         ->label('Payment Proof')
-                        ->image()
-                        ->directory('payment_proofs')
+                        ->disk('s3')
+                            ->visibility('public')
+                            ->directory('MGC_CRM')
                         ->nullable(),
                 ])
                 ->action(function (array $data, User $record) {

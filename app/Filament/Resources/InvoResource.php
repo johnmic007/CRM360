@@ -457,8 +457,11 @@ class InvoResource extends Resource
                 ->collapsible()
                 ->collapsed(false),
 
-                FileUpload::make('files')->multiple()
-
+                FileUpload::make('files')
+                ->multiple()
+                ->disk('s3')
+                ->visibility('public')
+                ->directory('MGC_CRM')
 
 
             // Payment Section
@@ -643,7 +646,9 @@ class InvoResource extends Resource
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
                             ->image()  // Specify that this is an image
-                            ->directory('payment_proofs')  // Store the image in a specific directory
+                            ->disk('s3')
+                            ->visibility('public')
+                            ->directory('MGC_CRM')
                             ->nullable(),
                     ])
                     ->action(function (array $data, Invoice $record) {

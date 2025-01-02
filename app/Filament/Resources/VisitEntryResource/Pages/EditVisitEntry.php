@@ -104,7 +104,9 @@ class EditVisitEntry extends EditRecord
                     Forms\Components\FileUpload::make('starting_meter_photo')
                         ->label('Starting Meter Photo')
                         ->required()
-                        ->maxSize(10240)
+                        ->disk('s3')
+                        ->visibility('public')
+                        ->directory('MGC_CRM')
                         ->helperText('Upload a photo of the starting meter.')
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
                 ])
@@ -130,7 +132,9 @@ class EditVisitEntry extends EditRecord
                     Forms\Components\FileUpload::make('ending_meter_photo')
                         ->label('Ending Meter Photo')
                         ->required()
-                        ->maxSize(10240)
+                        ->disk('s3')
+                        ->visibility('public')
+                        ->directory('MGC_CRM')
                         ->helperText('Upload a photo of the ending meter.')
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
@@ -144,6 +148,9 @@ class EditVisitEntry extends EditRecord
 
         Forms\Components\FileUpload::make('travel_bill')
             ->label('Travel Bill (Bus/Train)')
+            ->disk('s3')
+            ->visibility('public')
+            ->directory('MGC_CRM')
             ->helperText('Upload the travel bill.')
             ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])

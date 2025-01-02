@@ -228,6 +228,9 @@ class SchoolVisitRelationManager extends RelationManager
                 FileUpload::make('image')
                     ->label('images')
                     ->required()
+                    ->disk('s3')
+                    ->visibility('public')
+                    ->directory('MGC_CRM')
                     ->helperText('Upload image')
                     ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
 

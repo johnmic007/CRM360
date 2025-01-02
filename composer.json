@@ -13,10 +13,13 @@
         "dompdf/dompdf": "^3.0",
         "filament/filament": "3.2.57",
         "guava/calendar": "^1.10",
+        "joshembling/image-optimizer": "^1.4",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
+        "league/flysystem-aws-s3-v3": "~3.0",
         "maatwebsite/excel": "*",
         "mokhosh/filament-kanban": "^2.9",
+        "spatie/laravel-medialibrary": "^11.11",
         "symfony/amazon-mailer": "^7.1",
         "symfony/mailgun-mailer": "^7.1",
         "symfony/sendgrid-mailer": "^7.1"

@@ -45,6 +45,9 @@ class ListTrainerVisits extends ListRecords
 
                     FileUpload::make('travel_bill')
                         ->label('Images')
+                        ->disk('s3')
+                        ->visibility('public')
+                        ->directory('MGC_CRM')
                         ->required()
                         ->multiple(),                        
                 ])
