@@ -21,7 +21,7 @@ class StateResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin']);
+        return auth()->user()->hasRole(['admin', 'sales_operation']);
     }
 
     public static function form(Forms\Form $form): Forms\Form
