@@ -27,8 +27,9 @@ class BookResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin']);
+        return auth()->user()->hasRole(['admin', 'sales_operation', 'sales_operation_head' ,]);
     }
+
 
     public static function form(Form $form): Form
     {
