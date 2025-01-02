@@ -155,6 +155,10 @@ class UserResource extends Resource
                             return Role::pluck('name', 'id');
                         }
 
+                        if ($user->roles()->where('name', 'sales_operation')->exists()) {
+                            return Role::where('name', '!=', 'admin')->pluck('name', 'id');
+                        }
+
                         // Fetch roles that are one level below the user's roles
                         $userRoleLevels = $user->roles->pluck('level');
                         $maxLevel = $userRoleLevels->min() ?? 0; // Fallback to 0 if no roles are found
