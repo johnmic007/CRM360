@@ -215,4 +215,18 @@ class User extends Authenticatable
 
         return $allSubordinates->toArray();
     }
+
+
+
+    protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($user) {
+        if (empty($user->company_id) && auth()->check()) {
+            $user->company_id = auth()->user()->company_id;
+        }
+    });
+}
+
 }
