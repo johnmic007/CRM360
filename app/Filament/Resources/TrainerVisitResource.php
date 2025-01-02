@@ -223,6 +223,11 @@ class TrainerVisitResource extends Resource
                             ->disk('s3')
                             ->visibility('public')
                             ->directory('MGC_CRM')
+                            ->rules([
+                                'file', // Ensures it's a file
+                                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
+                                'max:10240', // Maximum size in KB (10 MB)
+                            ])
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->required(),
 
@@ -254,6 +259,11 @@ class TrainerVisitResource extends Resource
                             ->disk('s3')
                             ->visibility('public')
                             ->directory('MGC_CRM')
+                            ->rules([
+                                'file', // Ensures it's a file
+                                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
+                                'max:10240', // Maximum size in KB (10 MB)
+                            ])
 
                             ->label('Ending Meter Photo'),
 
@@ -322,6 +332,11 @@ class TrainerVisitResource extends Resource
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
                             ->disk('s3')
+                            ->rules([
+                                'file', // Ensures it's a file
+                                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
+                                'max:10240', // Maximum size in KB (10 MB)
+                            ])
                             ->visibility('public')
                             ->directory('MGC_CRM')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
@@ -360,6 +375,15 @@ class TrainerVisitResource extends Resource
                     ->label('Upload School Images') // Clear and descriptive label
                     ->required() // Makes the field mandatory
                     ->multiple() // Allows multiple files to be uploaded
+                    ->disk('s3')
+                            ->visibility('public')
+                            ->directory('MGC_CRM')
+
+                    ->rules([
+                        'file', // Ensures it's a file
+                        'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
+                        'max:10240', // Maximum size in KB (10 MB)
+                    ])
                     ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                     ->maxFiles(10) // Limit the maximum number of files (optional, adjust as needed)
                     ->helperText('Upload up to 10 school images in JPEG or PNG format.'), // Enhanced helper text
