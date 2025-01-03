@@ -45,14 +45,7 @@ class ListTrainerVisits extends ListRecords
 
                     FileUpload::make('travel_bill')
                         ->label('Images')
-                        ->disk('s3')
-                        ->visibility('public')
-                        ->directory('MGC_CRM')
-                        ->rules([
-                            'file', // Ensures it's a file
-                            'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                            'max:10240', // Maximum size in KB (10 MB)
-                        ])
+                      
                         ->required()
                         ->multiple(),                        
                 ])

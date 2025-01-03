@@ -220,14 +220,7 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('starting_meter_photo')
                             ->label('Starting Meter Photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-                            ->disk('s3')
-                            ->visibility('public')
-                            ->directory('MGC_CRM')
-                            ->rules([
-                                'file', // Ensures it's a file
-                                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                                'max:10240', // Maximum size in KB (10 MB)
-                            ])
+                            
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->required(),
 
@@ -257,13 +250,7 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('ending_meter_photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                             ->disk('s3')
-                            ->visibility('public')
-                            ->directory('MGC_CRM')
-                            ->rules([
-                                'file', // Ensures it's a file
-                                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                                'max:10240', // Maximum size in KB (10 MB)
-                            ])
+                           
 
                             ->label('Ending Meter Photo'),
 
@@ -331,14 +318,7 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('travel_bill')
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
-                            ->disk('s3')
-                            ->rules([
-                                'file', // Ensures it's a file
-                                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                                'max:10240', // Maximum size in KB (10 MB)
-                            ])
-                            ->visibility('public')
-                            ->directory('MGC_CRM')
+                           
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->helperText('Upload the bill for bus/train travel.'),

@@ -10,13 +10,5 @@ class EditSalesLeadStatus extends EditRecord
 {
     protected static string $resource = SalesLeadStatusResource::class;
 
-  
-
-
-    protected function getFormActions(): array
-    {
-        return []; // Remove all default form actions
-    }
-
-    
+      
 }

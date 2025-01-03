@@ -343,9 +343,7 @@ class UserResource extends Resource
 
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
-                            ->disk('s3')
-                            ->visibility('public')
-                            ->directory('MGC_CRM')
+                            ->directory('payment_proofs')
                             ->nullable(),
                     ])
                     ->action(function (array $data, User $record) {

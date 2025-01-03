@@ -58,9 +58,7 @@ class MouResource extends Resource
     
             FileUpload::make('image')
                 ->label('Upload Image')
-                ->disk('s3')
-                ->visibility('public')
-                ->directory('MGC_CRM')
+                ->directory('mou-images')
                 ->nullable(),
         ]);
     }

@@ -130,9 +130,8 @@ class BookShipmentResource extends Resource
 
                     Forms\Components\FileUpload::make('bills_and_gatepass')
                         ->label('Bills / Gate Pass')
-                        ->disk('s3')
-                        ->visibility('public')
-                        ->directory('MGC_CRM')
+                      
+                        ->directory('shipment_documents')
                         ->helperText('Upload related documents.')
                         ->nullable(),
 

@@ -104,14 +104,6 @@ class EditVisitEntry extends EditRecord
                     Forms\Components\FileUpload::make('starting_meter_photo')
                         ->label('Starting Meter Photo')
                         ->required()
-                        ->disk('s3')
-                        ->visibility('public')
-                        ->directory('MGC_CRM')
-                        ->rules([
-                            'file', // Ensures it's a file
-                            'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                            'max:10240', // Maximum size in KB (10 MB)
-                        ])
                         ->helperText('Upload a photo of the starting meter.')
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
                 ])
@@ -137,14 +129,7 @@ class EditVisitEntry extends EditRecord
                     Forms\Components\FileUpload::make('ending_meter_photo')
                         ->label('Ending Meter Photo')
                         ->required()
-                        ->disk('s3')
-                        ->visibility('public')
-                        ->directory('MGC_CRM')
-                        ->rules([
-                            'file', // Ensures it's a file
-                            'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                            'max:10240', // Maximum size in KB (10 MB)
-                        ])
+            
                         ->helperText('Upload a photo of the ending meter.')
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
@@ -159,14 +144,6 @@ class EditVisitEntry extends EditRecord
         Forms\Components\FileUpload::make('travel_bill')
             ->label('Travel Bill (Bus/Train)')
             ->disk('s3')
-            ->visibility('public')
-            ->directory('MGC_CRM')
-            ->helperText('Upload the travel bill.')
-            ->rules([
-                'file', // Ensures it's a file
-                'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                'max:10240', // Maximum size in KB (10 MB)
-            ])
             ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])
                 ->action(fn(array $data) => $this->submitStopVisit($data))
