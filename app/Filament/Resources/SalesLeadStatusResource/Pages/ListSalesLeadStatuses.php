@@ -11,12 +11,7 @@ class ListSalesLeadStatuses extends ListRecords
 {
     protected static string $resource = SalesLeadStatusResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
+  
 
 
 
