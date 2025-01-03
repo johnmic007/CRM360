@@ -40,6 +40,13 @@ class TrainerVisit extends Model
     ];
 
 
+    public function leadStatuses()
+{
+    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
+}
+
+
+
     protected $casts = [
         
         'school_id' => 'array', 
