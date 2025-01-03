@@ -123,9 +123,8 @@ class TaskResource extends Resource
                                 FileUpload::make('image')
                                     ->label('Upload Image')
                                     ->disabled($user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
-                                    ->disk('s3')
-                        ->visibility('public')
-                        ->directory('MGC_CRM')
+                                    ->directory('task-images')
+
                         ->helperText('Optional: Upload an image related to this task.'),
                             ]),
                     ])

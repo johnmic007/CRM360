@@ -143,7 +143,6 @@ class EditVisitEntry extends EditRecord
 
         Forms\Components\FileUpload::make('travel_bill')
             ->label('Travel Bill (Bus/Train)')
-            ->disk('s3')
             ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])
                 ->action(fn(array $data) => $this->submitStopVisit($data))

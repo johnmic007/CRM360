@@ -249,7 +249,6 @@ class TrainerVisitResource extends Resource
 
                         FileUpload::make('ending_meter_photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-                            ->disk('s3')
                            
 
                             ->label('Ending Meter Photo'),
@@ -355,15 +354,6 @@ class TrainerVisitResource extends Resource
                     ->label('Upload School Images') // Clear and descriptive label
                     ->required() // Makes the field mandatory
                     ->multiple() // Allows multiple files to be uploaded
-                    ->disk('s3')
-                            ->visibility('public')
-                            ->directory('MGC_CRM')
-
-                    ->rules([
-                        'file', // Ensures it's a file
-                        'mimes:jpeg,jpg,png,gif,bmp,svg', // Allowed image file types
-                        'max:10240', // Maximum size in KB (10 MB)
-                    ])
                     ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                     ->maxFiles(10) // Limit the maximum number of files (optional, adjust as needed)
                     ->helperText('Upload up to 10 school images in JPEG or PNG format.'), // Enhanced helper text
