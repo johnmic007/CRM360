@@ -142,87 +142,85 @@ class ViewTrainerVisit extends ViewRecord
 
             // 3. ACCOUNTS APPROVE
             Action::make('approveByAccounts')
-                ->label(' Approve')
-                ->icon('heroicon-o-check')
-                ->color('primary')
-                ->visible(fn() => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
-                ->hidden(fn() => $this->record->approval_status === 'approved' )   // Only show when `verify_status` is 'verified'
-
-                ->disabled(fn() => (
-                    // Disable if not verified by Sales yet or already approved
-                    $this->record->verify_status !== 'verified' ||
-                    $this->record->approval_status === 'approved' ||
-                    $this->record->approval_status === 'rejected'
-                ))
-                ->requiresConfirmation(fn() => $this->record->approval_status !== 'approved')
-                ->action(function () {
-                    // Must be verified by Sales first
-                    if ($this->record->verify_status !== 'verified') {
-                        Notification::make()
-                            ->title('Not Verified')
-                            ->danger()
-                            ->body('Sales has not yet verified this visit.')
-                            ->send();
-                        return;
-                    }
-
-                    // If already approved, do nothing
-                    if ($this->record->approval_status === 'approved') {
-                        Notification::make()
-                            ->title('Already Approved')
-                            ->warning()
-                            ->send();
-                        return;
-                    }
-
-                    // Deduct from wallet
-                    $record = $this->record;
-                    $user = User::find($record->user_id);
-                    $totalExpense = $record->total_expense;
-
-                    if (!$user) {
-                        Notification::make()
-                            ->title('User Not Found')
-                            ->danger()
-                            ->send();
-                        return;
-                    }
-
-                    // Check wallet balance
-                    if ($user->wallet_balance < $totalExpense) {
-                        Notification::make()
-                            ->title('Insufficient Balance')
-                            ->danger()
-                            ->body('The user does not have enough balance.')
-                            ->send();
-                        return;
-                    }
-
-                    // Deduct wallet
-                    $user->wallet_balance -= $totalExpense;
-                    $user->save();
-
-                    // Log this deduction
-                    WalletLog::create([
-                        'user_id' => $user->id,
-                        'amount' => $totalExpense,
-                        'type' => 'debit',
-                        'description' => 'Trainer visit expenses approved by Accounts',
-                        'approved_by' => Auth::id(),
-                    ]);
-
-                    // Update approval fields
-                    $record->approval_status = 'approved';
-                    $record->approved_by = Auth::id();
-                    $record->approved_at = now();
-                    $record->save();
-
+            ->label('Approve')
+            ->icon('heroicon-o-check')
+            ->color('primary')
+            ->visible(fn() => Auth::user()->hasAnyRole(['accounts', 'accounts_head']))
+            ->hidden(fn() => $this->record->approval_status === 'approved') // Only show when `verify_status` is 'verified'
+            ->disabled(fn() => (
+                // Disable if not verified by Sales yet or already approved
+                $this->record->verify_status !== 'verified' ||
+                $this->record->approval_status === 'approved' ||
+                $this->record->approval_status === 'rejected'
+            ))
+            ->requiresConfirmation(fn() => $this->record->approval_status !== 'approved')
+            ->action(function () {
+                // Must be verified by Sales first
+                if ($this->record->verify_status !== 'verified') {
                     Notification::make()
-                        ->title('Approval Successful')
-                        ->body('This visit has been fully approved, and the wallet has been updated.')
-                        ->success()
+                        ->title('Not Verified')
+                        ->danger()
+                        ->body('Sales has not yet verified this visit.')
                         ->send();
-                }),
+                    return;
+                }
+        
+                // If already approved, do nothing
+                if ($this->record->approval_status === 'approved') {
+                    Notification::make()
+                        ->title('Already Approved')
+                        ->warning()
+                        ->send();
+                    return;
+                }
+        
+                // Deduct from wallet
+                $record = $this->record;
+                $user = User::find($record->user_id);
+                $totalExpense = $record->total_expense;
+        
+                if (!$user) {
+                    Notification::make()
+                        ->title('User Not Found')
+                        ->danger()
+                        ->send();
+                    return;
+                }
+        
+                // Deduct wallet balance
+                $user->wallet_balance -= $totalExpense;
+                $user->save();
+        
+                // Log this deduction
+                WalletLog::create([
+                    'user_id' => $user->id,
+                    'amount' => $totalExpense,
+                    'type' => 'debit',
+                    'description' => 'Trainer visit expenses approved by Accounts',
+                    'approved_by' => Auth::id(),
+                ]);
+        
+                // Check if the balance is now negative and notify
+                if ($user->wallet_balance < 0) {
+                    Notification::make()
+                        ->title('Negative Balance')
+                        ->warning()
+                        ->body('The user\'s wallet balance is now negative.')
+                        ->send();
+                }
+        
+                // Update approval fields
+                $record->approval_status = 'approved';
+                $record->approved_by = Auth::id();
+                $record->approved_at = now();
+                $record->save();
+        
+                Notification::make()
+                    ->title('Approval Successful')
+                    ->body('This visit has been fully approved, and the wallet has been updated.')
+                    ->success()
+                    ->send();
+            }),        
 
             // 4. ACCOUNTS REJECT
             Action::make('rejectByAccounts')
