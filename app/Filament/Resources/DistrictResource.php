@@ -13,6 +13,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\FileUpload;
 use App\Filament\Resources\DistrictResource\Pages;
+use App\Models\State;
 
 class DistrictResource extends Resource
 {
@@ -35,6 +36,14 @@ class DistrictResource extends Resource
                 ->label('District Name')
                 ->required()
                 ->maxLength(255),
+
+
+                Forms\Components\Select::make('state_id')
+                ->label('State')
+                ->options(State::all()->pluck('name', 'id')) // Fetch district names for the dropdown
+                ->required()
+                ->searchable()
+                ->placeholder('Select a State'),
         ]);
     }
 
