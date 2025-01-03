@@ -84,9 +84,9 @@ class ListTrainerVisits extends ListRecords
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'verified'))
                     ->badgeColor('success'),
 
-                'unverified' => Tab::make('Unverified Visits')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'unverified'))
-                    ->badgeColor('danger'),
+                // 'unverified' => Tab::make('Unverified Visits')
+                //     ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'unverified'))
+                //     ->badgeColor('danger'),
 
                     'approved' => Tab::make('approved')
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class TrainerVisit extends Model
 {
     protected $fillable = [
+        'id',
         'user_id',
         'school_id',
         'company_id',
@@ -42,7 +43,7 @@ class TrainerVisit extends Model
 
     public function leadStatuses()
 {
-    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
+    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
 }
 
 

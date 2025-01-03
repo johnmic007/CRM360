@@ -183,6 +183,19 @@ class EditVisitEntry extends EditRecord
     public function submitStopVisit(array $data)
     {
 
+        $startingKm = $this->record->starting_km;
+
+    // Validate that ending_km is greater than starting_km
+    if (isset($data['ending_km']) && $data['ending_km'] <= $startingKm) {
+        Notification::make()
+            ->title('Validation Error')
+            ->danger()
+            ->body('The ending kilometers must be greater than the starting kilometers.')
+            ->send();
+
+        return; // Stop execution if validation fails
+    }
+
         // Combine start and stop data and save everything together
         $this->record->update([
             // Data collected during 'start'

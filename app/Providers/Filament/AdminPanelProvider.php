@@ -57,7 +57,6 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 // Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
-                SubordinateVisitsWidget::class,
                 WalletBalanceWidget::class,
                 CalendarWidget::class,
                 SalesLeadChartWidget::class,

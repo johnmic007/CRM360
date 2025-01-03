@@ -12,12 +12,6 @@ class ListSalesLeadManagement extends ListRecords
 {
     protected static string $resource = SalesLeadManagementResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
 
     protected function getTableQuery(): Builder
     {
