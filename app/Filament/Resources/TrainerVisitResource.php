@@ -60,7 +60,7 @@ class TrainerVisitResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasAnyRole(['admin', 'sales_operation', 'head_trainer']);
+        return !auth()->user()->hasAnyRole(['admin', 'sales_operation']);
     }
 
 
@@ -322,6 +322,8 @@ class TrainerVisitResource extends Resource
 
                             ->helperText('Upload the bill for bus/train travel.'),
 
+                            
+
 
                         TextInput::make('travel_expense')
                             ->label('Travel Expense')
@@ -420,7 +422,7 @@ class TrainerVisitResource extends Resource
                             fn ($q) => $q->whereDate('created_at', $data['date'])
                         );
                     })
-                    ->indicator(function (array $data) {
+                    ->indicateUsing(function (array $data) {
                         if (!empty($data['date'])) {
                             $date = \Carbon\Carbon::parse($data['date']); // Parse the date into Carbon/DateTime
                             return 'Visit Date: ' . $date->format('M d, Y');

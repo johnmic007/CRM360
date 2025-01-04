@@ -158,7 +158,7 @@ class LeadStageReportResource extends Resource
                 Tables\Filters\Filter::make('visited_date')
                 ->form([
                     DatePicker::make('date')
-                        ->label('Select Date'),
+                        ->label('visited_date'),
                 ])
                 ->query(function (Builder $query, array $data) {
                     return $query->whereHas('leadStatuses', function ($q) use ($data) {
@@ -176,7 +176,7 @@ class LeadStageReportResource extends Resource
             Tables\Filters\Filter::make('follow_up_date')
                 ->form([
                     DatePicker::make('date')
-                        ->label('Select Date'),
+                        ->label('Follow-Up Date'),
                 ])
                 ->query(function (Builder $query, array $data) {
                     return $query->whereHas('leadStatuses', function ($q) use ($data) {

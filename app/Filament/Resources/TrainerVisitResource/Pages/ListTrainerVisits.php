@@ -88,9 +88,11 @@ class ListTrainerVisits extends ListRecords
                 //     ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'unverified'))
                 //     ->badgeColor('danger'),
 
-                    'approved' => Tab::make('approved')
+                    'approved' => Tab::make('approval')
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),
 
+                    'verification status' => Tab::make('verify')
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'approved')),
                     'pending' => Tab::make('pending')
 
             ];
@@ -100,11 +102,19 @@ class ListTrainerVisits extends ListRecords
                 'all' => Tab::make('All Visits')
                     ->modifyQueryUsing(fn (Builder $query) => $query),
 
-                    'approved' => Tab::make('approved')
-                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),
+                    
 
-                    'pending' => Tab::make('pending')
+                    'verify' => Tab::make('Verification Verified')
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'verified')),
+
+                    'verify_pending' => Tab::make('Verification Pending')
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('verify_status', 'pending')),
+
+                    'pending' => Tab::make('Approval Pending')
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'pending')),
+
+                    'approved' => Tab::make('Approved')
+                    ->modifyQueryUsing(fn (Builder $query) => $query->where('approval_status', 'approved')),
 
              
             ];
