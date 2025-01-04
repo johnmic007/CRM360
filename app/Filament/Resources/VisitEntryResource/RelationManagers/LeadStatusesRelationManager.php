@@ -81,6 +81,9 @@ class SchoolVisitRelationManager extends RelationManager
                             return;
                         }
 
+                        $currentUserId = auth()->id();
+
+
                         $assignedSchools = DB::table('school_user')->where('school_id', $state)->exists();
 
                         if (!$assignedSchools) {
@@ -352,6 +355,8 @@ class SchoolVisitRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+
             ]);
     }
 }

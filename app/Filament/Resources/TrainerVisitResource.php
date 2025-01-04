@@ -20,7 +20,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class TrainerVisitResource extends Resource
 {
@@ -406,6 +406,29 @@ class TrainerVisitResource extends Resource
                     ->url(fn(TrainerVisit $record) => route('trainer-visit.download', $record->id))
                     ->openUrlInNewTab(),
             ])
+            ->filters([
+                Tables\Filters\Filter::make('visit_date')
+                    ->label('Visit Date')
+                    ->form([
+                        Forms\Components\DatePicker::make('date')
+                            ->label('Select Date')
+                            ->placeholder('Choose a date'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when(
+                            $data['date'], 
+                            fn ($q) => $q->whereDate('created_at', $data['date'])
+                        );
+                    })
+                    ->indicator(function (array $data) {
+                        if (!empty($data['date'])) {
+                            $date = \Carbon\Carbon::parse($data['date']); // Parse the date into Carbon/DateTime
+                            return 'Visit Date: ' . $date->format('M d, Y');
+                        }
+                        return null;
+                    }),
+            ])
+            
             ->bulkActions([
                 Tables\Actions\BulkAction::make('downloadPdf')
                     ->label('Download as PDF')

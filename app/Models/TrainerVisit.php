@@ -29,7 +29,7 @@ class TrainerVisit extends Model
         'approved_by',
         'approved_at',
         'approval_status',
-        'verify_by',
+        'verified_by',
         'verify_status',
         'clarification_question',
         'clarification_answer',

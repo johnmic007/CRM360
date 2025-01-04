@@ -9,8 +9,11 @@ use App\Models\SalesLeadStatus;
 use App\Models\VisitEntry;
 use Filament\Resources\Resource;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Model;
 
 class SalesLeadStatusResource extends Resource
@@ -29,7 +32,7 @@ class SalesLeadStatusResource extends Resource
     
     public static function canEdit(Model $record): bool
     {
-        return auth()->user()->hasRole([  'sales_operation_head',]);
+        return auth()->user()->hasRole([  'sales_operation_head' , 'admin']);
 
         
     }
@@ -85,17 +88,41 @@ class SalesLeadStatusResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table->columns([
-            Tables\Columns\TextColumn::make('id')->label('ID')->sortable(),
-            Tables\Columns\TextColumn::make('travel_type'),
+            TextColumn::make('user.name'),
 
-            Tables\Columns\TextColumn::make('travel_expense'),
+            TextColumn::make('travel_type'),
+
+            TextColumn::make('travel_expense'),
 
             
 
-            Tables\Columns\TextColumn::make('user.name'),
 
           
             
+        ])
+        ->filters([
+            Filter::make('date_range')
+                ->label('Date Range')
+                ->form([
+                    DatePicker::make('start_date')
+                        ->label('Start Date')
+                        ->default(now()->startOfDay()),
+
+                    DatePicker::make('end_date')
+                        ->label('End Date')
+                        ->default(now()->endOfDay()),
+                ])
+                ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                    if (!empty($data['start_date']) && !empty($data['end_date'])) {
+                        $query->whereBetween('created_at', [$data['start_date'], $data['end_date']]);
+                    }
+                })
+                ->indicateUsing(function (array $data) {
+                    if (!empty($data['start_date']) && !empty($data['end_date'])) {
+                        return 'From ' . $data['start_date'] . ' to ' . $data['end_date'];
+                    }
+                    return null;
+                }),
         ])
         ->actions([
             Tables\Actions\ViewAction::make(), // Add View action

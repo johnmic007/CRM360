@@ -182,6 +182,7 @@ class InvoResource extends Resource
 
                             Select::make('status')
                                 ->label('Status')
+                                ->disabled()
                                 ->options([
                                     'draft' => 'Draft',
                                     'sent' => 'Sent',
@@ -565,6 +566,7 @@ class InvoResource extends Resource
 
                 SelectFilter::make('status')
                     ->label('Status')
+                    
                     ->options([
                         'draft' => 'Draft',
                         'sent' => 'Sent',
