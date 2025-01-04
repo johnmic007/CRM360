@@ -38,6 +38,13 @@ class LeadStageReportResource extends Resource
     protected static ?string $navigationGroup = 'Reports';
 
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , ]);
+    }
+
+
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([

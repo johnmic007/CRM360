@@ -33,10 +33,12 @@ class VisitReportResource extends Resource
 
     protected static ?string $pluralLabel = 'Visit Report';
 
+  
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' ,  'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , ]);
     }
+
 
 
     public static function form(Forms\Form $form): Forms\Form
