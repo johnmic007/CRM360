@@ -7,6 +7,8 @@ use App\Models\VisitEntry;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions\ButtonAction;
+use Illuminate\Database\Eloquent\Builder;
+
 
 
 class ListVisitReports extends ListRecords
@@ -59,28 +61,26 @@ class ListVisitReports extends ListRecords
         ];
     }
 
-    protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder
+    protected function getTableQuery(): Builder
     {
+        $query = parent::getTableQuery(); // Get the default query
+
         $user = auth()->user();
 
-        // Base query to include only records where start_time is not null
-        $query = VisitEntry::query()
-            ->whereNotNull('start_time') // Only include records with a non-null start_time
-            ->with(['user', 'trainerVisit', 'leadStatuses']);
-
-        // Fetch visits based on user role
-        if ($user->roles()->where('name', 'admin')->exists() || $user->roles()->where('name', 'accounts_head')->exists()) {
+        // Allow all reports for admin and accounts_head roles
+        if ($user->roles()->whereIn('name', ['admin'])->exists()) {
             return $query;
         }
 
-        if ($user->roles()->where('name', 'sales_operation')->exists()) {
-            return $query
-                ->whereHas('user', fn($query) => $query->where('company_id', $user->company_id));
+        // Show reports for the logged-in user's company for sales_operation role
+        if ($user->roles()->where('name', ['sales_operation_head' ,'head' , 'sales_operation'])->exists()) {
+            return $query->where('company_id', $user->company_id);
         }
 
+        // Fetch subordinate user IDs for other roles
         $subordinateIds = $user->getAllSubordinateIds();
 
-        return $query
-            ->whereIn('user_id', $subordinateIds);
+        // Show only reports for the subordinates
+        return $query->whereIn('user_id', $subordinateIds);
     }
 }

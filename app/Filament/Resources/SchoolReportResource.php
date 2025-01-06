@@ -36,10 +36,9 @@ class SchoolReportResource extends Resource
     protected static ?string $navigationGroup = 'Reports';
 
 
-   
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , ]);
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , 'head' , 'zonal_manager' , 'regional_manager' ]);
     }
 
 
@@ -157,6 +156,26 @@ class SchoolReportResource extends Resource
 
             ])
             ->filters([
+
+                Tables\Filters\SelectFilter::make('status')
+                ->label('Status')
+                ->options([
+                    'School Nurturing' => 'School Nurturing',
+                    'Demo Completed' => 'Demo Completed',
+                    'Demo reschedule' => 'Demo Schedule',
+                    'deal_won' => 'Deal Won',
+                    'deal_lost' => 'Deal lost',
+                ])
+                ->attribute('status') // Specify the attribute to filter
+                ->searchable()
+                ->query(function (Builder $query, array $data) {
+                    if (!empty($data['value'])) {
+                        $query->where('status', $data['value']);
+                    }
+                })
+                ->indicateUsing(function (array $data) {
+                    return !empty($data['value']) ? 'Status: ' . ucfirst($data['value']) : null;
+                }),
                 // Tables\Filters\SelectFilter::make('state_id')
                 //     ->label('State')
                 //     ->options(State::pluck('name', 'id')->toArray()),

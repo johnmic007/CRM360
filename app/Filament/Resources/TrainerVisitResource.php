@@ -371,43 +371,71 @@ class TrainerVisitResource extends Resource
                 // TextColumn::make('school.name')->label('School'),
                 TextColumn::make('visit_date')->label('Visit Date')->date(),
                 TextColumn::make('travel_mode')->label('Travel Mode'),
-                TextColumn::make('starting_km')->label('Starting Kilometer'),
-                TextColumn::make('ending_km')->label('Ending Kilometer'),
+                // TextColumn::make('starting_km')->label('Starting Kilometer'),
+                // TextColumn::make('ending_km')->label('Ending Kilometer'),
                 TextColumn::make('distance_traveled')->label('Distance (km)'),
                 TextColumn::make('total_expense')->label('Total Expense')->money('INR'),
-                TextColumn::make('approval_status')
-                    ->badge()
-                    ->colors([
-                        'primary' => 'Pending',
-                        'success' => 'approved',
-                        'danger' => 'rejected',
-                    ])
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('approval_and_verification_status')
+    ->label('Approval & Verification Status')
+    ->badge() // Adds badge styling
+    ->getStateUsing(function ($record) {
+        $approvalStatus = ucfirst($record->approval_status); // Capitalize the first letter
+        $verifyStatus = ucfirst($record->verify_status);     // Capitalize the first letter
+        return "{$approvalStatus} / {$verifyStatus}";
+    })
+    ->colors([
+        'danger' => fn($state) => str_contains($state, 'Rejected') || str_contains($state, 'Pending'),
+        'success' => fn($state) => str_contains($state, 'Approved') && str_contains($state, 'Verified'),
+        'warning' => fn($state) => str_contains($state, 'Clarification'),
+        'primary' => fn($state) => str_contains($state, 'Pending'),
+    ])
+    ->sortable(),
+
+                // TextColumn::make('approval_status')
+                //     ->badge()
+                //     ->colors([
+                //         'primary' => 'Pending',
+                //         'success' => 'approved',
+                //         'danger' => 'rejected',
+                //     ])
+                //     ->sortable(),
 
 
-                    Tables\Columns\TextColumn::make('verify_status')
-                    ->label('Verification Status')
-                    ->badge() // Adds the badge styling
-                    ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head']))
-                    ->Colors([
-                        'danger' => 'pending',           // Red for 'Pending'
-                        'warning' => 'clarification',   // Yellow for 'Need Clarification'
-                        'success' => 'verified',        // Green for 'Verified'
-                    ]),                
+                //     Tables\Columns\TextColumn::make('verify_status')
+                //     ->label('Verification Status')
+                //     ->badge() // Adds the badge styling
+                //     ->visible(fn() => !auth()->user()->hasAnyRole(['accounts', 'accounts_head']))
+                //     ->Colors([
+                //         'danger' => 'pending',           // Red for 'Pending'
+                //         'warning' => 'clarification',   // Yellow for 'Need Clarification'
+                //         'success' => 'verified',        // Green for 'Verified'
+                //     ]),                
                 
 
 
-                    TextColumn::make('approved_by')->label('Approved By')
-                    ->formatStateUsing(fn($state) => $state ? User::find($state)?->name ?? 'User Not Found' : 'Pending'),
+                Tables\Columns\IconColumn::make('approved_by')
+    ->label('Approved By')
+    ->tooltip(fn($state) => $state ? User::find($state)?->name ?? 'User Not Found' : 'Pending')
+    ->icon(fn($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-clock')
+    ->colors([
+        'success' => fn($state) => $state !== null, // Green for approved
+        'secondary' => fn($state) => $state === null, // Gray for pending
+    ])
+    ->extraAttributes([
+        'class' => 'cursor-pointer',
+    ]),
+
                 
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('Download PDF')
-                    ->label('Download PDF')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn(TrainerVisit $record) => route('trainer-visit.download', $record->id))
-                    ->openUrlInNewTab(),
+                Tables\Actions\ActionGroup::make([
+                    Tables\Actions\Action::make('download_pdf')
+                        ->label('Download PDF')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->url(fn(TrainerVisit $record) => route('trainer-visit.download', $record->id))
+                        ->openUrlInNewTab(), // Opens the PDF in a new tab
+                ]),
             ])
             ->filters([
                 Tables\Filters\Filter::make('visit_date')
@@ -430,13 +458,13 @@ class TrainerVisitResource extends Resource
                         }
                         return null;
                     }),
-            ])
+                ]);
             
-            ->bulkActions([
-                Tables\Actions\BulkAction::make('downloadPdf')
-                    ->label('Download as PDF')
-                    ->action(fn($records) => self::downloadPdf($records)),
-            ]);
+            // ->bulkActions([
+            //     Tables\Actions\BulkAction::make('downloadPdf')
+            //         ->label('Download as PDF')
+            //         ->action(fn($records) => self::downloadPdf($records)),
+            // ]);
     }
 
     public static function getRelations(): array

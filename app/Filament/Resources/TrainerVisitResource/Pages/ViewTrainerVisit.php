@@ -18,10 +18,47 @@ class ViewTrainerVisit extends ViewRecord
 {
     protected static string $resource = TrainerVisitResource::class;
 
+
+    
+
     protected function getActions(): array
     {
-        return [
-            // 1. SALES VERIFY
+
+        $prevRecordId = TrainerVisit::where('id', '<', $this->record->id)
+        ->orderBy('id', 'desc')
+        ->first()?->id;
+
+    $nextRecordId = TrainerVisit::where('id', '>', $this->record->id)
+        ->orderBy('id', 'asc')
+        ->first()?->id;
+
+    return [
+      
+        
+        Action::make('previous')
+    ->label('Previous')
+    ->icon('heroicon-o-chevron-left')
+    ->color('gray')
+    ->tooltip('Go to the previous record') // Add a tooltip
+    ->extraAttributes([
+        'class' => 'rounded-full px-4 py-2 shadow-md hover:bg-gray-100', // Styling for the button
+    ])
+    ->iconPosition('before') // Ensure the icon is before the label
+    ->url(fn() => $prevRecordId ? route('filament.admin.resources.trainer-visits.view', $prevRecordId) : null)
+    ->disabled(fn() => !$prevRecordId),
+
+Action::make('next')
+    ->label('Next')
+    ->icon('heroicon-o-chevron-right')
+    ->color('gray')
+    ->tooltip('Go to the next record') // Add a tooltip
+    ->extraAttributes([
+        'class' => 'rounded-full px-4 py-2 shadow-md hover:bg-gray-100', // Styling for the button
+    ])
+    ->iconPosition('after') // Ensure the icon is after the label
+    ->url(fn() => $nextRecordId ? route('filament.admin.resources.trainer-visits.view', $nextRecordId) : null)
+    ->disabled(fn() => !$nextRecordId),
+
 
             Action::make('verif')
                 ->label('Sales Verified')

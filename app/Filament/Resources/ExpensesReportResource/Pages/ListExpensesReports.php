@@ -1,91 +1,80 @@
 <?php
 
-namespace App\Filament\Resources\LeadStageReportResource\Pages;
+namespace App\Filament\Resources\ExpensesReportResource\Pages;
 
-use App\Filament\Resources\LeadStageReportResource;
+use App\Filament\Resources\ExpensesReportResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 
-class ListLeadStageReports extends ListRecords
+
+class ListExpensesReports extends ListRecords
 {
-    protected static string $resource = LeadStageReportResource::class;
+    protected static string $resource = ExpensesReportResource::class;
 
 
 
     protected function getHeaderActions(): array
 {
     return [
-        // School Nurturing Count
-        Actions\Action::make('school_nurturing_count')
+        // Total Expenses
+        Actions\Action::make('total_expenses')
             ->label(function () {
                 $query = $this->getTableQuery();
                 if (method_exists($this, 'applyFiltersToTableQuery')) {
                     $this->applyFiltersToTableQuery($query);
                 }
-                $count = $query->where('status', 'School Nurturing')->count();
-                return "School Nurturing: {$count}";
+                $totalExpenses = $query->sum('total_expense');
+                return "Total Expenses: ₹" . number_format($totalExpenses, 2);
             })
-            ->color('primary')
-            ->icon('heroicon-o-academic-cap')
+            ->color('success')
+            ->icon('heroicon-o-calculator')
             ->disabled(), // Display-only action
 
-            Actions\Action::make('demo_reschedule_count')
+        // Total Requests
+        Actions\Action::make('total_requests')
             ->label(function () {
                 $query = $this->getTableQuery();
                 if (method_exists($this, 'applyFiltersToTableQuery')) {
                     $this->applyFiltersToTableQuery($query);
                 }
-                $count = $query->where('status', 'Demo Reschedule')->count();
-                return "Demo Reschedule: {$count}";
+                $totalRequests = $query->count();
+                return "Total Requests: {$totalRequests}";
             })
-            ->color('warning')
-            ->icon('heroicon-o-calendar')
-            ->disabled(), 
+            ->color('primary')
+            ->icon('heroicon-o-document-text')
+            ->disabled(), // Display-only action
 
-        // Demo Completed Count
-        Actions\Action::make('demo_completed_count')
+        // Approved Expenses
+        Actions\Action::make('approved_expenses')
             ->label(function () {
                 $query = $this->getTableQuery();
                 if (method_exists($this, 'applyFiltersToTableQuery')) {
                     $this->applyFiltersToTableQuery($query);
                 }
-                $count = $query->where('status', 'Demo Completed')->count();
-                return "Demo Completed: {$count}";
+                $approvedExpenses = $query->where('approval_status', 'approved')->sum('total_expense');
+                return "Approved Expenses: ₹" . number_format($approvedExpenses, 2);
             })
             ->color('success')
             ->icon('heroicon-o-check-circle')
             ->disabled(), // Display-only action
 
-        // Deal Won Count
-        Actions\Action::make('deal_won_count')
+        // Rejected Expenses
+        Actions\Action::make('rejected_expenses')
             ->label(function () {
                 $query = $this->getTableQuery();
                 if (method_exists($this, 'applyFiltersToTableQuery')) {
                     $this->applyFiltersToTableQuery($query);
                 }
-                $count = $query->where('status', 'deal_won')->count();
-                return "Deal Won: {$count}";
-            })
-            ->color('success')
-            ->icon('heroicon-o-trophy')
-            ->disabled(), // Display-only action
-
-        // Deal Lost Count
-        Actions\Action::make('deal_lost_count')
-            ->label(function () {
-                $query = $this->getTableQuery();
-                if (method_exists($this, 'applyFiltersToTableQuery')) {
-                    $this->applyFiltersToTableQuery($query);
-                }
-                $count = $query->where('status', 'deal_lost')->count();
-                return "Deal Lost: {$count}";
+                $rejectedExpenses = $query->where('approval_status', 'rejected')->sum('total_expense');
+                return "Rejected Expenses: ₹" . number_format($rejectedExpenses, 2);
             })
             ->color('danger')
             ->icon('heroicon-o-x-circle')
             ->disabled(), // Display-only action
     ];
 }
+
 
 
     protected function getTableQuery(): Builder
@@ -111,4 +100,5 @@ class ListLeadStageReports extends ListRecords
         return $query->whereIn('user_id', $subordinateIds);
     }
   
+    
 }
