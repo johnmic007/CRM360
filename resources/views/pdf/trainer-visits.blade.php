@@ -120,41 +120,74 @@
     </tbody>
 </table>
 
+
+
 <div class="photos">
     <div class="photo">
         <p class="photo-title">Starting Meter Photo:</p>
-        @if ($trainerVisit->starting_meter_photo && file_exists(public_path('storage/' . $trainerVisit->starting_meter_photo)))
-            <img src="{{ asset('storage/' . $trainerVisit->starting_meter_photo) }}" alt="Starting Meter Photo">
+        @if ($trainerVisit->starting_meter_photo)
+            @php
+                $imagePath = public_path('storage/' . $trainerVisit->starting_meter_photo);
+                $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            @endphp
+            @if ($base64Image)
+                <img src="{{ $base64Image }}" alt="Starting Meter Photo">
+            @else
+                <p>No Image</p>
+            @endif
         @else
             <p>No Image</p>
         @endif
     </div>
     <div class="photo">
         <p class="photo-title">Ending Meter Photo:</p>
-        @if ($trainerVisit->ending_meter_photo && file_exists(public_path('storage/' . $trainerVisit->ending_meter_photo)))
-            <img src="{{ asset('storage/' . $trainerVisit->ending_meter_photo) }}" alt="Ending Meter Photo">
+        @if ($trainerVisit->ending_meter_photo)
+            @php
+                $imagePath = public_path('storage/' . $trainerVisit->ending_meter_photo);
+                $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            @endphp
+            @if ($base64Image)
+                <img src="{{ $base64Image }}" alt="Ending Meter Photo">
+            @else
+                <p>No Image</p>
+            @endif
         @else
             <p>No Image</p>
         @endif
     </div>
     <div class="photo">
         <p class="photo-title">GPS Photo:</p>
-        @if ($trainerVisit->gps_photo && file_exists(public_path('storage/' . $trainerVisit->gps_photo)))
-            <img src="{{ asset('storage/' . $trainerVisit->gps_photo) }}" alt="GPS Photo">
+        @if ($trainerVisit->gps_photo)
+            @php
+                $imagePath = public_path('storage/' . $trainerVisit->gps_photo);
+                $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            @endphp
+            @if ($base64Image)
+                <img src="{{ $base64Image }}" alt="GPS Photo">
+            @else
+                <p>No Image</p>
+            @endif
         @else
             <p>No Image</p>
         @endif
     </div>
     <div class="photo">
         <p class="photo-title">Travel Bill:</p>
-        @if ($trainerVisit->travel_bill && file_exists(public_path('storage/' . $trainerVisit->travel_bill)))
-            <img src="{{ asset('storage/' . $trainerVisit->travel_bill) }}" alt="Travel Bill">
+        @if ($trainerVisit->travel_bill)
+            @php
+                $imagePath = public_path('storage/' . $trainerVisit->travel_bill);
+                $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            @endphp
+            @if ($base64Image)
+                <img src="{{ $base64Image }}" alt="Travel Bill">
+            @else
+                <p>No Image</p>
+            @endif
         @else
             <p>No Image</p>
         @endif
     </div>
 </div>
-
 
 <div class="footer">
     <p><strong>Approval Status:</strong> {{ ucfirst($trainerVisit->approval_status) }}</p>
