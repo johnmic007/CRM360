@@ -397,8 +397,9 @@ class TrainerVisitResource extends Resource
                 
 
 
-                TextColumn::make('approved_by')->label('Approved By')
-                    ->formatStateUsing(fn($state) => $state ? User::find($state)->name : 'Pending'),
+                    TextColumn::make('approved_by')->label('Approved By')
+                    ->formatStateUsing(fn($state) => $state ? User::find($state)?->name ?? 'User Not Found' : 'Pending'),
+                
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
