@@ -10,7 +10,7 @@ class TrainerVisitController extends Controller
     public function downloadPdf($id)
     {
         // Fetch the trainer visit details
-        $trainerVisit = TrainerVisit::with(['user'])->findOrFail($id);
+        $trainerVisit = TrainerVisit::with(['user' ,'leadStatuses'])->findOrFail($id);
 
         // Generate the PDF using the Blade view
         $pdf = Pdf::loadView('pdf.trainer-visits', compact('trainerVisit'));
