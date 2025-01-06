@@ -121,67 +121,39 @@
 </table>
 
 <div class="photos">
-    @php
-        // Helper function to convert image to base64
-        function getBase64Image($path) {
-            $imagePath = public_path('storage/' . $path);
-            return file_exists($imagePath) ? base64_encode(file_get_contents($imagePath)) : null;
-        }
-    @endphp
-
     <div class="photo">
         <p class="photo-title">Starting Meter Photo:</p>
-        @php
-            $base64Image = getBase64Image($trainerVisit->starting_meter_photo);
-        @endphp
-        @if($base64Image)
-            <img src="data:image/webp;base64,{{ $base64Image }}" alt="Starting Meter Photo">
+        @if ($trainerVisit->starting_meter_photo && file_exists(public_path('storage/' . $trainerVisit->starting_meter_photo)))
+            <img src="{{ asset('storage/' . $trainerVisit->starting_meter_photo) }}" alt="Starting Meter Photo">
         @else
-            <p>Image not available</p>
+            <p>No Image</p>
         @endif
     </div>
-
     <div class="photo">
         <p class="photo-title">Ending Meter Photo:</p>
-        @php
-            $base64Image = getBase64Image($trainerVisit->ending_meter_photo);
-        @endphp
-        @if($base64Image)
-            <img src="data:image/webp;base64,{{ $base64Image }}" alt="Ending Meter Photo">
+        @if ($trainerVisit->ending_meter_photo && file_exists(public_path('storage/' . $trainerVisit->ending_meter_photo)))
+            <img src="{{ asset('storage/' . $trainerVisit->ending_meter_photo) }}" alt="Ending Meter Photo">
         @else
-            <p>Image not available</p>
+            <p>No Image</p>
         @endif
     </div>
-
     <div class="photo">
         <p class="photo-title">GPS Photo:</p>
-        @php
-            $base64Image = getBase64Image($trainerVisit->gps_photo);
-        @endphp
-        @if($base64Image)
-            <img src="data:image/webp;base64,{{ $base64Image }}" alt="GPS Photo">
+        @if ($trainerVisit->gps_photo && file_exists(public_path('storage/' . $trainerVisit->gps_photo)))
+            <img src="{{ asset('storage/' . $trainerVisit->gps_photo) }}" alt="GPS Photo">
         @else
-            <p>Image not available</p>
+            <p>No Image</p>
         @endif
     </div>
-
     <div class="photo">
         <p class="photo-title">Travel Bill:</p>
-        @php
-            $base64Image = getBase64Image($trainerVisit->travel_bill);
-        @endphp
-        @if($base64Image)
-            <img src="data:image/webp;base64,{{ $base64Image }}" alt="Travel Bill">
+        @if ($trainerVisit->travel_bill && file_exists(public_path('storage/' . $trainerVisit->travel_bill)))
+            <img src="{{ asset('storage/' . $trainerVisit->travel_bill) }}" alt="Travel Bill">
         @else
-            <p>Image not available</p>
+            <p>No Image</p>
         @endif
     </div>
 </div>
-
-
-
-</div>
-
 
 
 <div class="footer">
