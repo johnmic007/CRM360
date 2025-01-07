@@ -60,7 +60,7 @@ class SalesLeadStatus extends Model
 
         
 
-        static::creating(function ($status) {
+        static::saving(function ($status) {
             // Fetch the status from SalesLeadManagement if sales_lead_management_id is set
             if ($status->sales_lead_management_id) {
                 $salesLead = SalesLeadManagement::find($status->sales_lead_management_id);
@@ -68,6 +68,11 @@ class SalesLeadStatus extends Model
                 if ($salesLead) {
                     // Automatically assign the status from the SalesLeadManagement record
                     $salesLead->status = $status->status;
+
+                    $salesLead->save();
+
+
+                    // dd($salesLead->status , $status->status );
                     // $status->school_id = $salesLead->school_id; // Ensure school_id is also set if needed
                 } else {
                     throw new \Exception("SalesLeadManagement record not found for ID: {$status->sales_lead_management_id}");

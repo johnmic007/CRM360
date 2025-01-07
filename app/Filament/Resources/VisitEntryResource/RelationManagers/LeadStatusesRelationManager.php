@@ -267,7 +267,7 @@ class SchoolVisitRelationManager extends RelationManager
                     ->label('Visited Date')
                     ->default(now())
                     ->required()
-                    ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule' , 'support' , 'deal_won' , 'deal_lost'])),
+                    ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule'  , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
 
 
                     Forms\Components\Toggle::make('potential_meet')
@@ -276,7 +276,7 @@ class SchoolVisitRelationManager extends RelationManager
 
                 Forms\Components\DatePicker::make('follow_up_date')
                     ->label('Follow-Up Date')
-                    ->visible(fn(callable $get) => $get('status') === ['School Nurturing', 'Demo reschedule' , 'support' , 'deal_won' , 'deal_lost']),
+                    ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule'  , 'Demo Completed' , 'support' , 'deal_won' , 'deal_lost'])),
 
                 Forms\Components\DatePicker::make('reschedule_date')
                     ->label('Reschedule Date')
@@ -288,7 +288,6 @@ class SchoolVisitRelationManager extends RelationManager
                         'deal_won' => 'Deal Won',
                         'deal_lost' => 'Deal Lost',
                     ])
-                    ->required()
                     ->helperText('Select whether the deal was won or lost.')
                     ->visible(fn(callable $get) => $get('status') === 'Demo Completed'),
 

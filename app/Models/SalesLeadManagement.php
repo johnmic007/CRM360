@@ -72,29 +72,6 @@ class SalesLeadManagement extends Model
         parent::boot();
 
 
-        static::saved(function ($model) {
-            // Define an array of statuses and their corresponding actions
-            $statuses = [
-                'School Nurturing' => 'School Nurturing',
-                'Demo reschedule'  => 'Demo reschedule',
-                'Demo Completed'   => 'Demo Completed',
-                'deal_won'         => 'Deal Won',
-                'deal_lost'        => 'Deal Lost',
-                'support'   => 'Support',
-
-            ];
-        
-            if (!\App\Models\SalesLeadStatus::where('sales_lead_management_id', $model->id)
-            ->where('status', $statuses[$model->status])
-            ->exists()) {
-           \App\Models\SalesLeadStatus::create([
-               'sales_lead_management_id' => $model->id,
-               'status' => $statuses[$model->status],
-               'visited_by' => auth()->id(),
-           ]);
-       }
-       
-        });
         
 
         // Automatically set 'allocated_to' and 'company_id' fields before creating a new record
