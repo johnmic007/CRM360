@@ -77,6 +77,15 @@ class AccountsExpensesResource extends Resource
                     ->label('Cash in Hand')
                     ->sortable()
                     ->getStateUsing(fn ($record) => $record->wallet_balance),
+
+
+                    TextColumn::make('last_expense')
+                    ->label('Last Expense')
+                    ->sortable()
+                    ->getStateUsing(function ($record) {
+                        $lastExpense = $record->trainerVisits()->latest('visit_date')->first();
+                        return $lastExpense ? $lastExpense->total_expense : 'N/A';
+                    }),
             ])
             ->filters([
                 // Add filters if necessary
