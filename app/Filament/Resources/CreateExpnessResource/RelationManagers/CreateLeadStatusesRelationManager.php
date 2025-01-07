@@ -113,6 +113,12 @@ class CreateLeadStatusesRelationManager extends RelationManager
 
                         $assignedSchools = DB::table('school_user')->where('school_id', $state)->exists();
 
+                        $visitEntry = $this->getOwnerRecord(); // Retrieve the owner record (VisitEntry)
+            
+                        // Retrieve the related User model
+                        $user = $visitEntry?->user_id;
+
+                        
                         if (!$assignedSchools) {
                             $salesLeadManagement = SalesLeadManagement::firstOrCreate([
                                 'school_id' => $state,
@@ -120,7 +126,7 @@ class CreateLeadStatusesRelationManager extends RelationManager
                                 'block_id' => $get('block_id'),
                                 'state_id' => $get('state_id'),
                                 'status' => 'School Nurturing',
-                                'allocated_to' => auth()->id(),
+                                'allocated_to' => $user,
                                 'company_id' => auth()->user()->company_id ?? null,
                             ]);
 
@@ -137,11 +143,11 @@ class CreateLeadStatusesRelationManager extends RelationManager
                             $set('status', 'School Nurturing');
                         } else {
                             $status = SalesLeadManagement::where('school_id', $state)
-                                ->where('allocated_to', auth()->id())
+                                ->where('allocated_to', $user)
                                 ->value('status');
 
                             $salesLeadManagementId = SalesLeadManagement::where('school_id', $state)
-                                ->where('allocated_to', auth()->id())
+                                ->where('allocated_to',$user)
                                 ->value('id');
 
                             // Pass the existing SalesLeadManagement ID

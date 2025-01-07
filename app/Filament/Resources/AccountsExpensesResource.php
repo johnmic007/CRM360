@@ -4,9 +4,13 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\AccountsExpensesResource\Pages;
+use App\Filament\Resources\AccountsExpensesResource\Pages\ListAccountsExpenses;
+use App\Filament\Resources\AccountsExpensesResource\Pages\ViewAccountsExpenses;
 use App\Filament\Resources\AccountsExpensesResource\RelationManagers\TrainerVisitsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\WalletPaymentLogsRelationManager;
 use App\Models\User;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -17,17 +21,21 @@ class AccountsExpensesResource extends Resource
 {
     protected static ?string $model = User::class; // Change to User model
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-currency-rupee';
 
     protected static ?string $navigationLabel = 'Accounts Expenses Report';
 
     protected static ?string $pluralLabel = 'Accounts Expenses Reports';
 
+    protected static ?string $navigationGroup = 'Reports';
+
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                TextInput::make('name')
+            
             ]);
     }
 
@@ -68,7 +76,7 @@ class AccountsExpensesResource extends Resource
                 // Add filters if necessary
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ]);
     }
 
@@ -76,7 +84,7 @@ class AccountsExpensesResource extends Resource
     {
         return [
             TrainerVisitsRelationManager::class,
-            WalletPaymentLogsRelationManager::class,
+            // WalletPaymentLogsRelationManager::class,
         ];
     }
 
@@ -86,6 +94,8 @@ class AccountsExpensesResource extends Resource
             'index' => Pages\ListAccountsExpenses::route('/'),
             'create' => Pages\CreateAccountsExpenses::route('/create'),
             'edit' => Pages\EditAccountsExpenses::route('/{record}/edit'),
+            'view' => ViewAccountsExpenses::route('/{record}'),
+
         ];
     }
 }

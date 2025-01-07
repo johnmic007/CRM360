@@ -61,10 +61,10 @@ class TrainerVisitsRelationManager extends RelationManager
                 ])
             ->filters([
                 //
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
             ]);
+            // ->actions([
+            //     Tables\Actions\ViewAction::make(),
+            // ]);
           
     }
 }
