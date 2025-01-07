@@ -2,69 +2,42 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\TrainerVisitResource\Pages;
-use App\Filament\Resources\TrainerVisitResource\RelationManagers\PostsRelationManager;
-use App\Filament\Resources\VisitEntryResource\RelationManagers\SchoolVisitRelationManager;
-use App\Models\TrainerVisit;
-use App\Models\User;
+use App\Filament\Resources\CreateExpnessResource\Pages;
+use App\Filament\Resources\CreateExpnessResource\RelationManagers;
+use App\Models\CreateExpness;
 use App\Models\Setting;
+use App\Models\TrainerVisit;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Table;
-use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class TrainerVisitResource extends Resource
+class CreateExpnessResource extends Resource
 {
     protected static ?string $model = TrainerVisit::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calculator';
+    protected static ?string $navigationIcon = 'heroicon-o-currency-rupee';
 
-    // protected static ?string $navigationLabel = 'Expenses Logs';
+      protected static ?string $navigationLabel = 'Add New Expenses ';
 
-    // protected static ?string $pluralLabel = 'Expenses Logs';
+    protected static ?string $pluralLabel = 'Add New Expenses ';
 
-    protected static ?string $navigationGroup = 'Approvals';
-
-
+    protected static ?string $navigationGroup = 'New Entry';
 
 
-    public static function canEdit($record): bool
+    public static function canViewAny(): bool
     {
-        // Allow edit only if the user is the owner of the record
-        return $record->user_id === auth()->id();
+        return auth()->user()->hasRole(['admin' , 'sales_operation_head' , 'accounts_head']);
     }
-
-
-    public static function getModelLabel(): string
-    {
-        $user = auth()->user();
-
-        // Check if user has BDA or BDM role
-        if (!$user->hasRole(['admin', 'sales_operation'])) {
-            return 'Expenses Logs';
-        }
-
-        // Return a default label or empty string if you want no label otherwise
-        return 'Expenses Requests';
-    }
-
-
-    public static function canCreate(): bool
-    {
-        return !auth()->user()->hasAnyRole(['admin', 'sales_operation']);
-    }
-
-
-
 
 
 
@@ -112,7 +85,7 @@ class TrainerVisitResource extends Resource
 
 
 
-                        Hidden::make('user_id')
+                        Hidden::make('created_by')
                             ->default(auth()->id())
                             ->required(),
 
@@ -122,46 +95,48 @@ class TrainerVisitResource extends Resource
 
                         Select::make('user_id')
                             ->label('Name')
-                            ->disabled()
                             ->relationship('user', 'name')
                             ->required(),
 
 
-                        // Select::make('school_id')
-                        // ->label('School')
-                        // ->options(function ($record) {
-                        //     $userId = auth()->id();
-                        //     $todayVisitedSchools = \App\Models\SalesLeadStatus::query()
-                        //         ->where('visited_by', $userId)
-                        //         ->whereDate('created_at', now()->toDateString())
-                        //         ->with('school') // Load the school relationship
-                        //         ->get()
-                        //         ->pluck('school.name', 'school.id'); // Get today's visited schools
+                            
+                            
 
-                        //     if ($record && $record->school_id) {
-                        //         // Include the selected school even if it wasn't visited today
-                        //         $selectedSchool = \App\Models\School::query()
-                        //             ->where('id', $record->school_id)
-                        //             ->pluck('name', 'id');
+                            // Select::make('school_id')
+                            // ->label('School')
+                            // ->options(function ($record) {
+                            //     $userId = auth()->id();
+                            //     $todayVisitedSchools = \App\Models\SalesLeadStatus::query()
+                            //         ->where('visited_by', $userId)
+                            //         ->whereDate('created_at', now()->toDateString())
+                            //         ->with('school') // Load the school relationship
+                            //         ->get()
+                            //         ->pluck('school.name', 'school.id'); // Get today's visited schools
+                        
+                            //     if ($record && $record->school_id) {
+                            //         // Include the selected school even if it wasn't visited today
+                            //         $selectedSchool = \App\Models\School::query()
+                            //             ->where('id', $record->school_id)
+                            //             ->pluck('name', 'id');
+                        
+                            //         return $selectedSchool->union($todayVisitedSchools);
+                            //     }
+                        
+                            //     return $todayVisitedSchools;
+                            // })
+                            // ->required()
+                            // ->searchable()
+                            // ->multiple()
+                            // ->visible(fn($record) => $record === null) // Only visible when creating a new record
 
-                        //         return $selectedSchool->union($todayVisitedSchools);
-                        //     }
+                            // ->helperText('Select a school. Shows today\'s visited schools but includes already selected schools if editing.')
+                        
+                            // ->disabled(fn($record) => $record && $record->verify_status === 'verified')
+                            // ->helperText('Only shows schools visited today.')
+                            // ->preload()
+                            // ->default(fn($record) => $record && $record->school_id ? [$record->school_id] : []), // Pre-select school if editing
 
-                        //     return $todayVisitedSchools;
-                        // })
-                        // ->required()
-                        // ->searchable()
-                        // ->multiple()
-                        // ->visible(fn($record) => $record === null) // Only visible when creating a new record
-
-                        // ->helperText('Select a school. Shows today\'s visited schools but includes already selected schools if editing.')
-
-                        // ->disabled(fn($record) => $record && $record->verify_status === 'verified')
-                        // ->helperText('Only shows schools visited today.')
-                        // ->preload()
-                        // ->default(fn($record) => $record && $record->school_id ? [$record->school_id] : []), // Pre-select school if editing
-
-
+                        
 
 
 
@@ -171,22 +146,22 @@ class TrainerVisitResource extends Resource
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                             ->required(),
 
-                        TextInput::make('total_expense')
+                            TextInput::make('total_expense')
                             ->numeric()
                             ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
                             ->readOnly(fn() => !auth()->user()->hasAnyRole(['sales_operation', 'sales_operation_head'])),
 
 
-                        FileUpload::make('travel_bill')
+                            FileUpload::make('travel_bill')
                             ->required()
                             ->multiple()
                             ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
-
+                           
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->helperText('Upload the bill for bus/train travel.'),
-
-                        Select::make('travel_type')
+                        
+                            Select::make('travel_type')
                             ->label('Travel Type')
                             ->options([
                                 'own_vehicle' => 'Travel by Own Vehicle',
@@ -236,7 +211,7 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('starting_meter_photo')
                             ->label('Starting Meter Photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-
+                            
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->required(),
 
@@ -265,7 +240,7 @@ class TrainerVisitResource extends Resource
 
                         FileUpload::make('ending_meter_photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-
+                           
 
                             ->label('Ending Meter Photo'),
 
@@ -273,7 +248,7 @@ class TrainerVisitResource extends Resource
                             ->label('Ending Kilometer')
                             ->numeric()
                             ->required()
-
+                            
                             ->reactive()
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
@@ -333,12 +308,12 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('travel_bill')
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
-
+                           
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->helperText('Upload the bill for bus/train travel.'),
 
-
+                            
 
 
                         TextInput::make('travel_expense')
@@ -386,6 +361,8 @@ class TrainerVisitResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('user.name')->label('Name'),
+                TextColumn::make('creator.name')->label('Name'),
+
                 // TextColumn::make('school.name')->label('School'),
                 TextColumn::make('visit_date')->label('Visit Date')->date(),
                 TextColumn::make('travel_mode')->label('Travel Mode'),
@@ -488,43 +465,16 @@ class TrainerVisitResource extends Resource
     public static function getRelations(): array
     {
         return [
-            SchoolVisitRelationManager::class,
-
+            //
         ];
     }
-
-    public static function downloadPdf($records)
-    {
-        $data = $records->map(function ($record) {
-            return [
-                'Name' => $record->user->name,
-                'Visit Date' => $record->visit_date,
-                'Travel Mode' => $record->travel_mode,
-                'Starting KM' => $record->starting_km,
-                'Ending KM' => $record->ending_km,
-                'Distance' => $record->distance_traveled,
-                'Total Expense' => $record->total_expense,
-                'Status' => $record->approval_status,
-                'Approved By' => $record->approved_by ? User::find($record->approved_by)->name : 'Pending',
-                // 'Starting Meter Photo' => $record->starting_meter_photo ? base64_encode(file_get_contents(storage_path('app/public/' . $record->starting_meter_photo))) : null,
-                // 'Ending Meter Photo' => $record->ending_meter_photo ? base64_encode(file_get_contents(storage_path('app/public/' . $record->ending_meter_photo))) : null,
-                // 'Travel Bill' => $record->travel_bill ? base64_encode(file_get_contents(storage_path('app/public/' . $record->travel_bill))) : null,
-            ];
-        });
-
-        $pdf = Pdf::loadView('pdf.trainer-visits', ['data' => $data]);
-        return $pdf->download('trainer-visits.pdf');
-    }
-
 
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListTrainerVisits::route('/'),
-            'create' => Pages\CreateTrainerVisit::route('/create'),
-            'edit' => Pages\EditTrainerVisit::route('/{record}/edit'),
-            'view' => Pages\ViewTrainerVisit::route('/{record}'),
-
+            'index' => Pages\ListCreateExpnesses::route('/'),
+            'create' => Pages\CreateCreateExpness::route('/create'),
+            'edit' => Pages\EditCreateExpness::route('/{record}/edit'),
         ];
     }
 }

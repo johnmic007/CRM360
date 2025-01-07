@@ -13,6 +13,11 @@ class EditApprovalRequest extends EditRecord
 {
     protected static string $resource = ApprovalRequestResource::class;
 
+    protected function getFormActions(): array
+    {
+        return []; // Remove Save Changes and Cancel buttons
+    }
+
     protected function getActions(): array
     {
         $user = Auth::user();

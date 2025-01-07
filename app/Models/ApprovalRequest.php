@@ -11,13 +11,18 @@ class ApprovalRequest extends Model
     use HasFactory;
 
     protected $fillable = [
-        'manager_id', 
         'message',
         'company_id',
         'user_id',
         'school_id',
         'status'
     ];
+
+    public function schoolUsers()
+{
+    return $this->hasMany(SchoolUser::class, 'school_id', 'school_id');
+}
+
 
 
     public function user()

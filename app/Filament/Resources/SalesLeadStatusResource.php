@@ -56,27 +56,41 @@ class SalesLeadStatusResource extends Resource
                     ->disabled()
                     ->relationship('user', 'name') // Specify the relationship and the display column (e.g., `name`)
                     ->required(),
+
+                    Forms\Components\Select::make('travel_type')
+                    ->options([
+                        'own_vehicle' => 'Travel by Own Vehicle',
+                        'with_colleague' => 'Travel with Colleague',
+                    ])
+                        ->required()
+                        ->reactive()
+                        ->label('Travel Type'),
+    
               
                 Forms\Components\FileUpload::make('starting_meter_photo')
-                    ->label('Starting Meter Photo'),
+                    ->label('Starting Meter Photo')
+                    ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
+
                 Forms\Components\FileUpload::make('ending_meter_photo')
-                    ->label('Ending Meter Photo'),
-                Forms\Components\Select::make('travel_type')
-                ->options([
-                    'own_vehicle' => 'Travel by Own Vehicle',
-                    'with_colleague' => 'Travel with Colleague',
-                ])
-                    ->required()
-                    ->label('Travel Type'),
-                Forms\Components\TextInput::make('travel_bill')
+                    ->label('Ending Meter Photo')
+                    ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
+
+              
+                    Forms\Components\FileUpload::make('travel_bill')
+                    ->visible(fn(callable $get) => $get('travel_type') === 'with_colleague')
                     ->label('Travel Bill'),
                 Forms\Components\TextInput::make('travel_expense')
                     ->label('Travel Expense'),
                 Forms\Components\TextInput::make('starting_km')
-                    ->label('Starting KM'),
+                    ->label('Starting KM')
+                    ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
+
                 Forms\Components\TextInput::make('ending_km')
-                    ->label('Ending KM'),
+                    ->label('Ending KM')
+                    ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
+
                 Forms\Components\Select::make('travel_mode')
+                ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle')
                 ->options([
                     'car' => 'Car',
                     'bike' => 'Bike',
@@ -105,12 +119,10 @@ class SalesLeadStatusResource extends Resource
                 ->label('Date Range')
                 ->form([
                     DatePicker::make('start_date')
-                        ->label('Start Date')
-                        ->default(now()->startOfDay()),
+                        ->label('Start Date'),
 
                     DatePicker::make('end_date')
                         ->label('End Date')
-                        ->default(now()->endOfDay()),
                 ])
                 ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
                     if (!empty($data['start_date']) && !empty($data['end_date'])) {

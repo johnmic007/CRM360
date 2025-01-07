@@ -60,18 +60,18 @@ class ListExpensesReports extends ListRecords
             ->disabled(), // Display-only action
 
         // Rejected Expenses
-        Actions\Action::make('rejected_expenses')
-            ->label(function () {
-                $query = $this->getTableQuery();
-                if (method_exists($this, 'applyFiltersToTableQuery')) {
-                    $this->applyFiltersToTableQuery($query);
-                }
-                $rejectedExpenses = $query->where('approval_status', 'rejected')->sum('total_expense');
-                return "Rejected Expenses: ₹" . number_format($rejectedExpenses, 2);
-            })
-            ->color('danger')
-            ->icon('heroicon-o-x-circle')
-            ->disabled(), // Display-only action
+        // Actions\Action::make('rejected_expenses')
+        //     ->label(function () {
+        //         $query = $this->getTableQuery();
+        //         if (method_exists($this, 'applyFiltersToTableQuery')) {
+        //             $this->applyFiltersToTableQuery($query);
+        //         }
+        //         $rejectedExpenses = $query->where('approval_status', 'rejected')->sum('total_expense');
+        //         return "Rejected Expenses: ₹" . number_format($rejectedExpenses, 2);
+        //     })
+        //     ->color('danger')
+        //     ->icon('heroicon-o-x-circle')
+        //     ->disabled(), // Display-only action
     ];
 }
 

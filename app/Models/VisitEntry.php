@@ -62,16 +62,12 @@ protected static function boot()
 
 
 
+        
 
-        if (
-            $visitEntry->user_id &&
-            $visitEntry->travel_type &&
-            $visitEntry->starting_meter_photo &&
-            $visitEntry->starting_km &&
-            $visitEntry->ending_km &&
-            $visitEntry->ending_meter_photo &&
-            $visitEntry->travel_mode
-        ) {
+
+
+
+        if ( $visitEntry->travel_type == 'own_vehicle') {
 
             TrainerVisit::updateOrCreate(
                 ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
@@ -89,15 +85,7 @@ protected static function boot()
 
 
 
-
-        if (
-            $visitEntry->user_id &&
-            $visitEntry->travel_type &&
-            $visitEntry->travel_bill &&
-            $visitEntry->travel_expense 
-
-            
-        ) {
+        if ( $visitEntry->travel_type == 'with_colleague') {
 
             TrainerVisit::updateOrCreate(
                 ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id

@@ -185,28 +185,26 @@ class UserResource extends Resource
 
                 // Manager selection based on role hierarchy
                 Select::make('manager_id')
-                    ->label('Manager')
-                    ->options(function (callable $get) {
-                        $selectedRoles = $get('roles');
-                        if (!$selectedRoles) {
-                            return []; // No manager options if roles are not set
-                        }
-
-                        // Fetch the highest level of the selected role(s)
-                        $selectedLevels = Role::whereIn('id', $selectedRoles)->pluck('level');
-                        $minLevel = $selectedLevels->min();
-
-                        // Fetch users with roles exactly one level above the current role
-                        $allowedManagerLevel = $minLevel - 1;
-
-                        return User::whereHas('roles', function ($query) use ($allowedManagerLevel) {
-                            $query->where('level', $allowedManagerLevel);
-                        })->pluck('name', 'id');
-                    })
-                    ->nullable()
-                    ->helperText('Assign a manager (only users with higher roles will appear).'),
-
-
+                ->label('Manager')
+                ->options(function (callable $get) {
+                    $selectedRoles = $get('roles');
+                    if (!$selectedRoles) {
+                        return []; // No manager options if roles are not set
+                    }
+            
+                    // Fetch the highest level of the selected role(s)
+                    $selectedLevels = Role::whereIn('id', $selectedRoles)->pluck('level');
+                    $minLevel = $selectedLevels->min();
+            
+                    // Fetch users with roles at levels higher than or equal to 1 and less than the current level
+                    return User::whereHas('roles', function ($query) use ($minLevel) {
+                        $query->where('level', '<', $minLevel) // Higher roles
+                              ->where('level', '>=', 1);     // Exclude levels below 1
+                    })->pluck('name', 'id');
+                })
+                ->nullable()
+                ->helperText('Assign a manager (only users with higher roles up to level 1 will appear).'),
+            
 
                 // Forms\Components\Repeater::make('issued_books')
                 //     ->label('Issue Demo Books')

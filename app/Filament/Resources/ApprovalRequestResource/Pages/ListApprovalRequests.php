@@ -13,26 +13,31 @@ use Illuminate\Support\Facades\Auth;
 class ListApprovalRequests extends ListRecords
 {
     protected static string $resource = ApprovalRequestResource::class;
+    
 
-    public function getTableQuery(): Builder
+ protected function getTableQuery(): Builder
     {
-        $user = Auth::user();
-    
-        // Admin and Sales roles see all requests for their company_id
-        if ($user->hasRole(['admin', 'sales_operation'])) {
-            return ApprovalRequest::query()
-                ->whereHas('user', function ($query) use ($user) {
-                    $query->where('company_id', $user->company_id);
-                });
+        $query = parent::getTableQuery(); // Get the default query
+
+        $user = auth()->user();
+
+        if ($user->roles()->whereIn('name', ['admin'])->exists()) {
+            return $query;
         }
-    
-        // Managers see requests assigned to them, and users see their own requests
-        return ApprovalRequest::query()
-            ->where(function ($query) use ($user) {
-                $query->where('manager_id', $user->id)
-                    ->orWhere('user_id', $user->id); // Include the user's own requests
-            })
-            ->where('company_id', $user->company_id);
+
+        if ($user->roles()->where('name', ['sales_operation_head' ,'head' , 'sales_operation'])->exists()) {
+            return $query->where('company_id', $user->company_id);
+        }
+
+        if ($user->roles()->where('name', ['bda' ,'bdm' ])->exists()) {
+            return $query->where('user_id', $user->id);
+        }
+
+
+
+        $subordinateIds = $user->getAllSubordinateIds();
+
+        return $query->whereIn('user_id', $subordinateIds);
     }
     
 

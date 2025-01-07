@@ -193,6 +193,10 @@ class ListTrainerVisits extends ListRecords
             return TrainerVisit::where('company_id', $user->company_id);
         }
 
+        if ($user->hasRole('sales_operation_head')) {
+            return TrainerVisit::where('company_id', $user->company_id);
+        }
+
         if ($user->hasRole('accounts_head')) {
             return TrainerVisit::where('verify_status', 'verified');
         }

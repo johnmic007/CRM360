@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class TrainerVisit extends Model implements HasMedia
+class TrainerVisit extends Model 
 {
 
-    use InteractsWithMedia;
+    // use InteractsWithMedia;
 
     protected $fillable = [
         'id',
@@ -33,6 +33,7 @@ class TrainerVisit extends Model implements HasMedia
         'travel_bill',
         'approved_by',
         'approved_at',
+        'created_by',
         'approval_status',
         'verified_by',
         'verify_status',
@@ -110,6 +111,12 @@ class TrainerVisit extends Model implements HasMedia
         return $this->belongsTo(User::class);
     }
 
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class , 'created_by');
+    }
+
     // Approve the visit and deduct from trainer's wallet
     public function approveVisit()
     {
@@ -129,10 +136,12 @@ class TrainerVisit extends Model implements HasMedia
 
         static::creating(function ($trainerVisit) {
             // Set the user_id from the authenticated user
-            if (Auth::check()) {
+            if (empty($trainerVisit->user_id)) {
                 $trainerVisit->user_id = Auth::id();
-
-                // Set the company_id from the related user
+            }
+        
+            // Assign company_id only if it's not already set
+            if (empty($trainerVisit->company_id)) {
                 $trainerVisit->company_id = Auth::user()->company_id;
             }
 
@@ -147,29 +156,42 @@ class TrainerVisit extends Model implements HasMedia
 
 
 
+
             if ($trainerVisit->travel_type !== 'extra_expense'){
                 // Calculate distance_traveled by subtracting starting_km from ending_km
-            if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
-                $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
 
-                // Ensure the distance is not negative
-                if ($trainerVisit->distance_traveled < 0) {
-                    throw new \Exception('Ending KM must be greater than or equal to Starting KM.');
+
+
+
+
+                if ($trainerVisit->travel_type == 'own_vehicle' ){
+
+                    if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
+                        $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
+        
+                        // dd($trainerVisit);
+        
+                    
+                            $rate = ($trainerVisit->travel_mode === 'car')
+                                ? Setting::getCarRate() // Fetch car rate from settings
+                                : Setting::getBikeRate(); // Fetch bike rate from settings
+            
+            
+            
+                            $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
+                        
+        
+                    }
+
                 }
-            }
 
-            // Calculate travel expense based on travel_mode
-            if (
-                $trainerVisit->travel_mode &&
-                $trainerVisit->distance_traveled &&
-                !$trainerVisit->travel_expense
-            ) {
-                $rate = ($trainerVisit->travel_mode === 'car')
-                    ? Setting::getCarRate() // Fetch car rate from settings
-                    : Setting::getBikeRate(); // Fetch bike rate from settings
+                if ($trainerVisit->travel_type == 'with_colleague' ){
 
-                $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
-            }
+                }
+
+                // dd($trainerVisit);
+
+
 
             // Set the food expense from settings
             $trainerVisit->food_expense = Setting::getFoodExpenseRate();
