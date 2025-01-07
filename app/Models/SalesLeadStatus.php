@@ -67,8 +67,8 @@ class SalesLeadStatus extends Model
                 
                 if ($salesLead) {
                     // Automatically assign the status from the SalesLeadManagement record
-                    $status->status = $salesLead->status;
-                    $status->school_id = $salesLead->school_id; // Ensure school_id is also set if needed
+                    $salesLead->status = $status->status;
+                    // $status->school_id = $salesLead->school_id; // Ensure school_id is also set if needed
                 } else {
                     throw new \Exception("SalesLeadManagement record not found for ID: {$status->sales_lead_management_id}");
                 }
