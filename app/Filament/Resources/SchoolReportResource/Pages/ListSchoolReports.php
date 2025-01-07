@@ -90,7 +90,10 @@ class ListSchoolReports extends ListRecords
 
         // Show reports for the logged-in user's company for sales_operation role
         if ($user->roles()->where('name', ['sales_operation_head' ,'head' , 'sales_operation'])->exists()) {
-            return $query->where('company_id', $user->company_id);
+            // return $query->where('company_id', $user->company_id);
+
+            return $query;
+
         }
 
         // Fetch subordinate user IDs for other roles

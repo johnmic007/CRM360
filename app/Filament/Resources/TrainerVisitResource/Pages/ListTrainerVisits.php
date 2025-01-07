@@ -6,6 +6,7 @@ use App\Filament\Resources\TrainerVisitResource;
 use App\Models\TrainerVisit;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
@@ -36,6 +37,10 @@ class ListTrainerVisits extends ListRecords
                         ->numeric()
                         ->required()
                         ->helperText('Enter the amount for the extra expense.'),
+
+                    
+
+                 
                     
                     Textarea::make('description')
                         ->label('Description')
@@ -50,13 +55,22 @@ class ListTrainerVisits extends ListRecords
                         ->multiple(),                        
                 ])
                 ->action(function (array $data): void {
+                  
+                    
+                    $travelType = $data['travel_type'] ?? 'extra_expense';
+
                     // Save the extra expense data
                     TrainerVisit::create([
                         'total_expense' => $data['total_expense'],
                         'description' => $data['description'],
+                        'travel_bill' => $data['travel_bill'], // Save the file paths as an array
+
+                        'travel_type' => $travelType, // Use the resolved travel type
                         'user_id' => auth()->id(), // Assign the current user
                         'company_id' => auth()->user()->company_id, // Optional if company is relevant
                     ]);
+
+                    
 
                     // Notification for success
                     \Filament\Notifications\Notification::make()

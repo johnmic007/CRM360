@@ -127,39 +127,39 @@ class TrainerVisitResource extends Resource
                             ->required(),
                             
 
-                            Select::make('school_id')
-                            ->label('School')
-                            ->options(function ($record) {
-                                $userId = auth()->id();
-                                $todayVisitedSchools = \App\Models\SalesLeadStatus::query()
-                                    ->where('visited_by', $userId)
-                                    ->whereDate('created_at', now()->toDateString())
-                                    ->with('school') // Load the school relationship
-                                    ->get()
-                                    ->pluck('school.name', 'school.id'); // Get today's visited schools
+                            // Select::make('school_id')
+                            // ->label('School')
+                            // ->options(function ($record) {
+                            //     $userId = auth()->id();
+                            //     $todayVisitedSchools = \App\Models\SalesLeadStatus::query()
+                            //         ->where('visited_by', $userId)
+                            //         ->whereDate('created_at', now()->toDateString())
+                            //         ->with('school') // Load the school relationship
+                            //         ->get()
+                            //         ->pluck('school.name', 'school.id'); // Get today's visited schools
                         
-                                if ($record && $record->school_id) {
-                                    // Include the selected school even if it wasn't visited today
-                                    $selectedSchool = \App\Models\School::query()
-                                        ->where('id', $record->school_id)
-                                        ->pluck('name', 'id');
+                            //     if ($record && $record->school_id) {
+                            //         // Include the selected school even if it wasn't visited today
+                            //         $selectedSchool = \App\Models\School::query()
+                            //             ->where('id', $record->school_id)
+                            //             ->pluck('name', 'id');
                         
-                                    return $selectedSchool->union($todayVisitedSchools);
-                                }
+                            //         return $selectedSchool->union($todayVisitedSchools);
+                            //     }
                         
-                                return $todayVisitedSchools;
-                            })
-                            ->required()
-                            ->searchable()
-                            ->multiple()
-                            ->visible(fn($record) => $record === null) // Only visible when creating a new record
+                            //     return $todayVisitedSchools;
+                            // })
+                            // ->required()
+                            // ->searchable()
+                            // ->multiple()
+                            // ->visible(fn($record) => $record === null) // Only visible when creating a new record
 
-                            ->helperText('Select a school. Shows today\'s visited schools but includes already selected schools if editing.')
+                            // ->helperText('Select a school. Shows today\'s visited schools but includes already selected schools if editing.')
                         
-                            ->disabled(fn($record) => $record && $record->verify_status === 'verified')
-                            ->helperText('Only shows schools visited today.')
-                            ->preload()
-                            ->default(fn($record) => $record && $record->school_id ? [$record->school_id] : []), // Pre-select school if editing
+                            // ->disabled(fn($record) => $record && $record->verify_status === 'verified')
+                            // ->helperText('Only shows schools visited today.')
+                            // ->preload()
+                            // ->default(fn($record) => $record && $record->school_id ? [$record->school_id] : []), // Pre-select school if editing
 
                         
 
@@ -171,7 +171,22 @@ class TrainerVisitResource extends Resource
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
                             ->required(),
 
-                        Select::make('travel_type')
+                            TextInput::make('total_expense')
+                            ->numeric()
+                            ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
+                            ->readOnly(fn() => !auth()->user()->hasAnyRole(['sales_operation', 'sales_operation_head'])),
+
+
+                            FileUpload::make('travel_bill')
+                            ->required()
+                            ->multiple()
+                            ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
+                           
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+
+                            ->helperText('Upload the bill for bus/train travel.'),
+                        
+                            Select::make('travel_type')
                             ->label('Travel Type')
                             ->options([
                                 'own_vehicle' => 'Travel by Own Vehicle',
@@ -179,6 +194,7 @@ class TrainerVisitResource extends Resource
                             ])
                             ->reactive()
                             ->required()
+                            ->hidden(fn(callable $get) => $get('travel_type') == 'extra_expense')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->helperText('Select how you traveled. Additional fields will appear based on your choice.')
@@ -354,6 +370,8 @@ class TrainerVisitResource extends Resource
 
                 Forms\Components\FileUpload::make('files')
                     ->label('Upload School Images') // Clear and descriptive label
+                    ->hidden(fn(callable $get) => $get('travel_type') == 'extra_expense')
+
                     ->required() // Makes the field mandatory
                     ->multiple() // Allows multiple files to be uploaded
                     ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
