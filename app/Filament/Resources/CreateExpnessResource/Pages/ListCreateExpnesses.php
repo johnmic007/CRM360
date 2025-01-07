@@ -15,7 +15,7 @@ class ListCreateExpnesses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('Create New Expnesses'),
+            Actions\CreateAction::make()->label('Create New Visit'),
         ];
     }
 
