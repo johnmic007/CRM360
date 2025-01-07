@@ -29,6 +29,12 @@ class AccountsExpensesResource extends Resource
 
     protected static ?string $navigationGroup = 'Reports';
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'sales_operation_head' , 'accounts_head']);
+    }
+
+
 
     public static function form(Form $form): Form
     {
