@@ -88,6 +88,8 @@ class LeadStatusesRelationManager extends RelationManager
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(), // Default view action
+                Tables\Actions\EditAction::make(), // Default view action
+
             ])
             ->filters([
                 Tables\Filters\Filter::make('visited_date')
