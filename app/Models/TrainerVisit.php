@@ -134,27 +134,24 @@ class TrainerVisit extends Model
         parent::boot();
 
 
-        static::creating(function ($trainerVisit) {
-            // Set the user_id from the authenticated user
-            if (empty($trainerVisit->user_id)) {
-                $trainerVisit->user_id = Auth::id();
-            }
-        
-            // Assign company_id only if it's not already set
-            if (empty($trainerVisit->company_id)) {
-                $trainerVisit->company_id = Auth::user()->company_id;
-            }
-
-            // Set the visit_date if it's not already provided
-            if (empty($trainerVisit->visit_date)) {
-                $trainerVisit->visit_date = now();
-            }
-        });
-
 
         static::saving(function ($trainerVisit) {
 
 
+    // Set the user_id from the authenticated user
+    if (empty($trainerVisit->user_id)) {
+        $trainerVisit->user_id = Auth::id();
+    }
+
+    // Assign company_id only if it's not already set
+    if (empty($trainerVisit->company_id)) {
+        $trainerVisit->company_id = Auth::user()->company_id;
+    }
+
+    // Set the visit_date if it's not already provided
+    if (empty($trainerVisit->visit_date)) {
+        $trainerVisit->visit_date = now();
+    }
 
 
             if ($trainerVisit->travel_type !== 'extra_expense'){

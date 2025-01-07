@@ -31,6 +31,12 @@ class WalletLog extends Model
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    public function trainerVisits()
+{
+    return $this->hasMany(TrainerVisit::class, 'user_id', 'user_id');
+}
+
+
 
     public static function boot()
     {

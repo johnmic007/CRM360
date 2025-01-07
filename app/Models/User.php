@@ -17,6 +17,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'id',
         'name',
         'email',
         'password',
@@ -63,6 +64,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'model_has_roles', 'model_id', 'role_id')
             ->where('model_has_roles.model_type', self::class);
     }
+
+
+    public function trainerVisits()
+    {
+        return $this->hasMany(TrainerVisit::class);
+    }
+    
 
 
     public function issuedBooks()

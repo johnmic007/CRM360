@@ -13,10 +13,10 @@ class TestBookLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'school_id',
         'lead_id',
         'book_id',
+        'user_id',
         'action',
         'count',
         'remarks',
@@ -59,7 +59,8 @@ class TestBookLog extends Model
         parent::boot();
     
         static::creating(function ($model) {
-            if (Auth::check()) {
+
+            if (empty($model->created_by) && Auth::check()) {
                 $model->created_by = Auth::id();
             }
     
