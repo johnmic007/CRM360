@@ -5,9 +5,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class TrainerVisit extends Model
+class TrainerVisit extends Model implements HasMedia
 {
+
+    use InteractsWithMedia;
+
     protected $fillable = [
         'id',
         'user_id',
@@ -42,17 +47,17 @@ class TrainerVisit extends Model
 
 
     public function leadStatuses()
-{
-    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
-}
+    {
+        return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
+    }
 
 
 
     protected $casts = [
-        
-        'school_id' => 'array', 
-        'travel_bill' => 'array', 
-        'files' => 'array', 
+
+        'school_id' => 'array',
+        'travel_bill' => 'array',
+        'files' => 'array',
 
 
     ];
@@ -75,7 +80,7 @@ class TrainerVisit extends Model
         $foodExpenseRate = Setting::getFoodExpenseRate();
         $this->food_expense = $foodExpenseRate;
         $this->travel_expense = $this->calculateTravelExpense();
-        $this->total_expense = $this->travel_expense + $this->food_expense  ;
+        $this->total_expense = $this->travel_expense + $this->food_expense;
     }
 
     public function school()
@@ -85,20 +90,20 @@ class TrainerVisit extends Model
 
 
     public function visitedSchool()
-{
-    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
-}
+    {
+        return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id');
+    }
 
 
 
 
     public function schools()
-{
-    return School::whereIn('id', $this->school_id)->get();
-}
+    {
+        return School::whereIn('id', $this->school_id)->get();
+    }
 
 
-    
+
 
     public function user()
     {
@@ -118,60 +123,60 @@ class TrainerVisit extends Model
 
 
     protected static function boot()
-{
-    parent::boot();
+    {
+        parent::boot();
 
 
-    static::creating(function ($trainerVisit) {
-        // Set the user_id from the authenticated user
-        if (Auth::check()) {
-            $trainerVisit->user_id = Auth::id();
-            
-            // Set the company_id from the related user
-            $trainerVisit->company_id = Auth::user()->company_id;
-        }
+        static::creating(function ($trainerVisit) {
+            // Set the user_id from the authenticated user
+            if (Auth::check()) {
+                $trainerVisit->user_id = Auth::id();
 
-        // Set the visit_date if it's not already provided
-        if (empty($trainerVisit->visit_date)) {
-            $trainerVisit->visit_date = now();
-        }
-    });
-
-
-    static::saving(function ($trainerVisit) {
-    
-        
-
-        // Calculate distance_traveled by subtracting starting_km from ending_km
-        if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
-            $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
-
-            // Ensure the distance is not negative
-            if ($trainerVisit->distance_traveled < 0) {
-                throw new \Exception('Ending KM must be greater than or equal to Starting KM.');
+                // Set the company_id from the related user
+                $trainerVisit->company_id = Auth::user()->company_id;
             }
-        }
 
-        // Calculate travel expense based on travel_mode
-        if (
-            $trainerVisit->travel_mode &&
-            $trainerVisit->distance_traveled &&
-            !$trainerVisit->travel_expense
-        ) {
-            $rate = ($trainerVisit->travel_mode === 'car')
-                ? Setting::getCarRate() // Fetch car rate from settings
-                : Setting::getBikeRate(); // Fetch bike rate from settings
-        
-            $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
-        }
-        
-        // Set the food expense from settings
-        $trainerVisit->food_expense = Setting::getFoodExpenseRate();
+            // Set the visit_date if it's not already provided
+            if (empty($trainerVisit->visit_date)) {
+                $trainerVisit->visit_date = now();
+            }
+        });
 
-        // Calculate total expense
-        $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense ;
-    });
-}
 
-    
+        static::saving(function ($trainerVisit) {
+
+
+
+            if ($trainerVisit->travel_type !== 'extra_expense'){
+                // Calculate distance_traveled by subtracting starting_km from ending_km
+            if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
+                $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
+
+                // Ensure the distance is not negative
+                if ($trainerVisit->distance_traveled < 0) {
+                    throw new \Exception('Ending KM must be greater than or equal to Starting KM.');
+                }
+            }
+
+            // Calculate travel expense based on travel_mode
+            if (
+                $trainerVisit->travel_mode &&
+                $trainerVisit->distance_traveled &&
+                !$trainerVisit->travel_expense
+            ) {
+                $rate = ($trainerVisit->travel_mode === 'car')
+                    ? Setting::getCarRate() // Fetch car rate from settings
+                    : Setting::getBikeRate(); // Fetch bike rate from settings
+
+                $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
+            }
+
+            // Set the food expense from settings
+            $trainerVisit->food_expense = Setting::getFoodExpenseRate();
+
+            // Calculate total expense
+            $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
+            }
+        });
+    }
 }
