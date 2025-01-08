@@ -21,6 +21,7 @@ use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class TrainerVisitResource extends Resource
 {
@@ -63,6 +64,11 @@ class TrainerVisitResource extends Resource
         return !auth()->user()->hasAnyRole(['admin', 'sales_operation']);
     }
 
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin' ]);
+
+    }
 
 
 
@@ -447,6 +453,7 @@ class TrainerVisitResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('download_pdf')
                         ->label('Download PDF')

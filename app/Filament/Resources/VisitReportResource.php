@@ -18,6 +18,7 @@ use Filament\Tables\Filters\SelectFilter;
 use App\Models\User;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class VisitReportResource extends Resource
@@ -39,6 +40,11 @@ class VisitReportResource extends Resource
         return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , 'head' , 'zonal_manager' , 'regional_manager' ]);
     }
 
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin' ]);
+
+    }
 
 
     public static function form(Forms\Form $form): Forms\Form
@@ -250,6 +256,8 @@ class VisitReportResource extends Resource
 
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\DeleteAction::make(),
+
 
             ])
             ->defaultSort('start_time', 'desc');
