@@ -141,6 +141,11 @@ class ExpensesReportResource extends Resource
                     ->searchable()
                     ->sortable(),
 
+                    Tables\Columns\TextColumn::make('user.wallet_balance')
+                    ->label('Cash in hand')
+                    ->searchable()
+                    ->sortable(),
+
                 // 2. Visit Date
                 Tables\Columns\TextColumn::make('visit_date')
                     ->label('Visit Date')

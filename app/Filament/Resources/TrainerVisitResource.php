@@ -43,7 +43,7 @@ class TrainerVisitResource extends Resource
         // Allow edit only if the user is the owner of the record
         // return $record->user_id === auth()->id();
 
-        return auth()->user()->hasRole(['admin' ]);
+        return auth()->user()->hasRole(['admin' , 'sales_operation_head' ]);
 
     }
 
