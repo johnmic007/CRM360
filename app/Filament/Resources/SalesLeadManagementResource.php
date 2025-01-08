@@ -23,7 +23,7 @@ class SalesLeadManagementResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
+        return auth()->user()->hasRole(['admin', 'bda', 'bdm', 'zonal_manager', 'regional_manager', 'head', 'sales_operation']);
     }
 
 
@@ -116,53 +116,50 @@ class SalesLeadManagementResource extends Resource
             Tables\Columns\TextColumn::make('school.name')->label('School'),
             Tables\Columns\TextColumn::make('allocatedUser.name')->label('Allocated user'),
             Tables\Columns\TextColumn::make('allocatedUser.roles.name')
-            ->label('Role')
-            ->getStateUsing(fn($record) => $record->allocatedUser?->roles->pluck('name')->join(', ') ?? 'No Role'),
+                ->label('Role')
+                ->getStateUsing(fn($record) => $record->allocatedUser?->roles->pluck('name')->join(', ') ?? 'No Role'),
 
             Tables\Columns\TextColumn::make('status')->label('Status'),
             // Tables\Columns\TextColumn::make('feedback')->label('Feedback')->limit(50),
         ])
             ->filters([
 
-            //    Tables\Filters\SelectFilter::make('status')
-            //     ->label('Status')
-            //     ->options([
-            //         'School Nurturing' => 'School Nurturing',
-            //         'active' => 'Active',
-            //         'rejected' => 'Rejected',
-            //         'converted' => 'Converted',
-            //     ])
-            //     ->query(function ($query, $value) {
-            //         $query->where('status', $value);
-            //     }),
+                //    Tables\Filters\SelectFilter::make('status')
+                //     ->label('Status')
+                //     ->options([
+                //         'School Nurturing' => 'School Nurturing',
+                //         'active' => 'Active',
+                //         'rejected' => 'Rejected',
+                //         'converted' => 'Converted',
+                //     ])
+                //     ->query(function ($query, $value) {
+                //         $query->where('status', $value);
+                //     }),
 
-            // Filter by Allocated User
-            // Tables\Filters\SelectFilter::make('allocated_to')
-            //     ->label('Allocated User')
-            //     ->options(\App\Models\User::pluck('name', 'id')->toArray())
-            //     ->query(function ($query, $value) {
-            //         $query->where('allocated_to', $value);
-            //     }),
+                // Filter by Allocated User
+                // Tables\Filters\SelectFilter::make('allocated_to')
+                //     ->label('Allocated User')
+                //     ->options(\App\Models\User::pluck('name', 'id')->toArray())
+                //     ->query(function ($query, $value) {
+                //         $query->where('allocated_to', $value);
+                //     }),
 
-            // Filter by District
-            SelectFilter::make('district_id')
-                ->label('District')
-                ->options(\App\Models\District::pluck('name', 'id')->toArray())
-            ,
+                // Filter by District
+                SelectFilter::make('district_id')
+                    ->label('District')
+                    ->options(\App\Models\District::pluck('name', 'id')->toArray()),
 
-            
 
-            SelectFilter::make('school_id')
-                ->label('School')
-                ->options(\App\Models\School::pluck('name', 'id')->toArray())
-            ,
+
+                    // SelectFilter::make('school_id')
+                    // ->label('School')
+                    // ->relationship('school', 'name')
 
 
             ])
             ->actions([
                 // Tables\Actions\ViewAction::make(),
             ]);
-            
     }
 
 
