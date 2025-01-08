@@ -471,13 +471,13 @@ class TrainerVisitResource extends Resource
                     ->label('Visit Date')
                     ->form([
                         Forms\Components\DatePicker::make('date')
-                            ->label('Select Date')
+                            ->label('Visit Date')
                             ->placeholder('Choose a date'),
                     ])
                     ->query(function (Builder $query, array $data) {
                         return $query->when(
                             $data['date'],
-                            fn($q) => $q->whereDate('created_at', $data['date'])
+                            fn($q) => $q->whereDate('visit_date', $data['date'])
                         );
                     })
                     ->indicateUsing(function (array $data) {
@@ -520,7 +520,7 @@ class TrainerVisitResource extends Resource
                             $query->where('user_id', $data['value']);
                         }
                     }),
-                                    
+
             ]);
 
         // ->bulkActions([

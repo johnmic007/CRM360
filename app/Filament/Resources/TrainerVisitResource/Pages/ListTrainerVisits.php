@@ -5,6 +5,7 @@ namespace App\Filament\Resources\TrainerVisitResource\Pages;
 use App\Filament\Resources\TrainerVisitResource;
 use App\Models\TrainerVisit;
 use Filament\Actions;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
@@ -38,6 +39,9 @@ class ListTrainerVisits extends ListRecords
                         ->required()
                         ->helperText('Enter the amount for the extra expense.'),
 
+
+                        DatePicker::make('visit_date')->label('Visited date'),
+
                     
 
                  
@@ -63,6 +67,8 @@ class ListTrainerVisits extends ListRecords
                     TrainerVisit::create([
                         'total_expense' => $data['total_expense'],
                         'description' => $data['description'],
+                        'visit_date' => $data['visit_date'],
+
                         'travel_bill' => $data['travel_bill'], // Save the file paths as an array
 
                         'travel_type' => $travelType, // Use the resolved travel type
