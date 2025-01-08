@@ -16,6 +16,9 @@ use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Filters\SelectFilter;
 use App\Models\User;
+use DateTime;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -34,16 +37,15 @@ class VisitReportResource extends Resource
 
     protected static ?string $pluralLabel = 'Visit Report';
 
-  
+
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , 'head' , 'zonal_manager' , 'regional_manager' ]);
+        return auth()->user()->hasRole(['admin', 'sales_operation', 'sales_operation_head', 'head', 'zonal_manager', 'regional_manager']);
     }
 
     public static function canDelete(Model $record): bool
     {
-        return auth()->user()->hasRole(['admin' ]);
-
+        return auth()->user()->hasRole(['admin']);
     }
 
 
@@ -51,11 +53,13 @@ class VisitReportResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('start_time')
+                DateTimePicker::make('start_time')
                     ->required()
+                    ->seconds(false)
                     ->label('Start Time'),
-                Forms\Components\TextInput::make('end_time')
-                    ->required()
+                    DateTimePicker::make('end_time')
+                    // ->required()
+                     ->seconds(false)
                     ->label('End Time'),
                 Forms\Components\Select::make('user_id')
                     ->label('User')
@@ -64,9 +68,22 @@ class VisitReportResource extends Resource
                     ->required(),
 
                 Forms\Components\FileUpload::make('starting_meter_photo')
-                    ->label('Starting Meter Photo'),
+                    ->label('Starting Meter Photo')
+                    ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
+
                 Forms\Components\FileUpload::make('ending_meter_photo')
-                    ->label('Ending Meter Photo'),
+                    ->label('Ending Meter Photo')
+                    ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
+
+                    Forms\Components\TextInput::make('starting_km')
+                    ->label('Starting KM')
+                    ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
+
+                Forms\Components\TextInput::make('ending_km')
+                    ->label('Ending KM')
+                    ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
+
+
                 Forms\Components\Select::make('travel_type')
                     ->options([
                         'own_vehicle' => 'Travel by Own Vehicle',
@@ -74,20 +91,19 @@ class VisitReportResource extends Resource
                     ])
                     ->required()
                     ->label('Travel Type'),
-                Forms\Components\TextInput::make('travel_bill')
+                FileUpload::make('travel_bill')
                     ->label('Travel Bill'),
                 Forms\Components\TextInput::make('travel_expense')
                     ->label('Travel Expense'),
-                Forms\Components\TextInput::make('starting_km')
-                    ->label('Starting KM'),
-                Forms\Components\TextInput::make('ending_km')
-                    ->label('Ending KM'),
+
                 Forms\Components\Select::make('travel_mode')
                     ->options([
                         'car' => 'Car',
                         'bike' => 'Bike',
                     ])
-                    ->label('Travel Mode'),
+                    ->label('Travel Mode')
+                    ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
+
             ]);
     }
 
@@ -133,14 +149,14 @@ class VisitReportResource extends Resource
                     ->getStateUsing(fn($record) => $record->leadStatuses()->sum('potential_meet')),
             ])
             ->filters([
-             
-                Tables\Filters\Filter::make('completed')
-                ->label('Completed Visits')
-                ->query(fn(Builder $query) => $query->whereNotNull('end_time')),
 
-            Tables\Filters\Filter::make('ongoing')
-                ->label('Ongoing Visits')
-                ->query(fn(Builder $query) => $query->whereNull('end_time')),
+                Tables\Filters\Filter::make('completed')
+                    ->label('Completed Visits')
+                    ->query(fn(Builder $query) => $query->whereNotNull('end_time')),
+
+                Tables\Filters\Filter::make('ongoing')
+                    ->label('Ongoing Visits')
+                    ->query(fn(Builder $query) => $query->whereNull('end_time')),
 
                 Tables\Filters\Filter::make('working_hours')
                     ->label('Working Hours')
@@ -180,7 +196,7 @@ class VisitReportResource extends Resource
                 // ...
 
 
-              
+
 
 
 
@@ -214,7 +230,7 @@ class VisitReportResource extends Resource
                     }),
 
 
-                    SelectFilter::make('selected_user')
+                SelectFilter::make('selected_user')
                     ->label('User Team Visits') // Shortened label
                     ->options(function () {
                         // Fetch users with specific roles (e.g., 'BDA' and 'BDM')
@@ -251,11 +267,21 @@ class VisitReportResource extends Resource
                             logger()->warning('User not found for selected ID:', ['user_id' => $selectedUserId]);
                         }
                     }),
-                  
+
+
+                SelectFilter::make('travel_type')
+                    ->label('Travel Type')
+                    ->options([
+                        'own_vehicle' => 'Travel by Own Vehicle',
+                        'with_colleague' => 'Travel with Colleague',
+                    ])
+
             ])
 
             ->actions([
                 Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+
                 Tables\Actions\DeleteAction::make(),
 
 
