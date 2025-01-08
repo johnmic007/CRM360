@@ -20,6 +20,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -486,6 +487,40 @@ class TrainerVisitResource extends Resource
                         }
                         return null;
                     }),
+
+                    SelectFilter::make('travel_type')
+                    ->label('Travel Type')
+                    ->options([
+                        'own_vehicle' => 'Travel by Own Vehicle',
+                        'with_colleague' => 'Travel with Colleague',
+                    ]),
+
+                    SelectFilter::make('travel_mode')
+                    ->label('Travel Type')
+                    ->options([
+                        'car' => 'Car',
+                        'bike' => 'Bike',
+                    ]),
+
+
+                    SelectFilter::make('selected_user')
+                    ->label('User') // Updated label
+                    ->options(function () {
+                        // Fetch all users except those with the 'admin' role
+                        return User::whereDoesntHave('roles', function ($query) {
+                                $query->where('name', 'admin');
+                            })
+                            ->pluck('name', 'id') // Fetch users' names and IDs
+                            ->all();
+                    })
+                    ->searchable()
+                    ->query(function (Builder $query, $data) {
+                        if (!empty($data['value'])) {
+                            // Filter by the selected user's ID
+                            $query->where('user_id', $data['value']);
+                        }
+                    }),
+                                    
             ]);
 
         // ->bulkActions([
