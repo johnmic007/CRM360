@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class TrainerVisit extends Model 
+class TrainerVisit extends Model
 {
 
     // use InteractsWithMedia;
@@ -114,7 +114,7 @@ class TrainerVisit extends Model
 
     public function creator()
     {
-        return $this->belongsTo(User::class , 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     // Approve the visit and deduct from trainer's wallet
@@ -137,64 +137,78 @@ class TrainerVisit extends Model
 
         static::saving(function ($trainerVisit) {
 
-
-    // Set the user_id from the authenticated user
-    if (empty($trainerVisit->user_id)) {
-        $trainerVisit->user_id = Auth::id();
-    }
-
-    // Assign company_id only if it's not already set
-    if (empty($trainerVisit->company_id)) {
-        $trainerVisit->company_id = Auth::user()->company_id;
-    }
-
-    // Set the visit_date if it's not already provided
-    if (empty($trainerVisit->visit_date)) {
-        $trainerVisit->visit_date = now();
-    }
+            // dd($trainerVisit);
 
 
-            if ($trainerVisit->travel_type !== 'extra_expense'){
+            // Set the user_id from the authenticated user
+            if (empty($trainerVisit->user_id)) {
+                $trainerVisit->user_id = Auth::id();
+            }
+
+            // Assign company_id only if it's not already set
+            if (empty($trainerVisit->company_id)) {
+                $trainerVisit->company_id = Auth::user()->company_id;
+            }
+
+            // Set the visit_date if it's not already provided
+            if (empty($trainerVisit->visit_date)) {
+                $trainerVisit->visit_date = now();
+            }
+
+
+            if ($trainerVisit->travel_type !== 'extra_expense') {
                 // Calculate distance_traveled by subtracting starting_km from ending_km
 
 
 
+                if ($trainerVisit->travel_type == 'extra_expense') {
 
+                    // Set the food expense from settings
+                    $trainerVisit->food_expense = Setting::getFoodExpenseRate();
 
-                if ($trainerVisit->travel_type == 'own_vehicle' ){
+                    // Calculate total expense
+                    $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
+                }
+
+                if ($trainerVisit->travel_type == 'own_vehicle' && $trainerVisit->ending_km) {
 
                     if (!is_null($trainerVisit->starting_km) && !is_null($trainerVisit->ending_km)) {
                         $trainerVisit->distance_traveled = $trainerVisit->ending_km - $trainerVisit->starting_km;
-        
+
                         // dd($trainerVisit);
-        
-                    
-                            $rate = ($trainerVisit->travel_mode === 'car')
-                                ? Setting::getCarRate() // Fetch car rate from settings
-                                : Setting::getBikeRate(); // Fetch bike rate from settings
-            
-            
-            
-                            $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
-                        
-        
+
+
+                        $rate = ($trainerVisit->travel_mode === 'car')
+                            ? Setting::getCarRate() // Fetch car rate from settings
+                            : Setting::getBikeRate(); // Fetch bike rate from settings
+
+
+
+                        $trainerVisit->travel_expense = $rate * $trainerVisit->distance_traveled;
                     }
 
+
+                    // Set the food expense from settings
+                    $trainerVisit->food_expense = Setting::getFoodExpenseRate();
+
+                    // Calculate total expense
+                    $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
                 }
 
-                if ($trainerVisit->travel_type == 'with_colleague' ){
+                if ($trainerVisit->travel_type == 'with_colleague' && $trainerVisit->travel_expense) {
 
+
+                    // Set the food expense from settings
+                    $trainerVisit->food_expense = Setting::getFoodExpenseRate();
+
+                    // Calculate total expense
+                    $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
                 }
 
                 // dd($trainerVisit);
 
 
 
-            // Set the food expense from settings
-            $trainerVisit->food_expense = Setting::getFoodExpenseRate();
-
-            // Calculate total expense
-            $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
             }
         });
     }

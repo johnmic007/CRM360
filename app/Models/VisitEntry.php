@@ -91,7 +91,7 @@ protected static function boot()
 
 
 
-        if ( $visitEntry->travel_type == 'own_vehicle') {
+        if ( $visitEntry->travel_type == 'own_vehicle' && $visitEntry->ending_km) {
 
             TrainerVisit::updateOrCreate(
                 ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
@@ -111,7 +111,7 @@ protected static function boot()
 
 
 
-        if ( $visitEntry->travel_type == 'with_colleague') {
+        if ( $visitEntry->travel_type == 'with_colleague' && $visitEntry->travel_expense) {
 
             TrainerVisit::updateOrCreate(
                 ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
