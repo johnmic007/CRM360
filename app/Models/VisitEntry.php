@@ -98,6 +98,8 @@ protected static function boot()
                 [
                     'starting_meter_photo' => $visitEntry->starting_meter_photo,
                     'user_id' => $visitEntry->user_id,
+                    'visit_date' => $visitEntry->start_time,
+
 
                     'starting_km' => $visitEntry->starting_km,
                     'ending_km' => $visitEntry->ending_km,
@@ -119,6 +121,8 @@ protected static function boot()
                     'travel_type' => $visitEntry->travel_type,
                     'travel_bill' => $visitEntry->travel_bill,
                     'user_id' => $visitEntry->user_id,
+                    'visit_date' => $visitEntry->start_time,
+
 
                     'travel_expense' => $visitEntry->travel_expense,
 

@@ -3,6 +3,7 @@
 // app/Models/TrainerVisit.php
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Spatie\MediaLibrary\HasMedia;
@@ -177,6 +178,8 @@ class TrainerVisit extends Model
 
                         // dd($trainerVisit);
 
+                        $trainerVisit->visit_date = Carbon::parse($trainerVisit->visit_date)->format('Y-m-d');
+
 
                         $rate = ($trainerVisit->travel_mode === 'car')
                             ? Setting::getCarRate() // Fetch car rate from settings
@@ -198,8 +201,14 @@ class TrainerVisit extends Model
                 if ($trainerVisit->travel_type == 'with_colleague') {
 
 
+
                     // Set the food expense from settings
                     $trainerVisit->food_expense = Setting::getFoodExpenseRate();
+
+                    $trainerVisit->visit_date = Carbon::parse($trainerVisit->visit_date)->format('Y-m-d');
+
+                    // dd($trainerVisit);
+
 
                     // Calculate total expense
                     $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
