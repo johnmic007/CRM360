@@ -41,7 +41,10 @@ class TrainerVisitResource extends Resource
     public static function canEdit($record): bool
     {
         // Allow edit only if the user is the owner of the record
-        return $record->user_id === auth()->id();
+        // return $record->user_id === auth()->id();
+
+        return auth()->user()->hasRole(['admin' ]);
+
     }
 
 
