@@ -29,6 +29,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
 {
@@ -42,6 +43,12 @@ class UserResource extends Resource
     public static function canViewAny(): bool
     {
         return auth()->user()->hasRole(['admin', 'sales_operation' ,   'head', 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin']);
+
     }
 
 

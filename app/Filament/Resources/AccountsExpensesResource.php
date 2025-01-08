@@ -3,12 +3,15 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Exports\AccountsExpensesExporter;
 use App\Filament\Resources\AccountsExpensesResource\Pages;
 use App\Filament\Resources\AccountsExpensesResource\Pages\ListAccountsExpenses;
 use App\Filament\Resources\AccountsExpensesResource\Pages\ViewAccountsExpenses;
 use App\Filament\Resources\AccountsExpensesResource\RelationManagers\TrainerVisitsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\WalletPaymentLogsRelationManager;
 use App\Models\User;
+use Filament\Actions\Exports\Enums\ExportFormat;
+use Filament\Tables\Actions\ExportAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
@@ -16,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class AccountsExpensesResource extends Resource
 {
@@ -33,6 +37,9 @@ class AccountsExpensesResource extends Resource
     {
         return auth()->user()->hasRole(['admin' , 'sales_operation_head' , 'accounts_head']);
     }
+
+
+    
 
 
 
@@ -92,6 +99,20 @@ class AccountsExpensesResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
+            ])
+            ->headerActions([
+                ExportAction::make()
+                ->modifyQueryUsing(function (Builder $query) {
+                    foreach (request()->input('tableFilters', []) as $filterKey => $filterData) {
+                        if ($filter = self::findFilterByKey($filterKey)) {
+                            $filter->apply($query, $filterData);
+                        }
+                    }
+                })
+                    ->exporter(AccountsExpensesExporter::class)->formats([
+                        ExportFormat::Xlsx,
+                        ExportFormat::Csv,
+                    ])
             ]);
     }
 
