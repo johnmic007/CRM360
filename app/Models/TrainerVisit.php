@@ -195,7 +195,7 @@ class TrainerVisit extends Model
                     $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
                 }
 
-                if ($trainerVisit->travel_type == 'with_colleague' && $trainerVisit->travel_expense) {
+                if ($trainerVisit->travel_type == 'with_colleague') {
 
 
                     // Set the food expense from settings

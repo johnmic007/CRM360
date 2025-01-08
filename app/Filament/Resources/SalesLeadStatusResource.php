@@ -14,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Model;
 
 class SalesLeadStatusResource extends Resource
@@ -21,7 +22,7 @@ class SalesLeadStatusResource extends Resource
     protected static ?string $model = VisitEntry::class;
 
 
-     protected static ?string $navigationLabel = 'Visit Entry Logs';
+    protected static ?string $navigationLabel = 'Visit Entry Logs';
 
     protected static ?string $pluralLabel = 'Visit Entry Logs';
 
@@ -29,12 +30,10 @@ class SalesLeadStatusResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-bars-arrow-up';
 
 
-    
+
     public static function canEdit(Model $record): bool
     {
-        return auth()->user()->hasRole([  'sales_operation_head' , 'admin']);
-
-        
+        return auth()->user()->hasRole(['sales_operation_head', 'admin']);
     }
 
 
@@ -51,22 +50,22 @@ class SalesLeadStatusResource extends Resource
                 Forms\Components\TextInput::make('end_time')
                     ->required()
                     ->label('End Time'),
-                    Forms\Components\Select::make('user_id')
+                Forms\Components\Select::make('user_id')
                     ->label('User')
                     ->disabled()
                     ->relationship('user', 'name') // Specify the relationship and the display column (e.g., `name`)
                     ->required(),
 
-                    Forms\Components\Select::make('travel_type')
+                Forms\Components\Select::make('travel_type')
                     ->options([
                         'own_vehicle' => 'Travel by Own Vehicle',
                         'with_colleague' => 'Travel with Colleague',
                     ])
-                        ->required()
-                        ->reactive()
-                        ->label('Travel Type'),
-    
-              
+                    ->required()
+                    ->reactive()
+                    ->label('Travel Type'),
+
+
                 Forms\Components\FileUpload::make('starting_meter_photo')
                     ->label('Starting Meter Photo')
                     ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
@@ -75,8 +74,8 @@ class SalesLeadStatusResource extends Resource
                     ->label('Ending Meter Photo')
                     ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
 
-              
-                    Forms\Components\FileUpload::make('travel_bill')
+
+                Forms\Components\FileUpload::make('travel_bill')
                     ->visible(fn(callable $get) => $get('travel_type') === 'with_colleague')
                     ->label('Travel Bill'),
                 Forms\Components\TextInput::make('travel_expense')
@@ -90,11 +89,11 @@ class SalesLeadStatusResource extends Resource
                     ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle'),
 
                 Forms\Components\Select::make('travel_mode')
-                ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle')
-                ->options([
-                    'car' => 'Car',
-                    'bike' => 'Bike',
-                ])
+                    ->visible(fn(callable $get) => $get('travel_type') === 'own_vehicle')
+                    ->options([
+                        'car' => 'Car',
+                        'bike' => 'Bike',
+                    ])
                     ->label('Travel Mode'),
             ]);
     }
@@ -103,43 +102,61 @@ class SalesLeadStatusResource extends Resource
     {
         return $table->columns([
             TextColumn::make('user.name'),
+            Tables\Columns\TextColumn::make('start_time')
+                ->label('Start Time')
+                ->dateTime(),
+
+            Tables\Columns\TextColumn::make('end_time')
+                ->label('End Time')
+                ->dateTime(),
+
+            Tables\Columns\BooleanColumn::make('completed')
+                ->label('Visit Completed')
+                ->getStateUsing(fn($record) => !is_null($record->end_time)),
 
             TextColumn::make('travel_type'),
 
-            TextColumn::make('travel_expense'),
-
-            
+            // TextColumn::make('total_expense'),
 
 
-          
-            
+
+
+
+
         ])
-        ->filters([
-            Filter::make('date_range')
-                ->label('Date Range')
-                ->form([
-                    DatePicker::make('start_date')
-                        ->label('Start Date'),
+            ->filters([
+                Filter::make('date_range')
+                    ->label('Date Range')
+                    ->form([
+                        DatePicker::make('start_date')
+                            ->label('Start Date'),
 
-                    DatePicker::make('end_date')
-                        ->label('End Date')
-                ])
-                ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
-                    if (!empty($data['start_date']) && !empty($data['end_date'])) {
-                        $query->whereBetween('created_at', [$data['start_date'], $data['end_date']]);
-                    }
-                })
-                ->indicateUsing(function (array $data) {
-                    if (!empty($data['start_date']) && !empty($data['end_date'])) {
-                        return 'From ' . $data['start_date'] . ' to ' . $data['end_date'];
-                    }
-                    return null;
-                }),
-        ])
-        ->actions([
-            Tables\Actions\ViewAction::make(), // Add View action
-            Tables\Actions\EditAction::make(), // Add Edit action
-        ]);
+                        DatePicker::make('end_date')
+                            ->label('End Date')
+                    ])
+                    ->query(function (\Illuminate\Database\Eloquent\Builder $query, array $data) {
+                        if (!empty($data['start_date']) && !empty($data['end_date'])) {
+                            $query->whereBetween('created_at', [$data['start_date'], $data['end_date']]);
+                        }
+                    })
+                    ->indicateUsing(function (array $data) {
+                        if (!empty($data['start_date']) && !empty($data['end_date'])) {
+                            return 'From ' . $data['start_date'] . ' to ' . $data['end_date'];
+                        }
+                        return null;
+                    }),
+
+                    SelectFilter::make('travel_type')
+                    ->label('Travel Type')
+                    ->options([
+                        'own_vehicle' => 'Travel by Own Vehicle',
+                        'with_colleague' => 'Travel with Colleague',
+                    ])
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(), // Add View action
+                Tables\Actions\EditAction::make(), // Add Edit action
+            ]);
     }
 
     public static function getRelations(): array

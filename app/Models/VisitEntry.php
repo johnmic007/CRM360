@@ -111,7 +111,7 @@ protected static function boot()
 
 
 
-        if ( $visitEntry->travel_type == 'with_colleague' && $visitEntry->travel_expense) {
+        if ( $visitEntry->travel_type == 'with_colleague' && $visitEntry->end_time) {
 
             TrainerVisit::updateOrCreate(
                 ['visit_entry_id' => $visitEntry->id], // Match by visit_entry_id
