@@ -20,6 +20,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Forms\Components\Textarea;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -185,6 +186,10 @@ class TrainerVisitResource extends Resource
                             ->numeric()
                             ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
                             ->readOnly(fn() => !auth()->user()->hasAnyRole(['sales_operation', 'sales_operation_head'])),
+
+                            Textarea::make('description')
+                            ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
+                            ->readOnly(),
 
 
                         FileUpload::make('travel_bill')
