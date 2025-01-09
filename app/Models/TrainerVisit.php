@@ -104,6 +104,12 @@ class TrainerVisit extends Model
         return School::whereIn('id', $this->school_id)->get();
     }
 
+    public function block()
+    {
+        return $this->belongsTo(Block::class);
+    }
+
+
 
 
 

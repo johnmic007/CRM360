@@ -40,6 +40,12 @@ public function roles()
     return $this->user->roles(); // Delegate roles relationship to the user
 }
 
+public function block()
+{
+    return $this->belongsTo(Block::class);
+}
+
+
     public function trainerVisit()
     {
         return $this->hasOne(TrainerVisit::class);
@@ -63,6 +69,7 @@ protected static function boot()
 
 
     static::saving(function ($visitEntry) {
+        
         // Ensure visit_date is present
         if ($visitEntry->visit_date) {
             $visitDate = $visitEntry->visit_date;

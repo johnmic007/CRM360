@@ -39,6 +39,11 @@ class SalesLeadStatus extends Model
         return $this->belongsTo(School::class);
     }
 
+    public function block()
+    {
+        return $this->belongsTo(Block::class);
+    }
+
     public function issuedBooksLog()
     {
         return $this->hasMany(TestBookLog::class, 'lead_id');

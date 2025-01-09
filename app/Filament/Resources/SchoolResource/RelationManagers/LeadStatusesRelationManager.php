@@ -72,6 +72,8 @@ class LeadStatusesRelationManager extends RelationManager
                 TextColumn::make('remarks')
                     ->label('Remarks')
                     ->limit(50),
+                    Tables\Columns\TextColumn::make('block.name')->label('Block'),
+
                 TextColumn::make('contacted_person')
                     ->label('Contacted Person'),
                 TextColumn::make('contacted_person_designation')

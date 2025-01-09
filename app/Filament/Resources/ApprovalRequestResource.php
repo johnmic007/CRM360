@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ApprovalRequestResource\Pages;
+use App\Filament\Resources\ApprovalRequestResource\RelationManagers\SchoolUsersManager;
 use App\Models\ApprovalRequest;
 use App\Models\School;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Database\Eloquent\Model;
 
 class ApprovalRequestResource extends Resource
 {
@@ -33,6 +35,12 @@ class ApprovalRequestResource extends Resource
         return auth()->user()->hasRole(['admin' , 'bda' , 'sales_operation_head' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
     }
 
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()->hasRole([ 'sales_operation_head' ,  'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
+
+    }
+
 
 
     
@@ -44,13 +52,7 @@ class ApprovalRequestResource extends Resource
             Hidden::make('company_id')
             ->default(auth()->user()->company_id) // Automatically assign the user's company_id
             ->required(),
-            Select::make('manager_id')
-                ->label('Manager')
-                ->options(User::pluck('name', 'id'))
-                ->searchable()
-                ->disabled()
-                ->required(),
-
+         
             Select::make('user_id')
                 ->label('Requested By')
                 ->options(User::pluck('name', 'id'))
@@ -102,10 +104,10 @@ class ApprovalRequestResource extends Resource
     
         return $table
             ->columns([
-                TextColumn::make('manager.name')
-                    ->label('Manager')
-                    ->sortable()
-                    ->searchable(),
+                // TextColumn::make('manager.name')
+                //     ->label('Manager')
+                //     ->sortable()
+                //     ->searchable(),
     
                 TextColumn::make('user.name')
                     ->label('Requested By')
@@ -150,13 +152,17 @@ class ApprovalRequestResource extends Resource
             ]))
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
+
             ]);
     }
     
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            SchoolUsersManager::class
+        ];
     }
 
     public static function getPages(): array

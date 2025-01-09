@@ -36,6 +36,13 @@ class SalesLeadStatusResource extends Resource
         return auth()->user()->hasRole(['sales_operation_head', 'admin']);
     }
 
+    public static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin']);
+    }
+
+
+
 
 
 
@@ -156,6 +163,9 @@ class SalesLeadStatusResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(), // Add View action
                 Tables\Actions\EditAction::make(), // Add Edit action
+                Tables\Actions\DeleteAction::make(), // Add Edit action
+
+                
             ]);
     }
 

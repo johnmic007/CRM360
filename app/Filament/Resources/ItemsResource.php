@@ -22,6 +22,10 @@ class ItemsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
 
+    protected static ?string $navigationGroup = 'Utilities';
+
+
+
     public static function canViewAny(): bool
     {
         return auth()->user()->hasRole(['admin' , 'head' , 'sales_operation']);

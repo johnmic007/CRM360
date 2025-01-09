@@ -79,8 +79,9 @@ class SalesLeadManagement extends Model
 
 
 
+
             if ($model->school_id) {
-                $school = \App\Models\School::find($model->school_id); // Assuming there's a School model
+                $school = School::find($model->school_id); // Assuming there's a School model
                 if ($school) {
                     $model->block_id = $model->block_id ?? $school->block_id;
                     $model->district_id = $model->district_id ?? $school->district_id;
@@ -97,6 +98,10 @@ class SalesLeadManagement extends Model
 
         // Ensure 'allocated_to' and 'company_id' fields are handled during updates
         static::updating(function ($model) {
+
+
+
+
             if (!auth()->user()->hasRole('admin')) {
                 if (!$model->isDirty('allocated_to')) {
                     $model->allocated_to = auth()->id(); // Reassign the current user's ID if not already updated
