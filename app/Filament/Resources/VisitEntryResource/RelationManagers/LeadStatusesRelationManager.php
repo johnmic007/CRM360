@@ -339,6 +339,8 @@ class SchoolVisitRelationManager extends RelationManager
             ->recordTitleAttribute('title')
             ->columns([
                 Tables\Columns\TextColumn::make('school.name')->label('School'),
+                Tables\Columns\TextColumn::make('block.name')->label('School'),
+
                 Tables\Columns\TextColumn::make('status')->label('Status'),
                 Tables\Columns\TextColumn::make('visited_date')->label('Visited Date')->date(),
                 Tables\Columns\BooleanColumn::make('potential_meet')->label('Potential Meet'),
