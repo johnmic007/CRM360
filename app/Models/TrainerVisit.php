@@ -30,6 +30,10 @@ class TrainerVisit extends Model
         'food_expense',
         'total_expense',
         'description',
+        'closing_status',
+        'closed_amount',
+        'remaning_closed_amount',
+        'credit_log_id',
         'gps_photo',
         'travel_bill',
         'approved_by',
@@ -60,6 +64,8 @@ class TrainerVisit extends Model
         'school_id' => 'array',
         'travel_bill' => 'array',
         'files' => 'array',
+        'credit_log_id' => 'array',
+
 
 
     ];

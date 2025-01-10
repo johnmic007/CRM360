@@ -10,10 +10,10 @@ class EditWalletLog extends EditRecord
 {
     protected static string $resource = WalletLogResource::class;
 
-    protected function getHeaderActions(): array
+    
+    protected function getFormActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        return [];
     }
+    
 }

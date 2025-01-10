@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ApprovalRequestResource\Pages;
 
 use App\Filament\Resources\ApprovalRequestResource;
 use App\Models\SalesLeadManagement;
+use App\Models\SchoolUser;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -35,15 +36,30 @@ class EditApprovalRequest extends EditRecord
                     // Update the status to Approved
                     $this->record->update(['status' => 'Approved']);
 
-                    
-                    
+
+
                     // Create a new SalesLeadManagement record with correct data
-                    SalesLeadManagement::create([
+                    // SalesLeadManagement::create([
+                    //     'school_id' => $this->record->school_id,
+                    //     'allocated_to' => $this->record->user_id, // Assign `user_id` to `allocated_to`
+                    //     'company_id' => $this->record->company_id,
+                    //     'status' => 'School Nurturing',
+                    // ]);
+
+                    SchoolUser::create([
                         'school_id' => $this->record->school_id,
-                        'allocated_to' => $this->record->user_id, // Assign `user_id` to `allocated_to`
-                        'company_id' => $this->record->company_id,
-                        'status' => 'School Nurturing',
+                        'user_id' => $this->record->user_id, // Assign `user_id` to `allocated_to`
+
                     ]);
+
+                    $schoolName = $this->record->school->name ?? 'Unknown School';
+
+
+                    Notification::make()
+                        ->title('School Allocated')
+                        ->body("You have been allocated to the school '$schoolName'.")
+                        ->success()
+                        ->sendToDatabase($this->record->user);
 
                     // Notify the user
                     Notification::make()
@@ -54,7 +70,7 @@ class EditApprovalRequest extends EditRecord
                     // Redirect back to the resource index
                     $this->redirect($this->getResource()::getUrl('index'));
                 })
-                ->visible(fn () => $this->record->status === 'Pending'),
+                ->visible(fn() => $this->record->status === 'Pending'),
 
             // Reject button (Visible only to the manager)
             Action::make('Set to Rejected')
@@ -72,7 +88,7 @@ class EditApprovalRequest extends EditRecord
                         ->send();
                     $this->redirect($this->getResource()::getUrl('index'));
                 })
-                ->visible(fn () => $this->record->status === 'Pending' && $user->id === $this->record->manager_id),
+                ->visible(fn() => $this->record->status === 'Pending' && $user->id === $this->record->manager_id),
 
             // Approved button (Visible to all roles if already approved)
             Action::make('Approved')
@@ -80,7 +96,7 @@ class EditApprovalRequest extends EditRecord
                 ->color('success')
                 ->icon('heroicon-o-check-circle')
                 ->disabled()
-                ->visible(fn () => $this->record->status === 'Approved'),
+                ->visible(fn() => $this->record->status === 'Approved'),
 
             // Rejected button (Visible to all roles if already rejected)
             Action::make('Rejected')
@@ -88,7 +104,7 @@ class EditApprovalRequest extends EditRecord
                 ->color('danger')
                 ->icon('heroicon-o-x-circle')
                 ->disabled()
-                ->visible(fn () => $this->record->status === 'Rejected'),
+                ->visible(fn() => $this->record->status === 'Rejected'),
 
             // Pending status (Visible to all roles if still pending)
             Action::make('Pending')
@@ -96,7 +112,7 @@ class EditApprovalRequest extends EditRecord
                 ->color('secondary')
                 ->icon('heroicon-o-clock')
                 ->disabled()
-                ->visible(fn () => $this->record->status === 'Pending'),
+                ->visible(fn() => $this->record->status === 'Pending'),
         ];
     }
 }

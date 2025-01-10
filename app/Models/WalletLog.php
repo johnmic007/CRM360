@@ -7,18 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class WalletLog extends Model
 {
     protected $fillable = [
-        
-        'user_id', 
+
+        'id',
+        'refund_id',
+        'user_id',
         'company_id',
+        'trainer_visit_id',
         'amount',
-        'payment_method' , 
+        'balance',
+        'payment_method',
         'payment_date',
         'payment_proof',
         'reference_number',
-        'type', 
-        'description', 
+        'type',
+        'description',
+        'reimbursement_id', // New field
+        'reimbursement_amount',
+        'wallet_logs',
+        'credit_type',
         'approved_by'
-    
+
     ];
 
     public function user()
@@ -32,9 +40,25 @@ class WalletLog extends Model
     }
 
     public function trainerVisits()
+    {
+        return $this->hasMany(TrainerVisit::class, 'user_id', 'user_id');
+    }
+
+public function associatedDebits()
 {
-    return $this->hasMany(TrainerVisit::class, 'user_id', 'user_id');
+    return $this->hasMany(WalletLog::class, 'wallet_logs', 'id')
+        ->where('type', 'debit');
 }
+
+    
+
+    /**
+     * Scope a query to only include credit type logs.
+     */
+    public function scopeCredit($query)
+    {
+        return $query->where('type', 'credit');
+    }
 
 
 
@@ -51,7 +75,9 @@ class WalletLog extends Model
             }
         });
     }
-
-
-    
+    public function companyTransactions()
+    {
+        return $this->belongsToMany(CompanyTransaction::class, 'company_transaction_wallet_log')
+            ->withTimestamps(); // Tracks when the association was created
+    }
 }

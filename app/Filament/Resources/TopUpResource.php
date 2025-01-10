@@ -30,11 +30,13 @@ class TopUpResource extends Resource
 
     protected static ?string $label = 'Topups'; // Singular form
     protected static ?string $pluralLabel = 'Topups';
+    protected static ?string $navigationGroup = 'Finance Management';
+
 
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['accounts', 'accounts_head' ]);
+        return auth()->user()->hasRole(['accounts', 'accounts_head']);
     }
 
     public static function form(Form $form): Form
@@ -63,8 +65,6 @@ class TopUpResource extends Resource
                 TextColumn::make('total_amount_given')
                     ->searchable(),
 
-
-
                 TextColumn::make('roles.name')
                     ->label('Roles')
                     ->getStateUsing(fn($record) => $record->roles->pluck('name')->join(', ')),
@@ -80,19 +80,40 @@ class TopUpResource extends Resource
                     ->visible(fn(User $record) => auth()->user()->hasRole('accounts_head'))
                     ->modalHeading('Top-Up Wallet')
                     ->form([
+                        Select::make('transaction_id')
+                            ->label('Select Transaction')
+                            ->options(
+                                \App\Models\CompanyTransaction::query()
+                                    ->where('type', 'credit') // Only credit transactions
+                                    ->where('balance', '>', 0) // Transactions with balance
+                                    ->get()
+                                    ->mapWithKeys(function ($transaction) {
+                                        return [$transaction->id => "{$transaction->transaction_id} (Available: {$transaction->balance} INR)"];
+                                    })
+                            )
+                            ->reactive()
+                            ->required()
+                            ->helperText(function (callable $get) {
+                                $transactionId = $get('transaction_id');
+                                if ($transactionId) {
+                                    $transaction = \App\Models\CompanyTransaction::find($transactionId);
+                                    return $transaction ? "Available balance: {$transaction->balance} INR" : 'No transaction selected.';
+                                }
+                                return 'Select a transaction to see the available balance.';
+                            }),
+
                         TextInput::make('amount')
                             ->label('Amount')
                             ->numeric()
                             ->required()
                             ->rules(['min:1']) // Ensure minimum amount of 1
-                            ->helperText('Enter the amount to top-up.'),
+                            ->helperText('Enter the amount to top-up. Must not exceed the transaction balance.'),
 
                         Select::make('payment_method')
                             ->label('Payment Method')
                             ->options([
                                 'cash' => 'Cash',
                                 'bank_transfer' => 'Bank Transfer',
-                                'credit_card' => 'Credit Card',
                             ])
                             ->required(),
 
@@ -101,44 +122,66 @@ class TopUpResource extends Resource
                             ->nullable()
                             ->helperText('Optional reference number for the payment.'),
 
+
+                            FileUpload::make('payment_proof')
+                            ->label('Payment Proof')
+                            ->directory('payment_proofs')  // Store the image in a specific directory
+                            ->nullable(),
+
                         DatePicker::make('payment_date')
                             ->required(),
-
-                        FileUpload::make('payment_proof')
-                            ->label('Payment Proof')
-                            ->directory('payment_proofs')
-                            ->nullable(),
                     ])
                     ->action(function (array $data, User $record) {
-                        // Handle file upload for payment proof
-                        $paymentProofPath = null;
-                        if (isset($data['payment_proof'])) {
-                            $paymentProofPath = $data['payment_proof']->store('payment_proofs', 'public');
+                        // Fetch the selected transaction
+                        $transaction = \App\Models\CompanyTransaction::find($data['transaction_id']);
+
+                        if (!$transaction) {
+                            throw new \Exception('Invalid transaction selected.');
+                        }
+
+                        // Validate the amount
+                        if ($data['amount'] > $transaction->balance) {
+                            throw new \Exception('The entered amount exceeds the transaction balance.');
                         }
 
                         // Process the top-up
                         $amount = $data['amount'];
 
+                        // Deduct from the CompanyTransaction balance
+                        $transaction->balance -= $amount;
+                        $transaction->save();
+
                         // Update the user's wallet balance
                         $record->wallet_balance += $amount;
-
                         $record->total_amount_given += $amount;
-
                         $record->amount_to_close += $amount;
-
                         $record->save();
 
                         // Log the wallet top-up transaction
-                        WalletLog::create([
+                        $walletLog = WalletLog::create([
                             'user_id' => $record->id,
+                            
                             'company_id' => $record->company_id,
                             'amount' => $amount,
+                            'balance' => $amount,
+                            'credit_type' => 'accounts topup',
+
+
                             'payment_date' => $data['payment_date'],
-                            'type' => 'credit',
-                            'description' => 'Wallet top-up by admin',
                             'payment_method' => $data['payment_method'],
+                            'payment_proof' => $data['payment_proof'],
+
+
+                            'type' => 'credit',
+                            'description' => 'Wallet top-up from Company Transaction',
+                            'payment_method' => 'CompanyTransaction',
                             'reference_number' => $data['reference_number'],
-                            'payment_proof' => $paymentProofPath,
+                            'payment_proof' => null, // No proof needed in this case
+                        ]);
+
+                        // Save the relationship in the pivot table
+                        $transaction->walletLogs()->attach($walletLog->id, [
+                            'type' => 'Top-Up', // Specify the type as "Top-Up"
                         ]);
 
                         // Send a database notification to the user
@@ -149,6 +192,7 @@ class TopUpResource extends Resource
                             ->sendToDatabase($record);
                     })
                     ->requiresConfirmation()
+
             ]);
     }
 
@@ -156,7 +200,7 @@ class TopUpResource extends Resource
     {
         return [
             WalletLogsRelationManager::class,
-           
+
 
 
         ];

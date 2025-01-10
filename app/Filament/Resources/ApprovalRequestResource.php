@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class ApprovalRequestResource extends Resource
@@ -32,27 +33,26 @@ class ApprovalRequestResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'sales_operation_head' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
+        return auth()->user()->hasRole(['admin', 'bda', 'sales_operation_head', 'bdm', 'zonal_manager', 'regional_manager', 'head', 'sales_operation']);
     }
 
     public static function canEdit(Model $record): bool
     {
-        return auth()->user()->hasRole([ 'sales_operation_head' ,  'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
-
+        return auth()->user()->hasRole(['sales_operation_head',  'zonal_manager', 'regional_manager', 'head', 'sales_operation']);
     }
 
 
 
-    
+
 
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form->schema([
 
             Hidden::make('company_id')
-            ->default(auth()->user()->company_id) // Automatically assign the user's company_id
-            ->required(),
-         
+                ->default(auth()->user()->company_id) // Automatically assign the user's company_id
+                ->required(),
+
             Select::make('user_id')
                 ->label('Requested By')
                 ->options(User::pluck('name', 'id'))
@@ -67,12 +67,12 @@ class ApprovalRequestResource extends Resource
                 ->disabled()
                 ->required(),
 
-                Textarea::make('message')
+            Textarea::make('message')
                 ->disabled(),
 
-                Forms\Components\Select::make('status')
+            Forms\Components\Select::make('status')
                 ->label('Status')
-                
+
                 ->options([
                     'Pending' => 'Pending',
                     'Approved' => 'Approved',
@@ -80,20 +80,20 @@ class ApprovalRequestResource extends Resource
                 ])
                 ->disabled()
                 ->required()
-                // ->disabled(function () {
-                //     $recordId = request()->route('record'); // Get the record ID from the route
-                //     if (!$recordId) {
-                //         return true; // Disable if no record ID is found
-                //     }
-            
-                //     $record = ApprovalRequest::find($recordId); // Retrieve the record using the ID
-                //     if (!$record) {
-                //         return true; // Disable if the record does not exist
-                //     }
-            
-                //     return auth()->id() !== $record->manager_id; // Disable if the logged-in user is not the manager
-                // }),
-            
+            // ->disabled(function () {
+            //     $recordId = request()->route('record'); // Get the record ID from the route
+            //     if (!$recordId) {
+            //         return true; // Disable if no record ID is found
+            //     }
+
+            //     $record = ApprovalRequest::find($recordId); // Retrieve the record using the ID
+            //     if (!$record) {
+            //         return true; // Disable if the record does not exist
+            //     }
+
+            //     return auth()->id() !== $record->manager_id; // Disable if the logged-in user is not the manager
+            // }),
+
         ]);
     }
 
@@ -101,24 +101,24 @@ class ApprovalRequestResource extends Resource
     {
         // Get the authenticated user
         $user = auth()->user();
-    
+
         return $table
             ->columns([
                 // TextColumn::make('manager.name')
                 //     ->label('Manager')
                 //     ->sortable()
                 //     ->searchable(),
-    
+
                 TextColumn::make('user.name')
                     ->label('Requested By')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('school.name')
                     ->label('School')
                     ->sortable()
                     ->searchable(),
-    
+
                 TextColumn::make('status')
                     ->label('Status')
                     ->badge()
@@ -128,13 +128,13 @@ class ApprovalRequestResource extends Resource
                         'danger' => 'Rejected',
                     ])
                     ->sortable(),
-    
+
                 TextColumn::make('created_at')
                     ->label('Requested At')
                     ->dateTime()
                     ->sortable(),
             ])
-            ->filters(array_filter([
+            ->filters([
                 SelectFilter::make('status')
                     ->label('Status')
                     ->options([
@@ -142,21 +142,38 @@ class ApprovalRequestResource extends Resource
                         'Approved' => 'Approved',
                         'Rejected' => 'Rejected',
                     ]),
-    
-                // Add manager_id filter only if user has the required roles
-                $user && $user->hasRole(['admin', 'sales_operation', 'head'])
-                    ? SelectFilter::make('manager_id')
-                        ->label('Manager')
-                        ->options(User::pluck('name', 'id')->toArray())
-                    : null, // Exclude null values
-            ]))
+
+                // Tables\Filters\Filter::make('created_at')
+                // ->label('Requested Date')
+                // ->form([
+                //     Forms\Components\DatePicker::make('created_date')
+                //         ->label('Select Date'),
+                // ]),
+
+                Tables\Filters\Filter::make('created_at')
+                    ->label('Requested Date')
+                    ->form([
+                        Forms\Components\DatePicker::make('date')
+                            ->label('Requested Date')
+
+                            ->label('created_at'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['date'], fn($q) => $q->whereDate('created_at', $data['date']));
+                    })
+                    ->indicateUsing(function (array $data) {
+                        return !empty($data['date']) ? 'Requested Date: ' . $data['date'] : null;
+                    }),
+
+
+            ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
 
             ]);
     }
-    
+
 
     public static function getRelations(): array
     {

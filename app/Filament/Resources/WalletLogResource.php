@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WalletLogResource\Pages;
+use App\Filament\Resources\WalletLogResource\RelationManagers\AssociatedDebitsRelationManager;
 use App\Filament\Widgets\WalletBalanceWidget;
 use App\Models\WalletLog;
 use Filament\Forms;
@@ -17,11 +18,22 @@ class WalletLogResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     
     protected static ?string $navigationLabel = 'Wallet Logs';
+    protected static ?string $navigationGroup = 'Finance Management';
+
 
     
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation' , 'trainer']);
+        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'accounts_head' , 'sales_operation' , 'trainer']);
+    }
+
+    public static function form(Forms\Form $form): Forms\Form
+    {
+        return $form
+            ->schema([
+                
+
+            ]);
     }
 
 
@@ -44,19 +56,25 @@ class WalletLogResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([])
-            ->actions([])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+
+            ])
             ->bulkActions([]);
     }
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            AssociatedDebitsRelationManager::class,
+
+        ];
     }
 
     public static function getWidgets(): array
     {
         return [
-            WalletBalanceWidget::class,
+            // WalletBalanceWidget::class,
         ];
     }
 
@@ -64,6 +82,8 @@ class WalletLogResource extends Resource
     {
         return [
             'index' => Pages\ListWalletLogs::route('/'),
+            'edit' => Pages\EditWalletLog::route('/{record}/edit'),
+
         ];
     }
 }

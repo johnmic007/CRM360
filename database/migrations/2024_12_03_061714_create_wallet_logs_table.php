@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
     $table->unsignedBigInteger('user_id')->nullable();
     $table->unsignedBigInteger('company_id')->nullable();
+    $table->unsignedBigInteger('trainer_visit')->nullable();
+
     $table->decimal('amount', 10, 2)->nullable();
     $table->string('payment_method')->nullable();
     $table->timestamp('payment_date')->nullable();

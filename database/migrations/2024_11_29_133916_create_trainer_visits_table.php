@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('school_id')->nullable();
+            $table->unsignedBigInteger('payment_id')->nullable();
+
             $table->unsignedBigInteger('company_id')->nullable();
             $table->date('visit_date')->nullable();
             $table->string('travel_mode')->nullable();

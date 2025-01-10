@@ -375,6 +375,9 @@ class UserResource extends Resource
                             'user_id' => $record->id,
                             'company_id' => $record->company_id,
                             'amount' => $amount,
+                            'balance' => $amount,
+                            'credit_type' => 'accounts topup',
+
                             'payment_date' => $data['payment_date'],
                             'type' => 'credit',
                             'description' => 'Wallet top-up by admin',

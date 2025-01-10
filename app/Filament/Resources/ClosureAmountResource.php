@@ -26,6 +26,9 @@ class ClosureAmountResource extends Resource
 
     protected static ?string $pluralLabel = 'Closure Amount';
 
+    protected static ?string $navigationGroup = 'Finance Management';
+
+
 
     public static function canViewAny(): bool
     {
