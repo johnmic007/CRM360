@@ -46,6 +46,9 @@ class EditApprovalRequest extends EditRecord
                     //     'status' => 'School Nurturing',
                     // ]);
 
+                    SchoolUser::where('school_id', $this->record->school_id)->delete();
+
+
                     SchoolUser::create([
                         'school_id' => $this->record->school_id,
                         'user_id' => $this->record->user_id, // Assign `user_id` to `allocated_to`
