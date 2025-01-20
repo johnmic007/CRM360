@@ -152,7 +152,7 @@ class CompanyAccountResource extends Resource
         return [
             'index' => Pages\ListCompanyAccounts::route('/'),
             'create' => Pages\CreateCompanyAccount::route('/create'),
-            'edit' => Pages\EditCompanyAccount::route('/{record}/edit'),
+            // 'edit' => Pages\EditCompanyAccount::route('/{record}/edit'),
         ];
     }
 }
