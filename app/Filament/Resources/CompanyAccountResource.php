@@ -117,7 +117,7 @@ class CompanyAccountResource extends Resource
                         CompanyTransaction::create([
                             'transaction_id' => $transactionId,
                             'amount' => $data['amount'],
-                            'balance' => $data['balance'],
+                            'balance' => 0,
 
                             'requested_at' => $data['requested_at'],
                             'issued_at' => $data['issued_at'],
