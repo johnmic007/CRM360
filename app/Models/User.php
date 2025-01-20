@@ -70,6 +70,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(TrainerVisit::class);
     }
+
+
+    public function companyTransactions()
+{
+    return $this->hasMany(CompanyTransaction::class, 'wallet_user_id');
+}
+
     
 
 

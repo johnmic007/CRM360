@@ -3,6 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CompanyAccountResource\Pages;
+use App\Filament\Resources\CompanyAccountResource\Pages\ViewCompanyAccounts;
+use App\Filament\Resources\CompanyAccountResource\RelationManagers\CompanyTransactionRelationManager;
 use App\Models\CompanyTransaction;
 use App\Models\WalletLog;
 use App\Models\User;
@@ -116,7 +118,7 @@ class CompanyAccountResource extends Resource
                         CompanyTransaction::create([
                             'transaction_id' => $transactionId,
                             'amount' => $data['amount'],
-                            'balance' => 0,
+                            'balance' => $data['amount'],
 
                             'requested_at' => $data['requested_at'],
                             'issued_at' => $data['issued_at'],
@@ -143,7 +145,7 @@ class CompanyAccountResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CompanyTransactionRelationManager::class,
         ];
     }
 
@@ -152,7 +154,9 @@ class CompanyAccountResource extends Resource
         return [
             'index' => Pages\ListCompanyAccounts::route('/'),
             'create' => Pages\CreateCompanyAccount::route('/create'),
-            // 'edit' => Pages\EditCompanyAccount::route('/{record}/edit'),
+            'view' => ViewCompanyAccounts::route('/{record}'),
+
+            'edit' => Pages\EditCompanyAccount::route('/{record}/edit'),
         ];
     }
 }
