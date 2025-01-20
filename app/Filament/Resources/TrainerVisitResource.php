@@ -458,6 +458,9 @@ class TrainerVisitResource extends Resource
                         'class' => 'cursor-pointer',
                     ]),
 
+                    TextColumn::make('remarks')->label('Remark'),
+
+
 
             ])
             ->actions([

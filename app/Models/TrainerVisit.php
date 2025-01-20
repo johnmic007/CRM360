@@ -49,6 +49,7 @@ class TrainerVisit extends Model
         'travel_type',
         'files',
         'visit_entry_id',
+        'remarks',
     ];
 
 

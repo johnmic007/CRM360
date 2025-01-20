@@ -70,7 +70,7 @@ class ReimbursementResource extends Resource
                     ->options([
                         'pending' => 'Pending',
                         'approved' => 'Approved',
-                        'rejected' => 'Rejected',
+                        'completed' => 'completed',
                     ])
                     ->required(),
 

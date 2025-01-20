@@ -15,6 +15,7 @@ class WalletLog extends Model
         'trainer_visit_id',
         'amount',
         'balance',
+        'is_closed',
         'payment_method',
         'payment_date',
         'payment_proof',
