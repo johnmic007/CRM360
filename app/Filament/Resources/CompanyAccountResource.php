@@ -22,6 +22,17 @@ class CompanyAccountResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $label = 'Top Ups'; // Singular form
+    protected static ?string $pluralLabel = 'Topups';
+    protected static ?string $navigationGroup = 'Finance Management';
+
+
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'company' ,  'accounts_head']);
+    }
+
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form

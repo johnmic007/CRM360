@@ -33,6 +33,12 @@ class AccountsClosingResource extends Resource
     protected static ?string $navigationGroup = 'Finance Management';
 
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'accounts_head']);
+    }
+
+
     public static function form(Form $form): Form
     {
         return $form
