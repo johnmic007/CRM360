@@ -13,12 +13,7 @@ class ListCompanyAccounts extends ListRecords
 {
     protected static string $resource = CompanyAccountResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
+    
 
 
     protected function getTableQuery(): Builder
