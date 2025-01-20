@@ -63,7 +63,6 @@ class CompanyAccountResource extends Resource
             ])
             ->filters([])
             ->actions([
-                Tables\Actions\EditAction::make(),
                 Action::make('topUp')
                     ->label('Top-Up Wallet')
                     ->icon('heroicon-o-plus-circle')
@@ -137,12 +136,8 @@ class CompanyAccountResource extends Resource
                     })
                     ->requiresConfirmation()
 
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
-            ]);
+                ]);
+          
     }
 
     public static function getRelations(): array
