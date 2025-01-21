@@ -8,6 +8,7 @@ use App\Models\TrainerVisit;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Actions;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Carbon;
@@ -24,12 +25,16 @@ class EditVisitEntry extends EditRecord
     public function getRelationManagers(): array
     {
         // Only load relation managers if `start_time` is set
-        if ($this->record && $this->record->start_time && $this->record->travel_type === 'own_vehicle' )  {
+        if (
+            $this->record && $this->record->start_time &&
+            ($this->record->travel_type === 'own_vehicle' || $this->record->belong_school)
+        ) {
             return [
                 SchoolVisitRelationManager::class,
                 // Add other relation managers here if needed
             ];
         }
+
 
         // Otherwise, return an empty array
         return [];
@@ -78,12 +83,14 @@ class EditVisitEntry extends EditRecord
                         ->options([
                             'own_vehicle' => 'Travel by Own Vehicle',
                             'with_colleague' => 'Travel with Colleague',
+                            'with_head' => 'Travel with Head',
+
                         ])
                         ->reactive()
                         ->required(),
 
-                    
-                        
+
+
 
                     Forms\Components\TextInput::make('starting_km')
                         ->label('Starting KM')
@@ -91,6 +98,26 @@ class EditVisitEntry extends EditRecord
                         ->helperText('Enter the starting kilometers.')
                         ->required()
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
+
+
+                    Checkbox::make('belong_school')
+                        ->label('Is this school belongs to you ')
+                        ->hidden(fn($get) => $get('travel_type') !== 'with_head'),
+
+
+                    Select::make('head_id')
+                        ->label('Select Head you travel with')
+                        ->options(function () {
+                            return \App\Models\User::role(['zonal_manager', 'regional_manager', 'sales_operation_head'])
+                                ->get()
+                                ->mapWithKeys(function ($user) {
+                                    return [$user->id => "{$user->name} ({$user->email})"];
+                                });
+                        })
+                        ->searchable()
+                        ->hidden(fn($get) => $get('travel_type') !== 'with_head')
+                        ->helperText('Select a user with the role Zonal Manager, Senior Manager, or Sales Head.'),
+
 
                     Select::make('travel_mode')
                         ->label('Travel Mode')
@@ -111,7 +138,7 @@ class EditVisitEntry extends EditRecord
                 ->visible(fn() => !$this->record->start_time) // Only visible if start_time is null
                 ->color('success'),
 
-                Actions\Action::make('stop')
+            Actions\Action::make('stop')
                 ->label('End the Visit')
                 ->modalHeading('Provide Ending Details')
                 ->modalSubheading('Please provide the ending details before stopping the visit.')
@@ -129,21 +156,21 @@ class EditVisitEntry extends EditRecord
                     Forms\Components\FileUpload::make('ending_meter_photo')
                         ->label('Ending Meter Photo')
                         ->required()
-            
+
                         ->helperText('Upload a photo of the ending meter.')
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
 
 
-                        Forms\Components\TextInput::make('travel_expense')
-            ->label('Travel Expense')
-            ->numeric()
-            ->helperText('Provide the travel expense incurred.')
-            ->visible(fn() => $this->record->travel_type === 'with_colleague'), // Only show if travel type is 'with_colleague'
+                    Forms\Components\TextInput::make('travel_expense')
+                        ->label('Travel Expense')
+                        ->numeric()
+                        ->helperText('Provide the travel expense incurred.')
+                        ->visible(fn() => $this->record->travel_type === 'with_colleague'), // Only show if travel type is 'with_colleague'
 
-        Forms\Components\FileUpload::make('travel_bill')
-            ->label('Travel Bill (Bus/Train)')
-            ->visible(fn() => $this->record->travel_type === 'with_colleague'),
+                    Forms\Components\FileUpload::make('travel_bill')
+                        ->label('Travel Bill (Bus/Train)')
+                        ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])
                 ->action(fn(array $data) => $this->submitStopVisit($data))
                 ->visible(fn() => $this->record->start_time && !$this->record->end_time)
@@ -164,9 +191,10 @@ class EditVisitEntry extends EditRecord
             'travel_type' => $data['travel_type'] ?? null,
             'travel_expense' => $data['travel_expense'] ?? null,
             'starting_km' => $data['starting_km'] ?? null,
+            'head_id' => $data['head_id'] ?? null,
 
-                'starting_meter_photo' => $data['starting_meter_photo'] ?? null, // Save raw array
-
+            'belong_school' => $data['belong_school'] ?? null,
+            'starting_meter_photo' => $data['starting_meter_photo'] ?? null, // Save raw array
             'travel_mode' => $data['travel_mode'] ?? null,
             'start_time' => now(), // Set the start time
             'end_time' => null, // Clear the end time
@@ -185,16 +213,16 @@ class EditVisitEntry extends EditRecord
 
         $startingKm = $this->record->starting_km;
 
-    // Validate that ending_km is greater than starting_km
-    if (isset($data['ending_km']) && $data['ending_km'] <= $startingKm) {
-        Notification::make()
-            ->title('Validation Error')
-            ->danger()
-            ->body('The ending kilometers must be greater than the starting kilometers.')
-            ->send();
+        // Validate that ending_km is greater than starting_km
+        if (isset($data['ending_km']) && $data['ending_km'] <= $startingKm) {
+            Notification::make()
+                ->title('Validation Error')
+                ->danger()
+                ->body('The ending kilometers must be greater than the starting kilometers.')
+                ->send();
 
-        return; // Stop execution if validation fails
-    }
+            return; // Stop execution if validation fails
+        }
 
         // Combine start and stop data and save everything together
         $this->record->update([
@@ -205,20 +233,20 @@ class EditVisitEntry extends EditRecord
             'starting_km' => $data['starting_km'] ?? $this->record->starting_km,
             'starting_meter_photo' => $data['starting_meter_photo'] ?? $this->record->starting_meter_photo,
             'travel_mode' => $data['travel_mode'] ?? $this->record->travel_mode,
-            
+
             // Data collected during 'stop'
             'ending_km' => $data['ending_km'] ?? null,
             'ending_meter_photo' => $data['ending_meter_photo'] ?? null,
             'end_time' => now(), // Set the end time
         ]);
-    
+
         Notification::make()
             ->title('Visit Stopped')
             ->success()
             ->body('The visit has been stopped successfully with the provided ending details.')
             ->send();
     }
-    
+
 
     protected function getWorkingHoursLabel(): string
     {

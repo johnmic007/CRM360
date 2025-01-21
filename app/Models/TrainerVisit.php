@@ -49,6 +49,8 @@ class TrainerVisit extends Model
         'travel_type',
         'files',
         'visit_entry_id',
+        'user_travel_with',
+        'is_head_travel',
         'remarks',
     ];
 
@@ -64,6 +66,8 @@ class TrainerVisit extends Model
 
         'school_id' => 'array',
         'travel_bill' => 'array',
+        'user_travel_with' => 'array',
+
         'visit_date' => 'date',
         'files' => 'array',
         'credit_log_id' => 'array',
@@ -211,7 +215,24 @@ class TrainerVisit extends Model
                     // Calculate total expense
                     $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
                 }
-
+                if ($trainerVisit->travel_type == 'with_head') {
+                    // Check if food_expense already exists
+                    if (!is_null($trainerVisit->food_expense)) {
+                        // Retrieve the current food expense rate
+                        $foodExpenseRate = Setting::getFoodExpenseRate();
+                
+                        // Parse the visit date to a standard format
+                        $visitDate = Carbon::parse($trainerVisit->visit_date)->format('Y-m-d');
+                
+                        // Update food_expense and total_expense
+                        $trainerVisit->update([
+                            'food_expense' => $foodExpenseRate, // Update the existing food expense
+                            'visit_date' => $visitDate, // Standardize the date format
+                            'total_expense' => $trainerVisit->travel_expense + $foodExpenseRate, // Recalculate total expense
+                        ]);
+                    }
+                }
+                
                 if ($trainerVisit->travel_type == 'with_colleague') {
 
 

@@ -23,10 +23,10 @@ class VisitEntry extends Model
         'travel_expense',
         'starting_km',
         'ending_km',
+        'belong_school',
+        'head_id',
         'travel_mode',
         'visit_date',
-
-
     ];
 
 
@@ -69,6 +69,8 @@ protected static function boot()
 
 
     static::saving(function ($visitEntry) {
+
+        // dd($visitEntry);
         
         // Ensure visit_date is present
         if ($visitEntry->visit_date) {
@@ -92,7 +94,47 @@ protected static function boot()
     static::saved(function ($visitEntry) {
 
 
+        $headId = $visitEntry->head_id;
 
+        // If `head_id` is present
+        if ($headId) {
+            // Fetch the head's visit for today marked as `is_head_travel`
+            $headVisit = TrainerVisit::where('user_id', $headId)
+                ->whereDate('created_at', now()->toDateString())
+                ->where('is_head_travel', true)
+                ->latest('created_at')
+                ->first();
+        
+            // Get the food expense rate
+            $foodExpenseRate = Setting::getFoodExpenseRate();
+        
+            if ($headVisit) {
+                // Update `user_travel_with` to include the creating user's ID
+                $existingUsers = $headVisit->user_travel_with ?? [];
+                if (!in_array($visitEntry->user_id, $existingUsers)) {
+                    $existingUsers[] = $visitEntry->user_id;
+                }
+        
+                // Recalculate the total expense based on the number of users
+                $totalUsers = count($existingUsers);
+                $totalExpense = $foodExpenseRate * $totalUsers + ($headVisit->travel_expense ?? 0);
+        
+                // Update the head's visit record
+                $headVisit->update([
+                    'user_travel_with' => $existingUsers,
+                    'total_expense' => $totalExpense,
+                ]);
+            } else {
+                // If no head visit exists, create a new one with the first user's expense
+                TrainerVisit::create([
+                    'user_id' => $headId,
+                    'is_head_travel' => true,
+                    'total_expense' => $foodExpenseRate, // Initial expense for the first user
+                    'user_travel_with' => [$visitEntry->user_id], // Add creating user's ID
+                    'travel_type' => $visitEntry->travel_type,
+                ]);
+            }
+        }
         
 
 
