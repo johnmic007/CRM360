@@ -260,7 +260,7 @@ class ViewTrainerVisit extends ViewRecord
                                 // Fetch credit transactions where transaction_id is null
                                 $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
                                     ->where('type', 'credit')
-                                    ->whereNull('transaction_id')
+                                    ->whereNotNull('transaction_id')
                                     ->get();
 
                                 // Fetch all debit transactions for the user
