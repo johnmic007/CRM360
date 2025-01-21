@@ -8,6 +8,7 @@ use App\Models\District;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Illuminate\Database\Eloquent\Model;
 
 class BlockResource extends Resource
 {
@@ -20,7 +21,14 @@ class BlockResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' ,'sales_operation']);
+        return auth()->user()->hasRole(['admin' ,'sales_operation' , 'company' ]);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin' ,'sales_operation'  ]);
+
+        
     }
 
     public static function form(Forms\Form $form): Forms\Form

@@ -64,6 +64,7 @@ class TrainerVisit extends Model
 
         'school_id' => 'array',
         'travel_bill' => 'array',
+        'visit_date' => 'date',
         'files' => 'array',
         'credit_log_id' => 'array',
 

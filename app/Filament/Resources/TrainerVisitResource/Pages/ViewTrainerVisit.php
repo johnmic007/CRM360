@@ -195,6 +195,10 @@ class ViewTrainerVisit extends ViewRecord
                 ->requiresConfirmation(fn() => $this->record->approval_status !== 'approved')
                 ->form(function () {
                     $user = User::find($this->record->user_id);
+                    $userId = $this->record->user_id;
+
+                    // dd($userId);
+
                     $totalExpense = $this->record->total_expense;
 
                     // Fetch selected wallet logs for the user
@@ -203,7 +207,7 @@ class ViewTrainerVisit extends ViewRecord
                         ->where('type', 'credit')
                         ->where(function ($query) {
                             $query->where('is_closed', false)
-                                  ->orWhereNull('is_closed');
+                                ->orWhereNull('is_closed');
                         })
                         // ->where('balance', '>', 0) // Only fetch logs with a positive balance
                         ->get();
@@ -214,12 +218,74 @@ class ViewTrainerVisit extends ViewRecord
                             ->default($user ? number_format($user->wallet_balance, 2) : '0.00')
                             ->disabled(), // Make the input read-only
 
+                        // Select::make('selected_credit_logs')
+                        // ->label('Select Credit Logs to Apply')
+                        // ->options(function () use ($walletLogs) {
+                        //     return $walletLogs->mapWithKeys(function ($log) {
+                        //         return [
+                        //             $log->id => "{$log->transaction_id} | Amount: {$log->amount} | Balance: {$log->balance}",
+                        //         ];
+                        //     });
+                        // })
+
+                        // Total Credit
+                        TextInput::make('total_credit')
+                            ->label('Total Credit')
+                            ->disabled() // Make it read-only
+                            ->reactive()
+                            ->default(function () use ($userId) {
+                                
+                                return \App\Models\WalletLog::where('user_id', $userId)
+                                    ->where('type', 'credit')
+                                    ->whereNull('transaction_id')
+                                    ->sum('amount'); 
+                            }),
+
+                        // Total Debit
+                        TextInput::make('total_debit')
+                            ->label('Total Debit')
+                            ->disabled() // Make it read-only
+                            ->reactive()
+                            ->default(function () use ($userId) {
+                                return \App\Models\WalletLog::where('user_id', $userId)
+                                    ->where('type', 'debit')
+                                    ->whereNull('transaction_id')
+                                    ->sum('amount'); // Sum up all debit transactions
+                            }),
+
+
                         Select::make('selected_credit_logs')
                             ->label('Select Credit Logs to Apply')
-                            ->options(function () use ($walletLogs) {
-                                return $walletLogs->mapWithKeys(function ($log) {
+                            ->visible(function () use ($walletLogs, $userId) {
+                                // Fetch credit transactions where transaction_id is null
+                                $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
+                                    ->where('type', 'credit')
+                                    ->whereNull('transaction_id')
+                                    ->get();
+
+                                // Fetch all debit transactions for the user
+                                $debitLogs = \App\Models\WalletLog::where('user_id', $userId)
+                                    ->where('type', 'debit')
+                                    ->get();
+
+                                // Calculate total amounts
+                                $totalCredits = $creditLogs->sum('amount');
+                                $totalDebits = $debitLogs->sum('amount');
+
+                                // Show the field only if the debit difference is greater
+                                return $totalDebits >= $totalCredits;
+                            })
+                            ->options(function () use ($walletLogs, $userId) {
+                                // Fetch credit transactions where transaction_id is null
+                                $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
+                                    ->where('type', 'credit')
+                                    // ->whereNull('transaction_id')
+                                    ->get();
+
+                                // Map the logs into options
+                                return $creditLogs->mapWithKeys(function ($log) {
                                     return [
-                                        $log->id => "Amount: {$log->amount} | Balance: {$log->balance}",
+                                        $log->id => "{$log->transaction_id} | Amount: {$log->amount} | Balance: {$log->balance}",
                                     ];
                                 });
                             })

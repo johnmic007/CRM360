@@ -113,10 +113,8 @@ class CompanyAccountResource extends Resource
                             'approved_by' => auth()->id(),
                         ]);
 
-                        // Log the company transaction
-                        $transactionId = CompanyTransaction::generateTransactionId($data['amount']);
-                        CompanyTransaction::create([
-                            'transaction_id' => $transactionId,
+
+                        $transaction = new \App\Models\CompanyTransaction([
                             'amount' => $data['amount'],
                             'balance' => $data['amount'],
 
@@ -128,6 +126,16 @@ class CompanyAccountResource extends Resource
                             'wallet_user_id' => $record->id,
                             'description' => $data['description'],
                         ]);
+                    
+                        // Save the transaction to generate the ID
+                        $transaction->save();
+                    
+                        // Generate the transaction ID using the instance method
+                        $transactionId = $transaction->generateTransactionId();
+
+                        $transaction->transaction_id = $transactionId;
+
+                        $transaction->save();
 
                         // Notify the admin of success
                         Notification::make()

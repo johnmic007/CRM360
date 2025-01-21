@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BoardResource extends Resource
@@ -23,8 +24,17 @@ class BoardResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'sales_operation']);
+        return auth()->user()->hasRole(['admin' , 'sales_operation' , 'company' ]);
     }
+
+    public static function canEdit(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin' , 'sales_operation' ]);
+
+        
+    }
+
+    
 
 
 

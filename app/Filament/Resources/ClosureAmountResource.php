@@ -32,7 +32,7 @@ class ClosureAmountResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['accounts_head']);
+        return auth()->user()->hasRole([ 'admin' , 'accounts_head']);
     }
 
 

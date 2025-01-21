@@ -23,7 +23,7 @@ class ListCreateExpnesses extends ListRecords
 
 protected function getTableQuery(): Builder
 {
-    $query = parent::getTableQuery(); // Get the default query
+    $query = parent::getTableQuery(); // Get the defaulpt query
     $user = auth()->user(); // Get the authenticated user
 
   

@@ -123,7 +123,7 @@ class TopUpResource extends Resource
                             ->helperText('Optional reference number for the payment.'),
 
 
-                            FileUpload::make('payment_proof')
+                        FileUpload::make('payment_proof')
                             ->label('Payment Proof')
                             ->directory('payment_proofs')  // Store the image in a specific directory
                             ->nullable(),
@@ -157,21 +157,34 @@ class TopUpResource extends Resource
                         $record->amount_to_close += $amount;
                         $record->save();
 
+
+                        $lastLog = \App\Models\WalletLog::where('transaction_id', 'like', "{$transaction->transaction_id}-%")
+                            ->orderBy('transaction_id', 'desc')
+                            ->first();
+
+                        $nextAlphabet = 'A';
+
+
+                        if ($lastLog) {
+                            $lastAlphabet = strtoupper(substr($lastLog->transaction_id, -1));
+                            $nextAlphabet = chr(ord($lastAlphabet) + 1); // Increment the alphabet
+                        }
+
+                        $newTransactionId = "{$transaction->transaction_id}-{$nextAlphabet}";
+
+
                         // Log the wallet top-up transaction
                         $walletLog = WalletLog::create([
                             'user_id' => $record->id,
-                            
+
                             'company_id' => $record->company_id,
                             'amount' => $amount,
                             'balance' => $amount,
                             'credit_type' => 'accounts topup',
-
-
+                            'transaction_id' => $newTransactionId,
                             'payment_date' => $data['payment_date'],
                             'payment_method' => $data['payment_method'],
                             'payment_proof' => $data['payment_proof'],
-
-
                             'type' => 'credit',
                             'description' => 'Wallet top-up from Company Transaction',
                             'payment_method' => 'CompanyTransaction',

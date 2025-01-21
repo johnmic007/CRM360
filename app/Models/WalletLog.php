@@ -26,6 +26,7 @@ class WalletLog extends Model
         'reimbursement_amount',
         'wallet_logs',
         'credit_type',
+        'transaction_id',
         'approved_by'
 
     ];

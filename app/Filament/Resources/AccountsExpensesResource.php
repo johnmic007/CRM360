@@ -19,6 +19,8 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+
 use Illuminate\Contracts\Database\Eloquent\Builder;
 
 class AccountsExpensesResource extends Resource
@@ -33,9 +35,17 @@ class AccountsExpensesResource extends Resource
 
     protected static ?string $navigationGroup = 'Reports';
 
+    
+
     public static function canViewAny(): bool
     {
+        return auth()->user()->hasRole(['admin', 'accounts_head' , 'company' ]);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
         return auth()->user()->hasRole(['admin' , 'sales_operation_head' , 'accounts_head']);
+
     }
 
 
