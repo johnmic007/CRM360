@@ -266,6 +266,7 @@ class ViewTrainerVisit extends ViewRecord
                                 // Fetch all debit transactions for the user
                                 $debitLogs = \App\Models\WalletLog::where('user_id', $userId)
                                     ->where('type', 'debit')
+                                    ->whereNull('transaction_id')
                                     ->get();
 
                                 // Calculate total amounts
