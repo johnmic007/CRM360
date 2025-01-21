@@ -20,6 +20,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -38,9 +39,9 @@ class TrainerVisitResource extends Resource
     protected static ?string $navigationGroup = 'Approvals';
 
     public static function canViewAny(): bool
-{
-    return !auth()->user()->hasRole('company');
-}
+    {
+        return !auth()->user()->hasRole('company');
+    }
 
 
 
@@ -51,8 +52,7 @@ class TrainerVisitResource extends Resource
         // Allow edit only if the user is the owner of the record
         // return $record->user_id === auth()->id();
 
-        return auth()->user()->hasRole(['admin' , 'sales_operation_head' ]);
-
+        return auth()->user()->hasRole(['admin', 'sales_operation_head']);
     }
 
 
@@ -77,8 +77,7 @@ class TrainerVisitResource extends Resource
 
     public static function canDelete(Model $record): bool
     {
-        return auth()->user()->hasRole(['admin' ]);
-
+        return auth()->user()->hasRole(['admin']);
     }
 
 
@@ -193,7 +192,7 @@ class TrainerVisitResource extends Resource
                             ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
                             ->readOnly(fn() => !auth()->user()->hasAnyRole(['sales_operation', 'sales_operation_head'])),
 
-                            Textarea::make('description')
+                        Textarea::make('description')
                             ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
                             ->readOnly(),
 
@@ -212,6 +211,8 @@ class TrainerVisitResource extends Resource
                             ->options([
                                 'own_vehicle' => 'Travel by Own Vehicle',
                                 'with_colleague' => 'Travel with Colleague',
+                                'with_head' => 'Travel with Head',
+
                             ])
                             ->reactive()
                             ->required()
@@ -389,6 +390,22 @@ class TrainerVisitResource extends Resource
                     ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
 
 
+                TextInput::make('total_expense')
+                    ->hidden(fn($get) => $get('travel_type') !== 'with_head')
+
+                    ->readOnly(),
+
+
+
+
+                Select::make('user_travel_with')
+                    ->label('Users Travel With')
+                    ->disabled()
+                    ->hidden(fn($get) => $get('travel_type') !== 'with_head')
+                    ->options(\App\Models\User::pluck('name', 'id')->toArray()) // Provide a list of users
+                    ->multiple() // Allow multiple selections
+                    ->searchable(),
+
                 Forms\Components\FileUpload::make('files')
                     ->label('Upload School Images') // Clear and descriptive label
                     ->hidden(fn(callable $get) => $get('travel_type') == 'extra_expense')
@@ -464,7 +481,7 @@ class TrainerVisitResource extends Resource
                         'class' => 'cursor-pointer',
                     ]),
 
-                    TextColumn::make('remarks')->label('Remark'),
+                TextColumn::make('remarks')->label('Remark'),
 
 
 
@@ -502,14 +519,14 @@ class TrainerVisitResource extends Resource
                         return null;
                     }),
 
-                    SelectFilter::make('travel_type')
+                SelectFilter::make('travel_type')
                     ->label('Travel Type')
                     ->options([
                         'own_vehicle' => 'Travel by Own Vehicle',
                         'with_colleague' => 'Travel with Colleague',
                     ]),
 
-                    SelectFilter::make('travel_mode')
+                SelectFilter::make('travel_mode')
                     ->label('Travel Type')
                     ->options([
                         'car' => 'Car',
@@ -517,13 +534,13 @@ class TrainerVisitResource extends Resource
                     ]),
 
 
-                    SelectFilter::make('selected_user')
+                SelectFilter::make('selected_user')
                     ->label('User') // Updated label
                     ->options(function () {
                         // Fetch all users except those with the 'admin' role
                         return User::whereDoesntHave('roles', function ($query) {
-                                $query->where('name', 'admin');
-                            })
+                            $query->where('name', 'admin');
+                        })
                             ->pluck('name', 'id') // Fetch users' names and IDs
                             ->all();
                     })

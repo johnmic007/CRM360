@@ -215,23 +215,23 @@ class TrainerVisit extends Model
                     // Calculate total expense
                     $trainerVisit->total_expense = $trainerVisit->travel_expense + $trainerVisit->food_expense;
                 }
-                if ($trainerVisit->travel_type == 'with_head') {
-                    // Check if food_expense already exists
-                    if (!is_null($trainerVisit->food_expense)) {
-                        // Retrieve the current food expense rate
-                        $foodExpenseRate = Setting::getFoodExpenseRate();
+                // if ($trainerVisit->travel_type == 'with_head') {
+                //     // Check if food_expense already exists
+                //     if (!is_null($trainerVisit->food_expense)) {
+                //         // Retrieve the current food expense rate
+                //         $foodExpenseRate = Setting::getFoodExpenseRate();
                 
-                        // Parse the visit date to a standard format
-                        $visitDate = Carbon::parse($trainerVisit->visit_date)->format('Y-m-d');
+                //         // Parse the visit date to a standard format
+                //         $visitDate = Carbon::parse($trainerVisit->visit_date)->format('Y-m-d');
                 
-                        // Update food_expense and total_expense
-                        $trainerVisit->update([
-                            'food_expense' => $foodExpenseRate, // Update the existing food expense
-                            'visit_date' => $visitDate, // Standardize the date format
-                            'total_expense' => $trainerVisit->travel_expense + $foodExpenseRate, // Recalculate total expense
-                        ]);
-                    }
-                }
+                //         // Update food_expense and total_expense
+                //         $trainerVisit->update([
+                //             'food_expense' => $foodExpenseRate, // Update the existing food expense
+                //             'visit_date' => $visitDate, // Standardize the date format
+                //             'total_expense' => $trainerVisit->travel_expense + $foodExpenseRate, // Recalculate total expense
+                //         ]);
+                //     }
+                // }
                 
                 if ($trainerVisit->travel_type == 'with_colleague') {
 
