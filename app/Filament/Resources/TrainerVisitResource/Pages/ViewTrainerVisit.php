@@ -389,7 +389,7 @@ class ViewTrainerVisit extends ViewRecord
                     $user->wallet_balance -= $totalExpense;
                     $user->save();
 
-                    $includedCreditLogs = $log->id;
+                    $includedCreditLogs = $log->id ?? null;
 
 
                     Log::info('Wallet balance updated (can be negative).', [
