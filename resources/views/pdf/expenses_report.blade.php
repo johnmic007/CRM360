@@ -241,9 +241,6 @@
         <div class="signature-box">Head</div>
     </div>
 
-    <!-- Optional Footer -->
-    <div class="footer">
-        &copy; {{ date('Y') }} Your Company. All rights reserved.
-    </div>
+   
 </body>
 </html>
