@@ -192,7 +192,6 @@ class EditVisitEntry extends EditRecord
             'travel_expense' => $data['travel_expense'] ?? null,
             'starting_km' => $data['starting_km'] ?? null,
             'head_id' => $data['head_id'] ?? null,
-
             'belong_school' => $data['belong_school'] ?? null,
             'starting_meter_photo' => $data['starting_meter_photo'] ?? null, // Save raw array
             'travel_mode' => $data['travel_mode'] ?? null,

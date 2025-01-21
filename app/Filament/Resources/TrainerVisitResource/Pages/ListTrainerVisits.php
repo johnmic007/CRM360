@@ -95,7 +95,7 @@ class ListTrainerVisits extends ListRecords
         $user = auth()->user();
 
         // Admin or accounts roles can see all records
-        if (!$user->hasRole(['admin', 'accounts', 'accounts_head'])) {
+        if (!$user->hasRole(['admin', 'accounts', 'accounts_head' , 'company'])) {
             return [
                 'all' => Tab::make('All Visits')
                     ->modifyQueryUsing(fn (Builder $query) => $query),
@@ -195,9 +195,14 @@ class ListTrainerVisits extends ListRecords
         }
 
         // For sales_operation, show records for their company
+        if ($user->hasRole('company')) {
+            return TrainerVisit::where('company_id', $user->company_id);
+        }
+
         if ($user->hasRole('sales_operation')) {
             return TrainerVisit::where('company_id', $user->company_id);
         }
+
 
         if ($user->hasRole('sales_operation_head')) {
             return TrainerVisit::where('company_id', $user->company_id);

@@ -6,12 +6,15 @@
         /* PDF & Print Friendly Styles */
         @page {
             margin: 20px;
+            size: auto;
+
         }
         body {
             font-family: Arial, Helvetica, sans-serif;
             margin: 20px;
             font-size: 14px;
             color: #333;
+            position: relative;
         }
 
         /* Heading / Title */
@@ -88,20 +91,21 @@
 
         /* Signature Section */
         .signature-section {
-            margin-top: 60px;
-            text-align: center;
-        }
-        .signature-box {
-            display: inline-block;
-            width: 160px;
-            border-top: 1px solid #000;
-            margin: 0 40px;
-            margin-top: 40px;
-            text-align: center;
-            padding-top: 6px;
-            font-weight: bold;
-        }
-
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+}
+.signature-box {
+    display: inline-block;
+    width: 160px;
+    border-top: 1px solid #000;
+    margin: 0 40px;
+    text-align: center;
+    padding-top: 6px;
+    font-weight: bold;
+}
         /* Optional: Add a small footer or page number for the PDF */
         .footer {
             margin-top: 50px;
@@ -121,8 +125,14 @@
     <div class="summary-section">
         <table class="summary-table">
             <tr>
-                <th>Date</th>
-                <td>{{ $vDate }}</td>
+            <th>Date</th>
+                <td>
+                    @if($records->isNotEmpty())
+                        {{ \Carbon\Carbon::parse($records->first()->visit_date)->format('d M Y') }}
+                    @else
+                        N/A
+                    @endif
+                </td>
             </tr>
             <tr>
                 <th>Total KM</th>

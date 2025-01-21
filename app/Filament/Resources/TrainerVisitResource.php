@@ -38,10 +38,10 @@ class TrainerVisitResource extends Resource
 
     protected static ?string $navigationGroup = 'Approvals';
 
-    public static function canViewAny(): bool
-    {
-        return !auth()->user()->hasRole('company');
-    }
+    // public static function canViewAny(): bool
+    // {
+    //     return !auth()->user()->hasRole('company');
+    // }
 
 
 

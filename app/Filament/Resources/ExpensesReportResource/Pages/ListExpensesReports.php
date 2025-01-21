@@ -101,6 +101,10 @@ public function downloadPDF()
 
     $vDate = request()->input('visit_date'); // Assuming `start_date` is passed in the request
 
+    $Date = request()->input('date'); // Assuming `start_date` is passed in the request
+
+
+
 
     // Calculate totals
     $totalKm = $records->sum('distance_traveled');
