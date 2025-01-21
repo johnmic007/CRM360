@@ -155,8 +155,7 @@ class EditTrainerVisit extends EditRecord
                                 ->where('type', 'credit')
                                 ->pluck('amount', 'id');
                         })
-                        ->searchable()
-                        ->required(),
+                        ->searchable(),
                 ])
                 ->action(function (array $data) {
                     // Must be verified by Sales first
