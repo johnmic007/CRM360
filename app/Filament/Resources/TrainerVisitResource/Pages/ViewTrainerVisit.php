@@ -259,8 +259,8 @@ class ViewTrainerVisit extends ViewRecord
                             ->visible(function () use ($walletLogs, $userId) {
                                 // Fetch credit transactions where transaction_id is null
                                 $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
-                                    ->where('type', 'credit')
-                                    ->whereNotNull('transaction_id')
+                                ->where('type', 'credit')
+                                ->whereNull('transaction_id')
                                     ->get();
 
                                 // Fetch all debit transactions for the user
@@ -273,15 +273,19 @@ class ViewTrainerVisit extends ViewRecord
                                 $totalCredits = $creditLogs->sum('amount');
                                 $totalDebits = $debitLogs->sum('amount');
 
+                                // dd(  $creditLogs ,  $totalCredits , $totalDebits  );
+
                                 // Show the field only if the debit difference is greater
-                                return $totalDebits >= $totalCredits;
+                                return $totalDebits > $totalCredits;
                             })
                             ->options(function () use ($walletLogs, $userId) {
                                 // Fetch credit transactions where transaction_id is null
                                 $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
                                     ->where('type', 'credit')
-                                    // ->whereNull('transaction_id')
+                                    ->whereNotNull('transaction_id')
                                     ->get();
+
+                                    // dd($creditLogs);
 
                                 // Map the logs into options
                                 return $creditLogs->mapWithKeys(function ($log) {
