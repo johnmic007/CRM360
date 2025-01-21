@@ -13,6 +13,8 @@ class ListAccountsClosings extends ListRecords
 
     protected function getTableQuery(): Builder
     {
-        return parent::getTableQuery()->whereNotNull('balance');
+        return parent::getTableQuery()
+            ->whereNotNull('balance')
+            ->where('credit_type', 'accounts topup');
     }
 }
