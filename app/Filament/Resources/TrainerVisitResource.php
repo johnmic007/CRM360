@@ -47,6 +47,7 @@ class TrainerVisitResource extends Resource
 
 
 
+
     public static function canEdit($record): bool
     {
         // Allow edit only if the user is the owner of the record
@@ -72,7 +73,7 @@ class TrainerVisitResource extends Resource
 
     public static function canCreate(): bool
     {
-        return !auth()->user()->hasAnyRole(['admin', 'sales_operation']);
+        return !auth()->user()->hasAnyRole(['admin', 'sales_operation', 'company']);
     }
 
     public static function canDelete(Model $record): bool
@@ -184,7 +185,7 @@ class TrainerVisitResource extends Resource
                         DatePicker::make('visit_date')
                             ->label('Visit Date')
                             ->default(now())
-                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified' && !auth()->user()->hasRole('admin')) // Allow admin to edit
                             ->required(),
 
                         TextInput::make('total_expense')

@@ -32,6 +32,7 @@ class EditAccountsClosing extends EditRecord
                 ? "Close Account (Reimbursement: {$this->record->balance})"
                 : "Close Account")
             ->icon('heroicon-o-lock-closed')
+            ->disabled(fn () => $this->record && $this->record->balance > 0)
             ->visible(fn () => !$this->record->is_closed) // Hide if is_closed is true
             ->color('danger')
             ->requiresConfirmation(fn () => $this->record->balance < 0 

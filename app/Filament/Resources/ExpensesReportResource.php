@@ -33,7 +33,7 @@ class ExpensesReportResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , 'head' , 'zonal_manager' , 'regional_manager' ]);
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'company' , 'sales_operation_head' , 'head' , 'zonal_manager' , 'regional_manager' ]);
     }
 
 

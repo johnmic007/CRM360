@@ -68,12 +68,12 @@ class ListVisitReports extends ListRecords
         $user = auth()->user();
 
         // Allow all reports for admin and accounts_head roles
-        if ($user->roles()->whereIn('name', ['admin'])->exists()) {
+        if ($user->roles()->whereIn('name', ['admin' ])->exists()) {
             return $query;
         }
 
         // Show reports for the logged-in user's company for sales_operation role
-        if ($user->roles()->where('name', ['sales_operation_head' ,'head' , 'sales_operation'])->exists()) {
+        if ($user->roles()->whereIn('name', ['sales_operation_head' ,'head' , 'sales_operation' ,'company' ])->exists()) {
             // return $query->where('company_id', $user->company_id);
             return $query;
 
