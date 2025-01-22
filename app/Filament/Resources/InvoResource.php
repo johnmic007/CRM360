@@ -180,15 +180,15 @@ class InvoResource extends Resource
                                 ->label('Due Date')
                                 ->nullable(),
 
-                            Select::make('status')
-                                ->label('Status')
-                                ->disabled()
-                                ->options([
-                                    'draft' => 'Draft',
-                                    'sent' => 'Sent',
-                                    'paid' => 'Paid',
-                                ])
-                                ->default('draft'),
+                            // Select::make('status')
+                            //     ->label('Status')
+                            //     ->disabled()
+                            //     ->options([
+                            //         'draft' => 'Draft',
+                            //         'sent' => 'Sent',
+                            //         'paid' => 'Paid',
+                            //     ])
+                            //     ->default('draft'),
                         ]),
                 ])
                 ->collapsible()
@@ -539,16 +539,16 @@ class InvoResource extends Resource
 
                 TextColumn::make('paid')
                     ->label('Paid')
-                    ->money('USD') // Adjust the currency as needed
+                    ->money('INR') // Adjust the currency as needed
                     ->sortable(),
 
-                TextColumn::make('status')
+                TextColumn::make('payment_status')
                     ->label('Status')
                     ->color(function ($state) {
                         return match ($state) {
                             'draft' => 'gray',
-                            'sent' => 'yellow',
-                            'paid' => 'green',
+                            'Pending' => 'primary',
+                            'Paid' => 'success',
                             default => 'gray',
                         };
                     })
@@ -564,14 +564,14 @@ class InvoResource extends Resource
                     ->label('Company')
                     ->relationship('company', 'name'),
 
-                SelectFilter::make('status')
-                    ->label('Status')
+                // SelectFilter::make('payment_status')
+                //     ->label('Status')
                     
-                    ->options([
-                        'draft' => 'Draft',
-                        'sent' => 'Sent',
-                        'paid' => 'Paid',
-                    ]),
+                //     ->options([
+                //         'draft' => 'Draft',
+                //         'sent' => 'Sent',
+                //         'paid' => 'Paid',
+                //     ]),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
