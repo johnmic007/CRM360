@@ -244,7 +244,13 @@ class InvoResource extends Resource
                                             // Update the total for this item based on quantity and price
                                             $quantity = $get('quantity') ?? 0;
                                             $price = $get('price') ?? 0;
-                                            $set('total', $quantity * $price); // Set the total for the item
+                                        
+                                            // Ensure both values are numeric
+                                            $quantity = is_numeric($quantity) ? (float)$quantity : 0;
+                                            $price = is_numeric($price) ? (float)$price : 0;
+                                        
+                                            // Calculate the total
+                                            $set('total', $quantity * $price);
                                         }),
 
                                     TextInput::make('total')
