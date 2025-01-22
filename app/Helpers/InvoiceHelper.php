@@ -14,7 +14,7 @@ class InvoiceHelper
     if (is_array($items) || is_object($items)) {
         foreach ($items as $item) {
             // Ensure each item has quantity and price
-            if (isset($item['quantity']) && isset($item['price'])) {
+            if (isset($item['quantity']) && isset($item['price']) && is_numeric($item['quantity']) && is_numeric($item['price'])) {
                 $totalAmount += ($item['quantity'] * $item['price']);
             }
         }
