@@ -258,6 +258,8 @@ class TrainerVisitResource extends Resource
 
                         FileUpload::make('starting_meter_photo')
                             ->label('Starting Meter Photo')
+                            ->disk('s3')
+                            ->directory('CRM')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->helperText('Upload a clear photo of the starting meter.')
@@ -356,6 +358,8 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('travel_bill')
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
+                            ->disk('s3')
+                            ->directory('CRM')
 
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
