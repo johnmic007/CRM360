@@ -126,81 +126,81 @@ class SchoolVisitRelationManager extends RelationManager
 
 
                 Forms\Components\Select::make('school_id')
-                ->label('School')
-                ->options(function (callable $get) {
-                    $blockId = $get('block_id');
-                    if (!$blockId) {
-                        return [];
-                    }
-                    return School::where('block_id', $blockId)->pluck('name', 'id');
-                })
-                ->reactive()
-                ->searchable()
-                ->required()
-                ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                    if (!$state) {
-                        return;
-                    }
-            
-                    $currentUserId = auth()->id();
-            
-                    // Check if the school is already assigned in `school_user`
-                    $assignedSchools = DB::table('school_user')->where('school_id', $state)->exists();
-            
-                    if ($assignedSchools) {
-                        // Check if the current user is assigned to this school
-                        $isCurrentUserAssigned = DB::table('school_user')
-                            ->where('school_id', $state)
-                            ->where('user_id', $currentUserId)
-                            ->exists();
-
-            
-                        if (!$isCurrentUserAssigned) {
-                            // If the school is assigned to another user
-                            // dd($isCurrentUserAssigned);
-
-                            // dd('kjdhsuj');
-                            $set('status', 'Assigned to Another User');
-            
-                            // Update the message in another input box
-                            $set('warning_message', 'This school is assigned to another user. Please request your manager to assign this school to you.');
+                    ->label('School')
+                    ->options(function (callable $get) {
+                        $blockId = $get('block_id');
+                        if (!$blockId) {
+                            return [];
+                        }
+                        return School::where('block_id', $blockId)->pluck('name', 'id');
+                    })
+                    ->reactive()
+                    ->searchable()
+                    ->required()
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                        if (!$state) {
                             return;
                         }
-            
-                        // If the current user is assigned, fetch the existing status
-                        $status = SalesLeadManagement::where('school_id', $state)
-                            ->where('allocated_to', auth()->id())
-                            ->value('status');
-            
-                        $salesLeadManagementId = SalesLeadManagement::where('school_id', $state)
-                            ->where('allocated_to', auth()->id())
-                            ->value('id');
-            
-                        // Pass the existing SalesLeadManagement ID
-                        $set('sales_lead_management_id', $salesLeadManagementId);
-            
-                        $set('status', $status ?? 'No Status Found');
-            
-                        // Clear any previous warning message
-                        $set('warning_message', null);
-                    } else {
-                        // If the school is not yet assigned, mark it for the current user
-                        $set('status', 'School Nurturing');
-                        $set('warning_message', null);
-                    }
-                }),
-            
+
+                        $currentUserId = auth()->id();
+
+                        // Check if the school is already assigned in `school_user`
+                        $assignedSchools = DB::table('school_user')->where('school_id', $state)->exists();
+
+                        if ($assignedSchools) {
+                            // Check if the current user is assigned to this school
+                            $isCurrentUserAssigned = DB::table('school_user')
+                                ->where('school_id', $state)
+                                ->where('user_id', $currentUserId)
+                                ->exists();
+
+
+                            if (!$isCurrentUserAssigned) {
+                                // If the school is assigned to another user
+                                // dd($isCurrentUserAssigned);
+
+                                // dd('kjdhsuj');
+                                $set('status', 'Assigned to Another User');
+
+                                // Update the message in another input box
+                                $set('warning_message', 'This school is assigned to another user. Please request your manager to assign this school to you.');
+                                return;
+                            }
+
+                            // If the current user is assigned, fetch the existing status
+                            $status = SalesLeadManagement::where('school_id', $state)
+                                ->where('allocated_to', auth()->id())
+                                ->value('status');
+
+                            $salesLeadManagementId = SalesLeadManagement::where('school_id', $state)
+                                ->where('allocated_to', auth()->id())
+                                ->value('id');
+
+                            // Pass the existing SalesLeadManagement ID
+                            $set('sales_lead_management_id', $salesLeadManagementId);
+
+                            $set('status', $status ?? 'No Status Found');
+
+                            // Clear any previous warning message
+                            $set('warning_message', null);
+                        } else {
+                            // If the school is not yet assigned, mark it for the current user
+                            $set('status', 'School Nurturing');
+                            $set('warning_message', null);
+                        }
+                    }),
+
                 Forms\Components\Section::make()
-                ->schema([
-                    // Styled Warning Message
-                    Forms\Components\Textarea::make('warning_message')
-                        ->label('⚠️ Warning Message')
-                        ->placeholder('No warnings at the moment.')
-                        ->rows(3)
-                        ->readOnly()
-                        ->reactive()
-                        ->extraAttributes([
-                            'style' => '
+                    ->schema([
+                        // Styled Warning Message
+                        Forms\Components\Textarea::make('warning_message')
+                            ->label('⚠️ Warning Message')
+                            ->placeholder('No warnings at the moment.')
+                            ->rows(3)
+                            ->readOnly()
+                            ->reactive()
+                            ->extraAttributes([
+                                'style' => '
                                 color: var(--warning-text-color);
                                 background-color: var(--warning-bg-color);
                                 font-weight: bold;
@@ -208,36 +208,36 @@ class SchoolVisitRelationManager extends RelationManager
                                 padding: 10px;
                                 border-radius: 5px;
                             '
-                        ])
-                        ->helperText('This section will display warnings, if applicable.'),
-            
-                    // Styled Input for Manager Request
-                    Forms\Components\Textarea::make('message')
-                        ->label('📝 Request Message')
-                        ->placeholder('Write your message to request reassignment from your manager.')
-                        ->rows(3)
-                        ->required()
-                        ->helperText('Compose a message to send to your manager. Be clear and concise.')
-                        ->extraAttributes([
-                            'style' => '
+                            ])
+                            ->helperText('This section will display warnings, if applicable.'),
+
+                        // Styled Input for Manager Request
+                        Forms\Components\Textarea::make('message')
+                            ->label('📝 Request Message')
+                            ->placeholder('Write your message to request reassignment from your manager.')
+                            ->rows(3)
+                            ->required()
+                            ->helperText('Compose a message to send to your manager. Be clear and concise.')
+                            ->extraAttributes([
+                                'style' => '
                                 border: 1px solid var(--input-border-color);
                                 color: var(--text-color);
                                 background-color: var(--input-bg-color);
                                 padding: 10px;
                                 border-radius: 5px;
                             '
-                        ]),
-                ])
-                ->extraAttributes([
-                    'style' => '
+                            ]),
+                    ])
+                    ->extraAttributes([
+                        'style' => '
                         background-color: var(--section-bg-color);
                         border: 1px solid var(--section-border-color);
                         padding: 15px;
                         border-radius: 10px;
                     '
-                ])
-                ->hidden(fn(callable $get) => !$get('warning_message')), // Hide the section if there's no warning
-            
+                    ])
+                    ->hidden(fn(callable $get) => !$get('warning_message')), // Hide the section if there's no warning
+
                 // Forms\Components\Select::make('school_id')
                 //     ->label('School')
                 //     ->options(function (callable $get) {
@@ -395,12 +395,23 @@ class SchoolVisitRelationManager extends RelationManager
 
 
 
+                    Forms\Components\Checkbox::make('skip_contact')
+                    ->reactive()
+                    ->label('Do not collect contact number'),
+
+                    Forms\Components\TextInput::make('contact_number')
+                    ->label('Contact Number')
+                    ->reactive()
+                    ->required(fn(callable $get) => !$get('skip_contact')) // Required only if 'skip_contact' is unchecked
+                    ->visible(fn(callable $get) => !$get('skip_contact')), // Hidden if 'skip_contact' is checked
+
+                
                 Forms\Components\TextInput::make('contacted_person')
                     ->label('Contacted Person')
                     ->required()
                     ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule', 'Demo Completed', 'support', 'deal_won', 'deal_lost'])),
-
-
+                
+               
                 Forms\Components\DatePicker::make('follow_up_date')
                     ->label('Follow-Up Date')
                     ->helperText('Specify the follow-up date for this status.')
@@ -444,7 +455,7 @@ class SchoolVisitRelationManager extends RelationManager
 
 
                 Forms\Components\Toggle::make('is_book_issued')
-                ->hidden(fn(callable $get) => $get('warning_message')) // Hide the section if there's no warning
+                    ->hidden(fn(callable $get) => $get('warning_message')) // Hide the section if there's no warning
 
                     ->label('Was a book issued during this visit?')
                     ->reactive()
@@ -486,7 +497,7 @@ class SchoolVisitRelationManager extends RelationManager
             ]);
     }
 
- 
+
 
     public function table(Table $table): Table
     {
@@ -495,6 +506,8 @@ class SchoolVisitRelationManager extends RelationManager
             ->columns([
                 Tables\Columns\TextColumn::make('school.name')->label('School'),
                 Tables\Columns\TextColumn::make('block.name')->label('Block'),
+                Tables\Columns\TextColumn::make('contact_number'),
+
 
                 Tables\Columns\TextColumn::make('status')->label('Status'),
                 Tables\Columns\TextColumn::make('visited_date')->label('Visited Date')->date(),

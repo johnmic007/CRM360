@@ -25,6 +25,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+
 
 class TrainerVisitResource extends Resource
 {
@@ -257,13 +259,30 @@ class TrainerVisitResource extends Resource
                             ->required(),
 
                         FileUpload::make('starting_meter_photo')
-                            ->label('Starting Meter Photo')
+                            ->label('Starting Meter Photosss')
                             ->disk('s3')
                             ->directory('CRM')
-                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-
+                            ->disabled(fn($record) => $record && $record->verify_status === 'verified') 
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->required(),
+
+
+
+
+                        // FileUpload::make('starting_meter_photo')
+                        //     ->label('Starting Meter Photo')
+                        //     ->disk('s3')
+                        //     ->directory('CRM')
+                        //     ->helperText('Upload a clear photo of the starting meter.')
+                        //     ->disabled(fn($record) => $record && $record->verify_status === 'verified')
+                        //     ->visibility('public') // Ensure proper permissions for S3 files
+                        //     ->afterStateHydrated(function ($state, $component) {
+                        //         if (is_string($state) && !str_starts_with($state, 'CRM/')) {
+                        //             // Temporarily adjust the state for display without saving it permanently
+                        //             $component->state('CRM/' . $state);
+                        //         }
+                        //     })
+                        //     ->required(),
 
 
                         TextInput::make('starting_km')
@@ -271,6 +290,7 @@ class TrainerVisitResource extends Resource
                             ->numeric()
                             ->required()
                             ->reactive()
+
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
                             ->afterStateUpdated(function ($state, $set, $get) {
@@ -290,7 +310,8 @@ class TrainerVisitResource extends Resource
 
                         FileUpload::make('ending_meter_photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-
+                            ->disk('s3')
+                            ->directory('CRM')
 
                             ->label('Ending Meter Photo'),
 

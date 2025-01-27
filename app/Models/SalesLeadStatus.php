@@ -15,6 +15,8 @@ class SalesLeadStatus extends Model
         'potential_meet',
         'created_by',
         'is_book_issued',
+        'skip_contact',
+        'contact_number',
         'state_id',
         'district_id',
         'block_id',
