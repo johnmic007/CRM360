@@ -54,7 +54,9 @@ class ListTrainerVisits extends ListRecords
 
                     FileUpload::make('travel_bill')
                         ->label('Images')
-                      
+                        // ->disk('s3')
+                        // ->optimize('webp')
+                        // ->directory('CRM')
                         ->required()
                         ->multiple(),                        
                 ])

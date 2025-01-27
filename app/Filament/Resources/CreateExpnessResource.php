@@ -118,7 +118,10 @@ class CreateExpnessResource extends Resource
             // Fields for "public_transport" travel type
             FileUpload::make('travel_bill')
                 ->label('Travel Bill (Bus/Train)')
-                ->image()
+                // ->disk('s3')
+                // ->public()
+                // ->webp()
+                // ->directory('CRM')
                 ->required()
                 ->hidden(fn($get) => $get('travel_type') !== 'with_colleague'),
 
