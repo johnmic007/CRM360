@@ -69,10 +69,14 @@ class VisitReportResource extends Resource
 
                 Forms\Components\FileUpload::make('starting_meter_photo')
                     ->label('Starting Meter Photo')
+                    ->disk('s3')
+                    ->directory('CRM')
                     ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
 
                 Forms\Components\FileUpload::make('ending_meter_photo')
                     ->label('Ending Meter Photo')
+                    ->disk('s3')
+                    ->directory('CRM')
                     ->visible(fn (callable $get) => $get('travel_type') === 'own_vehicle'), // Visible only for 'own_vehicle'
 
                     Forms\Components\TextInput::make('starting_km')
@@ -92,6 +96,8 @@ class VisitReportResource extends Resource
                     ->required()
                     ->label('Travel Type'),
                 FileUpload::make('travel_bill')
+                ->disk('s3')
+                ->directory('CRM')
                     ->label('Travel Bill'),
                 Forms\Components\TextInput::make('travel_expense')
                     ->label('Travel Expense'),

@@ -125,6 +125,8 @@ class TopUpResource extends Resource
 
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
+                            ->disk('s3')
+                            ->directory('CRM')
                             ->directory('payment_proofs')  // Store the image in a specific directory
                             ->nullable(),
 

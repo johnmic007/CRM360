@@ -121,6 +121,8 @@ class TaskResource extends Resource
                                     ->helperText('Optional: Add notes or feedback for this session.'),
 
                                 FileUpload::make('image')
+                                ->disk('s3')
+                                ->directory('CRM')
                                     ->label('Upload Image')
                                     ->disabled($user->hasAnyRole(['admin', 'sales_operation' , 'head_trainer']))
                                     ->directory('task-images')

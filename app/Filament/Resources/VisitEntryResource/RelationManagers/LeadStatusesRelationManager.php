@@ -381,6 +381,8 @@ class SchoolVisitRelationManager extends RelationManager
 
                 FileUpload::make('image')
                     ->label('images')
+                    ->disk('s3')
+                    ->directory('CRM')
                     ->required()
 
                     ->helperText('Upload image')

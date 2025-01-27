@@ -203,6 +203,8 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('travel_bill')
                             ->required()
                             ->multiple()
+                            ->disk('s3')
+                            ->directory('CRM')
                             ->hidden(fn(callable $get) => $get('travel_type') !== 'extra_expense')
 
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
@@ -260,8 +262,8 @@ class TrainerVisitResource extends Resource
 
                         FileUpload::make('starting_meter_photo')
                             ->label('Starting Meter Photosss')
-                            // ->disk('s3')
-                            // ->directory('CRM')
+                            ->disk('s3')
+                            ->directory('CRM')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') 
                             ->helperText('Upload a clear photo of the starting meter.')
                             ->required(),
@@ -310,8 +312,8 @@ class TrainerVisitResource extends Resource
 
                         FileUpload::make('ending_meter_photo')
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
-                            // ->disk('s3')
-                            // ->directory('CRM')
+                            ->disk('s3')
+                            ->directory('CRM')
 
                             ->label('Ending Meter Photo'),
 
@@ -379,8 +381,8 @@ class TrainerVisitResource extends Resource
                         FileUpload::make('travel_bill')
                             ->label('Upload Travel Bill (Bus/Train)')
                             ->required()
-                            // ->disk('s3')
-                            // ->directory('CRM')
+                            ->disk('s3')
+                            ->directory('CRM')
 
                             ->disabled(fn($record) => $record && $record->verify_status === 'verified') // Ensure $record is not null
 
@@ -433,6 +435,8 @@ class TrainerVisitResource extends Resource
                     ->searchable(),
 
                 Forms\Components\FileUpload::make('files')
+                ->disk('s3')
+                ->directory('CRM')
                     ->label('Upload School Images') // Clear and descriptive label
                     ->hidden(fn(callable $get) => $get('travel_type') == 'extra_expense')
 

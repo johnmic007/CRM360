@@ -94,6 +94,8 @@ class SchoolReportResource extends Resource
                     ->label('Remarks'),
 
                 Forms\Components\FileUpload::make('image')
+                ->disk('s3')
+                ->directory('CRM')
                     ->label('Image'),
 
                 Forms\Components\DatePicker::make('visited_date')

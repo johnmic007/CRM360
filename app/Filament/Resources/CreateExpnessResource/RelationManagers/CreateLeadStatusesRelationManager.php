@@ -262,6 +262,8 @@ class CreateLeadStatusesRelationManager extends RelationManager
 
 
                 FileUpload::make('image')
+                ->disk('s3')
+                ->directory('CRM')
                     ->label('images')
                     ->required()
 

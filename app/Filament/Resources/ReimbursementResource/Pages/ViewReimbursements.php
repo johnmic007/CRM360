@@ -38,6 +38,8 @@ class ViewReimbursements extends ViewRecord
     
                     FileUpload::make('payment_proof')
                         ->label('Payment Proof')
+                        ->disk('s3')
+                        ->directory('CRM')
                         ->directory('reimbursement_proofs')
                         ->nullable(),
                 ])
