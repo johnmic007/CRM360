@@ -401,7 +401,12 @@ class SchoolVisitRelationManager extends RelationManager
 
                     Forms\Components\TextInput::make('contact_number')
                     ->label('Contact Number')
+                    ->numeric()
                     ->reactive()
+                    ->minLength(10) // Minimum length of 10 digits
+                    ->maxLength(12)
+                    ->placeholder('Enter a 10-12 digit contact number') // Placeholder for guidance
+
                     ->required(fn(callable $get) => !$get('skip_contact')) // Required only if 'skip_contact' is unchecked
                     ->visible(fn(callable $get) => !$get('skip_contact')), // Hidden if 'skip_contact' is checked
 
