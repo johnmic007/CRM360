@@ -99,14 +99,14 @@ class CreateExpnessResource extends Resource
                 FileUpload::make('starting_meter_photo')
                     ->label('Starting Meter Photo')
                     ->required()
-                    ->disk('s3')
+        ->optimize('webp')                ->disk('s3')
                     ->directory('CRM')
                     ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
 
                 FileUpload::make('ending_meter_photo')
                     ->label('Ending Meter Photo')
                     ->required()
-                    ->disk('s3')
+        ->optimize('webp')                ->disk('s3')
                     ->directory('CRM')
                     ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
 
@@ -122,7 +122,7 @@ class CreateExpnessResource extends Resource
                 // Fields for "public_transport" travel type
                 FileUpload::make('travel_bill')
                     ->label('Travel Bill (Bus/Train)')
-                    ->disk('s3')
+        ->optimize('webp')                ->disk('s3')
                     ->directory('CRM')
                     // ->disk('s3')
                     // ->public()

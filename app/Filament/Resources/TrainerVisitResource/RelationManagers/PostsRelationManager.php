@@ -54,7 +54,7 @@ class PostsRelationManager extends RelationManager
                 ->required(),
                 FileUpload::make('image')
                 ->label('images')
-                ->disk('s3')
+    ->optimize('webp')                ->disk('s3')
                 ->directory('CRM')
                 ->required()
                 ->helperText('Upload image'),

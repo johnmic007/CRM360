@@ -32,64 +32,64 @@ class CreateLeadStatusesRelationManager extends RelationManager
         return $form
             ->schema([
                 Forms\Components\Select::make('state_id')
-                ->label('State')
-                ->options(function () {
-                    $visitEntry = $this->getOwnerRecord(); // Retrieve the owner record (VisitEntry)
-            
-                    // Retrieve the related User model
-                    $user = $visitEntry?->user; // Assuming VisitEntry has a `user` relationship
-            
-                    if (!$user) {
-                        return [];
-                    }
-            
-                    $allocatedStates = $user->allocated_states ?? [];
-            
-                    return State::whereIn('id', $allocatedStates)->pluck('name', 'id');
-                })
-                ->reactive()
-                ->afterStateUpdated(fn(callable $set) => $set('district_id', null)),
-            
-            Forms\Components\Select::make('district_id')
-                ->label('District')
-                ->options(function (callable $get) {
-                    $stateId = $get('state_id'); // Get the selected state
-                    if (!$stateId) {
-                        return [];
-                    }
-            
-                    $visitEntry = $this->getOwnerRecord(); // Retrieve the owner record (VisitEntry)
-                    if (!$visitEntry) {
-                        return [];
-                    }
-            
-                    // Retrieve districts allocated to the user associated with the VisitEntry
-                    $user = $visitEntry->user;
-                    if (!$user) {
-                        return [];
-                    }
-            
-                    $allocatedDistricts = $user->allocated_districts ?? [];
-                    return District::where('state_id', $stateId)
-                        ->whereIn('id', $allocatedDistricts)
-                        ->pluck('name', 'id');
-                })
-                ->reactive()
-                ->afterStateUpdated(fn(callable $set) => $set('block_id', null)),
-            
-            Forms\Components\Select::make('block_id')
-                ->label('Block')
-                ->options(function (callable $get) {
-                    $districtId = $get('district_id'); // Get the selected district
-                    if (!$districtId) {
-                        return [];
-                    }
-            
-                    return Block::where('district_id', $districtId)->pluck('name', 'id');
-                })
-                ->reactive()
-                ->afterStateUpdated(fn(callable $set) => $set('school_id', null)),
-            
+                    ->label('State')
+                    ->options(function () {
+                        $visitEntry = $this->getOwnerRecord(); // Retrieve the owner record (VisitEntry)
+
+                        // Retrieve the related User model
+                        $user = $visitEntry?->user; // Assuming VisitEntry has a `user` relationship
+
+                        if (!$user) {
+                            return [];
+                        }
+
+                        $allocatedStates = $user->allocated_states ?? [];
+
+                        return State::whereIn('id', $allocatedStates)->pluck('name', 'id');
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(fn(callable $set) => $set('district_id', null)),
+
+                Forms\Components\Select::make('district_id')
+                    ->label('District')
+                    ->options(function (callable $get) {
+                        $stateId = $get('state_id'); // Get the selected state
+                        if (!$stateId) {
+                            return [];
+                        }
+
+                        $visitEntry = $this->getOwnerRecord(); // Retrieve the owner record (VisitEntry)
+                        if (!$visitEntry) {
+                            return [];
+                        }
+
+                        // Retrieve districts allocated to the user associated with the VisitEntry
+                        $user = $visitEntry->user;
+                        if (!$user) {
+                            return [];
+                        }
+
+                        $allocatedDistricts = $user->allocated_districts ?? [];
+                        return District::where('state_id', $stateId)
+                            ->whereIn('id', $allocatedDistricts)
+                            ->pluck('name', 'id');
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(fn(callable $set) => $set('block_id', null)),
+
+                Forms\Components\Select::make('block_id')
+                    ->label('Block')
+                    ->options(function (callable $get) {
+                        $districtId = $get('district_id'); // Get the selected district
+                        if (!$districtId) {
+                            return [];
+                        }
+
+                        return Block::where('district_id', $districtId)->pluck('name', 'id');
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(fn(callable $set) => $set('school_id', null)),
+
 
                 Forms\Components\Select::make('school_id')
                     ->label('School')
@@ -114,11 +114,11 @@ class CreateLeadStatusesRelationManager extends RelationManager
                         $assignedSchools = DB::table('school_user')->where('school_id', $state)->exists();
 
                         $visitEntry = $this->getOwnerRecord(); // Retrieve the owner record (VisitEntry)
-            
+
                         // Retrieve the related User model
                         $user = $visitEntry?->user_id;
 
-                        
+
                         if (!$assignedSchools) {
                             $salesLeadManagement = SalesLeadManagement::firstOrCreate([
                                 'school_id' => $state,
@@ -147,7 +147,7 @@ class CreateLeadStatusesRelationManager extends RelationManager
                                 ->value('status');
 
                             $salesLeadManagementId = SalesLeadManagement::where('school_id', $state)
-                                ->where('allocated_to',$user)
+                                ->where('allocated_to', $user)
                                 ->value('id');
 
                             // Pass the existing SalesLeadManagement ID
@@ -262,8 +262,8 @@ class CreateLeadStatusesRelationManager extends RelationManager
 
 
                 FileUpload::make('image')
-                ->disk('s3')
-                ->directory('CRM')
+                    ->optimize('webp')->disk('s3')
+                    ->directory('CRM')
                     ->label('images')
                     ->required()
 
@@ -340,8 +340,8 @@ class CreateLeadStatusesRelationManager extends RelationManager
 
 
                         Forms\Components\Hidden::make('created_by')
-                        ->default(fn($get) => $this->getOwnerRecord()?->user_id) // Retrieve `user_id` from the parent record
-                        ->required(),
+                            ->default(fn($get) => $this->getOwnerRecord()?->user_id) // Retrieve `user_id` from the parent record
+                            ->required(),
 
 
                         Forms\Components\Hidden::make('school_id')

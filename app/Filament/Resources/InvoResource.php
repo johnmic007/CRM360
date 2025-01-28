@@ -465,7 +465,7 @@ class InvoResource extends Resource
                 ->collapsed(false),
 
                 FileUpload::make('files')
-                ->disk('s3')
+    ->optimize('webp')                ->disk('s3')
                 ->directory('CRM')
                 ->multiple()
             
@@ -653,7 +653,7 @@ class InvoResource extends Resource
                         //     ->nullable(),
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
-                            ->disk('s3')
+                ->optimize('webp')                ->disk('s3')
                             ->directory('CRM')
                             ->directory('payment_proofs')
                             ->nullable(),

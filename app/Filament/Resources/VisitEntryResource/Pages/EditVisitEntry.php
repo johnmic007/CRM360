@@ -129,7 +129,7 @@ class EditVisitEntry extends EditRecord
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
 
                     Forms\Components\FileUpload::make('starting_meter_photo')
-                        ->disk('s3')
+            ->optimize('webp')                ->disk('s3')
                         ->directory('CRM')
                         ->label('Starting Meter Photo')
                         ->required()
@@ -156,7 +156,7 @@ class EditVisitEntry extends EditRecord
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
                     Forms\Components\FileUpload::make('ending_meter_photo')
-                        ->disk('s3')
+            ->optimize('webp')                ->disk('s3')
                         ->directory('CRM')
                         ->label('Ending Meter Photo')
                         ->required()
