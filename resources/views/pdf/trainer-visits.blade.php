@@ -217,8 +217,12 @@
     </style>
 </head>
 
-<body>
+<!DOCTYPE html>
+<html lang="en">
 
+
+
+<body>
     <div class="header">
         <h1>Trainer Visit Report</h1>
     </div>
@@ -262,50 +266,51 @@
         </tbody>
     </table>
 
-
-
     <div class="photos">
         <div class="photo">
             <p class="photo-title">Starting Meter Photo:</p>
-            @if ($trainerVisit->starting_meter_photo)
             @php
-            $imagePath = public_path('storage/' . $trainerVisit->starting_meter_photo);
-            $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            $prefixedPath = $trainerVisit->starting_meter_photo ? 'CRM/' . $trainerVisit->starting_meter_photo : null;
+            $startingMeterUrl = $prefixedPath && Storage::disk('s3')->exists($prefixedPath)
+            ? Storage::disk('s3')->url($prefixedPath)
+            : null;
             @endphp
-            @if ($base64Image)
-            <img src="{{ $base64Image }}" alt="Starting Meter Photo">
-            @else
-            <p>No Image</p>
-            @endif
+            @if ($startingMeterUrl)
+            <p>{{ $startingMeterUrl }}</p>
+            <img src="{{ $startingMeterUrl }}" alt="Starting Meter Photo">
             @else
             <p>No Image</p>
             @endif
         </div>
+
         <div class="photo">
             <p class="photo-title">Ending Meter Photo:</p>
-            @if ($trainerVisit->ending_meter_photo)
             @php
-            $imagePath = public_path('storage/' . $trainerVisit->ending_meter_photo);
-            $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            $prefixedPath = $trainerVisit->ending_meter_photo ? 'CRM/' . $trainerVisit->ending_meter_photo : null;
+            $endingMeterUrl = $prefixedPath && Storage::disk('s3')->exists($prefixedPath)
+            ? Storage::disk('s3')->url($prefixedPath)
+            : null;
             @endphp
-            @if ($base64Image)
-            <img src="{{ $base64Image }}" alt="Ending Meter Photo">
-            @else
-            <p>No Image</p>
-            @endif
+            @if ($endingMeterUrl)
+            <p>{{ $endingMeterUrl }}</p>
+            <img src="{{ $endingMeterUrl }}" alt="Ending Meter Photo">
             @else
             <p>No Image</p>
             @endif
         </div>
+
         <div class="photo">
             <p class="photo-title">GPS Photo:</p>
             @if ($trainerVisit->gps_photo)
             @php
-            $imagePath = public_path('storage/' . $trainerVisit->gps_photo);
-            $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            $gpsPhotoUrl = 'CRM/' . $trainerVisit->gps_photo;
+            $gpsPhotoFullUrl = Storage::disk('s3')->exists($gpsPhotoUrl)
+            ? Storage::disk('s3')->url($gpsPhotoUrl)
+            : null;
             @endphp
-            @if ($base64Image)
-            <img src="{{ $base64Image }}" alt="GPS Photo">
+            @if ($gpsPhotoFullUrl)
+            <p>{{ $gpsPhotoFullUrl }}</p>
+            <img src="{{ $gpsPhotoFullUrl }}" alt="GPS Photo">
             @else
             <p>No Image</p>
             @endif
@@ -313,32 +318,27 @@
             <p>No Image</p>
             @endif
         </div>
+
         <div class="photo">
-    <p class="photo-title">Travel Bill:</p>
-
-    @if (is_array($trainerVisit->travel_bill) && count($trainerVisit->travel_bill) > 0)
-        @foreach ($trainerVisit->travel_bill as $billPath)
+            <p class="photo-title">Travel Bill:</p>
+            @if (is_array($trainerVisit->travel_bill) && count($trainerVisit->travel_bill) > 0)
+            @foreach ($trainerVisit->travel_bill as $billPath)
             @php
-                $imagePath = public_path('storage/' . $billPath);
-                $base64Image = file_exists($imagePath)
-                    ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath))
-                    : null;
+            $prefixedPath = 'CRM/' . $billPath;
+            $imageUrl = Storage::disk('s3')->exists($prefixedPath) ? Storage::disk('s3')->url($prefixedPath) : null;
             @endphp
-
-            @if ($base64Image)
-                <img src="{{ $base64Image }}" alt="Travel Bill" style="max-width: 200px; max-height: 200px;">
+            @if ($imageUrl)
+            <p>{{ $imageUrl }}</p>
+            <img src="{{ $imageUrl }}" alt="Travel Bill" style="max-width: 200px; max-height: 200px;">
             @else
-                <p>No Image</p>
+            <p>No Image</p>
             @endif
-        @endforeach
-    @else
-        <p>No Image</p>
-    @endif
-</div>
-
+            @endforeach
+            @else
+            <p>No Image</p>
+            @endif
+        </div>
     </div>
-
-
 
 
     <div class="lead-statuses">
@@ -354,28 +354,32 @@
             <p><strong>Image:</strong></p>
             @if ($status->image)
             @php
-            $imagePath = public_path('storage/' . $status->image);
-            $base64Image = file_exists($imagePath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($imagePath)) : null;
+            $prefixedPath = 'CRM/' . $status->image;
+            $imageUrl = Storage::disk('s3')->exists($prefixedPath)
+            ? Storage::disk('s3')->url($prefixedPath)
+            : null;
             @endphp
-            @if ($base64Image)
-            <img src="{{ $base64Image }}" alt="Lead Status Image" style="max-width: 200px;">
+            @if ($imageUrl)
+            <p>Generated URL: {{ $imageUrl }}</p>
+            <img src="{{ $imageUrl }}" alt="Lead Status Image" style="max-width: 200px;">
             @else
             <p>No Image Available</p>
             @endif
             @else
             <p>No Image</p>
             @endif
+
         </div>
         <hr>
         @endforeach
     </div>
 
-
     <div class="footer">
         <p><strong>Approval Status:</strong> {{ ucfirst($trainerVisit->approval_status) }}</p>
         <p><strong>Approved By:</strong> {{ $trainerVisit->approved_by ?? 'N/A' }}</p>
     </div>
-
 </body>
+
+
 
 </html>
