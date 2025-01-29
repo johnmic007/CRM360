@@ -94,7 +94,7 @@ class SchoolReportResource extends Resource
                     ->label('Remarks'),
 
                 Forms\Components\FileUpload::make('image')
-    ->optimize('webp')                ->disk('s3')
+            ->disk('s3')
                 ->directory('CRM')
                     ->label('Image'),
 

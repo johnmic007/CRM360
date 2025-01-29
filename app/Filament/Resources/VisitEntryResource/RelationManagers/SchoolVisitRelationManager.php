@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
+
 class SchoolVisitRelationManager extends RelationManager
 {
     protected static string $relationship = 'leadStatuses';

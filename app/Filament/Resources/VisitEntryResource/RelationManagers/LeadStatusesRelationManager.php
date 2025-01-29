@@ -390,24 +390,24 @@ class SchoolVisitRelationManager extends RelationManager
                         ->preserveFilenames() // Preserve original filename
                         ->required()
                         ->helperText('Upload an image')
-                        ->saveUploadedFileUsing(function ($file) {
-                            try {
-                                // Generate WebP file name
-                                $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                        // ->saveUploadedFileUsing(function ($file) {
+                        //     try {
+                        //         // Generate WebP file name
+                        //         $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
                     
-                                // Convert image to WebP format using Intervention Image
-                                $image = Image::make($file)
-                                    ->encode('webp', 80); // Compress to 80% quality
+                        //         // Convert image to WebP format using Intervention Image
+                        //         $image = Image::make($file)
+                        //             ->encode('webp', 80); // Compress to 80% quality
                     
-                                // Store the optimized image in S3
-                                Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                        //         // Store the optimized image in S3
+                        //         Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
                     
-                                return $optimizedFileName; // Save WebP filename in the database
-                            } catch (\Exception $e) {
-                                \Log::error('Error optimizing image: ' . $e->getMessage());
-                                return null; // If optimization fails, return null
-                            }
-                        })                    
+                        //         return $optimizedFileName; // Save WebP filename in the database
+                        //     } catch (\Exception $e) {
+                        //         \Log::error('Error optimizing image: ' . $e->getMessage());
+                        //         return null; // If optimization fails, return null
+                        //     }
+                        // })                    
                     ->visible(fn(callable $get) => in_array($get('status'), ['School Nurturing', 'Demo reschedule', 'Demo Completed', 'support', 'deal_won', 'deal_lost'])),
 
                 Forms\Components\TextInput::make('contacted_person_designation')

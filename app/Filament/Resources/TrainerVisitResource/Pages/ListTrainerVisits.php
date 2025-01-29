@@ -62,19 +62,19 @@ class ListTrainerVisits extends ListRecords
                             ->directory('CRM') // Saves to the "CRM" directory in S3
                             ->multiple() // Allows multiple uploads
                             ->required()
-                            ->saveUploadedFileUsing(function ($file) {
-                                // Generate WebP file name
-                                $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                            // ->saveUploadedFileUsing(function ($file) {
+                            //     // Generate WebP file name
+                            //     $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
                         
-                                // Convert to WebP using Intervention Image
-                                $image = Image::make($file)
-                                    ->encode('webp', 80); // Compress to 80% quality
+                            //     // Convert to WebP using Intervention Image
+                            //     $image = Image::make($file)
+                            //         ->encode('webp', 80); // Compress to 80% quality
                         
-                                // Store optimized image in S3
-                                Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                            //     // Store optimized image in S3
+                            //     Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
                         
-                                return $optimizedFileName; // Store WebP filename in DB
-                            }),
+                            //     return $optimizedFileName; // Store WebP filename in DB
+                            // }),
                                                
                 ])
                 ->action(function (array $data): void {

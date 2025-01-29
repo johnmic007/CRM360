@@ -197,76 +197,98 @@ class InvoResource extends Resource
             // Invoice Items Section
             Section::make('MOU Items')
                 ->schema([
-                    HasManyRepeater::make('items')
-                        ->relationship('items')
-                        ->schema([
-                            Select::make('item_id') // Change to a select input for items
-                                ->label('Item')
-                                ->options(Items::pluck('name', 'id')->toArray()) // Fetch items from the Items model
-                                ->required()
-                                ->reactive()
-                                ->afterStateUpdated(function (callable $set, $get, $state) {
-                                    $item = Items::find($state); // Find the selected item
-                                    if ($item) {
-                                        $set('price', $item->price); // Set the price from the selected item
-                                        // Update the total based on quantity and price
+                    TextInput::make('total_amount')
+                    ->label('Total Amount')
+                    ->numeric()
+                    ->readOnly(false) // Allow manual entry of total amount
+                    ->default(0)
+                    ->dehydrated() // Ensure it is saved
+                    ->reactive()
+                    ->formatStateUsing(function (callable $get) {
+                        $items = $get('items') ?? [];
+                        $totalAmount = InvoiceHelper::calculateTotalAmount($items);
+                        return $totalAmount;
+                    })
+                    ->afterStateUpdated(function (callable $set, $get, $state) {
+                        $items = $get('items') ?? [];
+                
+                        // Distribute the total amount proportionally across items
+                        $totalQuantity = array_reduce($items, function ($carry, $item) {
+                            return $carry + ($item['quantity'] ?? 0);
+                        }, 0);
+                
+                        if ($totalQuantity > 0) {
+                            foreach ($items as $index => $item) {
+                                $quantity = $item['quantity'] ?? 0;
+                                $price = $totalQuantity > 0 ? ($state / $totalQuantity) : 0;
+                                $set("items.{$index}.price", round($price, 2)); // Update price
+                                $set("items.{$index}.total", round($price * $quantity, 2)); // Update total
+                            }
+                        }
+                    })
+                    ->extraAttributes(['class' => 'text-xl font-bold']),
+                
+                Repeater::make('items')
+                    ->relationship('items')
+                    ->schema([
+                        Select::make('item_id') // Change to a select input for items
+                            ->label('Item')
+                            ->options(Items::pluck('name', 'id')->toArray()) // Fetch items from the Items model
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $set, $get, $state) {
+                                $item = Items::find($state); // Find the selected item
+                                if ($item) {
+                                    $set('price', $item->price); // Set the price from the selected item
+                                    // Update the total based on quantity and price
+                                    $quantity = $get('quantity') ?? 0;
+                                    $set('total', $quantity * $item->price);
+                                }
+                            }),
+                
+                        Grid::make(3)
+                            ->schema([
+                                TextInput::make('quantity')
+                                    ->label('Quantity')
+                                    ->numeric()
+                                    ->default(fn($get) => $get('../../students_count') ?? 0)
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set, $get, $state) {
+                                        $price = $get('price') ?? 0;
+                                        $set('total', $state * $price);
+                
+                                        // Recalculate total amount
+                                        $items = $get('../../items') ?? [];
+                                        $totalAmount = InvoiceHelper::calculateTotalAmount($items);
+                                        $set('../../total_amount', $totalAmount);
+                                    }),
+                
+                                TextInput::make('price')
+                                    ->label('Price')
+                                    ->numeric()
+                                    ->required()
+                                    ->reactive()
+                                    ->afterStateUpdated(function (callable $set, $get, $state) {
+                                        // Update the total for this item based on quantity and price
                                         $quantity = $get('quantity') ?? 0;
-                                        $set('total', $quantity * $item->price);
-                                    }
-                                }),
-
-
-                            Grid::make(3)
-                                ->schema([
-
-
-                                    TextInput::make('quantity')
-                                        ->label('Quantity')
-                                        ->numeric()
-                                        ->default(fn($get) => $get('../../students_count') ?? 0)
-                                        ->readOnly()
-                                        ->reactive()
-                                        ->afterStateUpdated(function (callable $set, callable $get, $state) {
-                                            $price = $get('price') ?? 0;
-                                            $set('total', $state * $price);
-                                            // Recalculate total amount
-                                            $totalAmount = InvoiceHelper::calculateTotalAmount($get('../../items'), $get('../../books'));
-                                            $set('../../total_amount', $totalAmount);
-                                        }),
-
-
-                                    TextInput::make('price')
-                                        ->label('Price')
-                                        ->numeric()
-                                        ->required()
-                                        ->reactive()
-                                        ->afterStateUpdated(function (callable $set, $get, $state) {
-                                            // Update the total for this item based on quantity and price
-                                            $quantity = $get('quantity') ?? 0;
-                                            $price = $get('price') ?? 0;
-                                        
-                                            // Ensure both values are numeric
-                                            $quantity = is_numeric($quantity) ? (float)$quantity : 0;
-                                            $price = is_numeric($price) ? (float)$price : 0;
-                                        
-                                            // Calculate the total
-                                            $set('total', $quantity * $price);
-                                        }),
-
-                                    TextInput::make('total')
-                                        ->label('Total')
-                                        ->numeric()
-                                        ->readonly()
-                                        ->default(0),
-                                ]),
-                        ])
-                        ->reactive()
-                        ->afterStateUpdated(function (callable $set, $get) {
-                            $items = $get('items') ?? [];
-                            $totalAmount = InvoiceHelper::calculateTotalAmount($items);
-                            $set('total_amount', $totalAmount);
-                        })
-                        ->createItemButtonLabel('Add Item'),
+                                        $set('total', $state * $quantity);
+                                    }),
+                
+                                TextInput::make('total')
+                                    ->label('Total')
+                                    ->numeric()
+                                    ->readonly()
+                                    ->default(0),
+                            ]),
+                    ])
+                    ->reactive()
+                    ->afterStateUpdated(function (callable $set, $get) {
+                        $items = $get('items') ?? [];
+                        $totalAmount = InvoiceHelper::calculateTotalAmount($items);
+                        $set('total_amount', $totalAmount);
+                    })
+                    ->createItemButtonLabel('Add Item'),
+                
                 ])
                 ->collapsible()
                 ->collapsed(false),
@@ -465,7 +487,7 @@ class InvoResource extends Resource
                 ->collapsed(false),
 
                 FileUpload::make('files')
-    ->optimize('webp')                ->disk('s3')
+            ->disk('s3')
                 ->directory('CRM')
                 ->multiple()
             
@@ -653,7 +675,7 @@ class InvoResource extends Resource
                         //     ->nullable(),
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
-                ->optimize('webp')                ->disk('s3')
+                        ->disk('s3')
                             ->directory('CRM')
                             ->directory('payment_proofs')
                             ->nullable(),

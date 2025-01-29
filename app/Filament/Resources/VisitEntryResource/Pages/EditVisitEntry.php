@@ -140,24 +140,24 @@ class EditVisitEntry extends EditRecord
                             ->disk('s3') // Upload to S3
                             ->directory('CRM') // Store in "CRM" folder
                             ->preserveFilenames() // Preserve the original name
-                            ->saveUploadedFileUsing(function ($file) {
-                                try {
-                                    // Generate WebP file name
-                                    $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                            // ->saveUploadedFileUsing(function ($file) {
+                            //     try {
+                            //         // Generate WebP file name
+                            //         $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
                         
-                                    // Convert image to WebP format using Intervention Image
-                                    $image = Image::make($file)
-                                        ->encode('webp', 80); // Compress to 80% quality
+                            //         // Convert image to WebP format using Intervention Image
+                            //         $image = Image::make($file)
+                            //             ->encode('webp', 80); // Compress to 80% quality
                         
-                                    // Store the optimized image in S3
-                                    Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                            //         // Store the optimized image in S3
+                            //         Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
                         
-                                    return $optimizedFileName; // Save WebP filename in database
-                                } catch (\Exception $e) {
-                                    \Log::error('Error optimizing image: ' . $e->getMessage());
-                                    return null; // If optimization fails, return null
-                                }
-                            })                        
+                            //         return $optimizedFileName; // Save WebP filename in database
+                            //     } catch (\Exception $e) {
+                            //         \Log::error('Error optimizing image: ' . $e->getMessagpe());
+                            //         return null; // If optimization fails, return null
+                            //     }
+                            // })                        
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
                 ])
                 ->action(fn(array $data) => $this->submitStartVisit($data)) // Ensure data is passed to the method
@@ -189,24 +189,24 @@ class EditVisitEntry extends EditRecord
                             ->disk('s3') // Upload to S3
                             ->directory('CRM') // Store in "CRM" folder
                             ->preserveFilenames() // Preserve original name
-                            ->saveUploadedFileUsing(function ($file) {
-                                try {
-                                    // Generate WebP file name
-                                    $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                            // ->saveUploadedFileUsing(function ($file) {
+                            //     try {
+                            //         // Generate WebP file name
+                            //         $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
                         
-                                    // Convert image to WebP format using Intervention Image
-                                    $image = Image::make($file)
-                                        ->encode('webp', 80); // Compress to 80% quality
+                            //         // Convert image to WebP format using Intervention Image
+                            //         $image = Image::make($file)
+                            //             ->encode('webp', 80); // Compress to 80% quality
                         
-                                    // Store the optimized image in S3
-                                    Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                            //         // Store the optimized image in S3
+                            //         Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
                         
-                                    return $optimizedFileName; // Save WebP filename in database
-                                } catch (\Exception $e) {
-                                    \Log::error('Error optimizing image: ' . $e->getMessage());
-                                    return null; // If optimization fails, return null
-                                }
-                            })                        
+                            //         return $optimizedFileName; // Save WebP filename in database
+                            //     } catch (\Exception $e) {
+                            //         \Log::error('Error optimizing image: ' . $e->getMessage());
+                            //         return null; // If optimization fails, return null
+                            //     }
+                            // })                        
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
 
@@ -226,24 +226,24 @@ class EditVisitEntry extends EditRecord
                             ->directory('CRM') // Store in "CRM" folder
                             ->multiple() // Enable multiple file uploads
                             ->preserveFilenames() // Preserve original file name
-                            ->saveUploadedFileUsing(function ($file) {
-                                try {
-                                    // Generate WebP file name
-                                    $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                            // ->saveUploadedFileUsing(function ($file) {
+                            //     try {
+                            //         // Generate WebP file name
+                            //         $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
                         
-                                    // Convert image to WebP format using Intervention Image
-                                    $image = Image::make($file)
-                                        ->encode('webp', 80); // Compress to 80% quality
+                            //         // Convert image to WebP format using Intervention Image
+                            //         $image = Image::make($file)
+                            //             ->encode('webp', 80); // Compress to 80% quality
                         
-                                    // Store the optimized image in S3
-                                    Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                            //         // Store the optimized image in S3
+                            //         Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
                         
-                                    return $optimizedFileName; // Save WebP filename in the database
-                                } catch (\Exception $e) {
-                                    \Log::error('Error optimizing image: ' . $e->getMessage());
-                                    return null; // If optimization fails, return null
-                                }
-                            })                       
+                            //         return $optimizedFileName; // Save WebP filename in the database
+                            //     } catch (\Exception $e) {
+                            //         \Log::error('Error optimizing image: ' . $e->getMessage());
+                            //         return null; // If optimization fails, return null
+                            //     }
+                            // })                       
                         ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])
                 ->action(fn(array $data) => $this->submitStopVisit($data))

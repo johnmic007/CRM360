@@ -135,7 +135,7 @@ class InvoicesRelationManager  extends RelationManager
                         //     ->nullable(),
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
-                ->optimize('webp')                ->disk('s3')
+                        ->disk('s3')
                             ->directory('CRM')
                             ->directory('payment_proofs') // Store the image in a specific directory
                             ->nullable(),
