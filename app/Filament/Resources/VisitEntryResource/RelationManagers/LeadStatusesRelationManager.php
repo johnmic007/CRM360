@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\VisitEntryResource\RelationManagers;
 
+use App\Jobs\StoreSchoolVisitJob;
+use App\Jobs\UpdateSchoolVisitJob;
 use App\Models\Block;
 use App\Models\District;
 use App\Models\SalesLeadManagement;
@@ -25,6 +27,22 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class SchoolVisitRelationManager extends RelationManager
 {
     protected static string $relationship = 'leadStatuses';
+
+
+
+    protected function beforeSave(array &$data): void
+    {
+        dispatch(new StoreSchoolVisitJob($data));
+    }
+
+    /**
+     * Hook before updating an existing record
+     */
+    protected function beforeUpdate($record, array &$data): void
+    {
+        dispatch(new UpdateSchoolVisitJob($record, $data));
+    }
+
 
 
 
