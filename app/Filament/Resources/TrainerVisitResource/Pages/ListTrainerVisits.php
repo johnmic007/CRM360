@@ -12,6 +12,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
+                        use Illuminate\Support\Facades\Storage;
+                        use Intervention\Image\Facades\Image;
 
 
 use Filament\Resources\Components\Tab;
@@ -52,15 +54,28 @@ class ListTrainerVisits extends ListRecords
                         ->placeholder('Provide a brief description of the extra expense.')
                         ->rows(3),
 
-                    FileUpload::make('travel_bill')
-                        ->label('Images')
-            ->optimize('webp')                ->disk('s3')
-                        ->directory('CRM')
-                        // ->disk('s3')
-                        // ->optimize('webp')
-                        // ->directory('CRM')
-                        ->required()
-                        ->multiple(),                        
+                        
+                        
+                        FileUpload::make('travel_bill')
+                            ->label('Images')
+                            ->disk('s3')
+                            ->directory('CRM') // Saves to the "CRM" directory in S3
+                            ->multiple() // Allows multiple uploads
+                            ->required()
+                            ->saveUploadedFileUsing(function ($file) {
+                                // Generate WebP file name
+                                $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                        
+                                // Convert to WebP using Intervention Image
+                                $image = Image::make($file)
+                                    ->encode('webp', 80); // Compress to 80% quality
+                        
+                                // Store optimized image in S3
+                                Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                        
+                                return $optimizedFileName; // Store WebP filename in DB
+                            }),
+                                               
                 ])
                 ->action(function (array $data): void {
                   

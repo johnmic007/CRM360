@@ -9,9 +9,12 @@ use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Actions;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class EditVisitEntry extends EditRecord
 {
@@ -128,12 +131,33 @@ class EditVisitEntry extends EditRecord
                         ->required()
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
 
-                    Forms\Components\FileUpload::make('starting_meter_photo')
-            ->optimize('webp')                ->disk('s3')
-                        ->directory('CRM')
-                        ->label('Starting Meter Photo')
-                        ->required()
-                        ->helperText('Upload a photo of the starting meter.')
+                       
+                        
+                        FileUpload::make('starting_meter_photo')
+                            ->label('Starting Meter Photo')
+                            ->helperText('Upload a photo of the starting meter.')
+                            ->required()
+                            ->disk('s3') // Upload to S3
+                            ->directory('CRM') // Store in "CRM" folder
+                            ->preserveFilenames() // Preserve the original name
+                            ->saveUploadedFileUsing(function ($file) {
+                                try {
+                                    // Generate WebP file name
+                                    $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                        
+                                    // Convert image to WebP format using Intervention Image
+                                    $image = Image::make($file)
+                                        ->encode('webp', 80); // Compress to 80% quality
+                        
+                                    // Store the optimized image in S3
+                                    Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                        
+                                    return $optimizedFileName; // Save WebP filename in database
+                                } catch (\Exception $e) {
+                                    \Log::error('Error optimizing image: ' . $e->getMessage());
+                                    return null; // If optimization fails, return null
+                                }
+                            })                        
                         ->hidden(fn($get) => $get('travel_type') !== 'own_vehicle'),
                 ])
                 ->action(fn(array $data) => $this->submitStartVisit($data)) // Ensure data is passed to the method
@@ -155,13 +179,34 @@ class EditVisitEntry extends EditRecord
                         ->helperText('Enter the ending kilometers.')
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
-                    Forms\Components\FileUpload::make('ending_meter_photo')
-            ->optimize('webp')                ->disk('s3')
-                        ->directory('CRM')
-                        ->label('Ending Meter Photo')
-                        ->required()
-
-                        ->helperText('Upload a photo of the ending meter.')
+                        
+                        
+                        
+                        FileUpload::make('ending_meter_photo')
+                            ->label('Ending Meter Photo')
+                            ->helperText('Upload a photo of the ending meter.')
+                            ->required()
+                            ->disk('s3') // Upload to S3
+                            ->directory('CRM') // Store in "CRM" folder
+                            ->preserveFilenames() // Preserve original name
+                            ->saveUploadedFileUsing(function ($file) {
+                                try {
+                                    // Generate WebP file name
+                                    $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                        
+                                    // Convert image to WebP format using Intervention Image
+                                    $image = Image::make($file)
+                                        ->encode('webp', 80); // Compress to 80% quality
+                        
+                                    // Store the optimized image in S3
+                                    Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                        
+                                    return $optimizedFileName; // Save WebP filename in database
+                                } catch (\Exception $e) {
+                                    \Log::error('Error optimizing image: ' . $e->getMessage());
+                                    return null; // If optimization fails, return null
+                                }
+                            })                        
                         ->visible(fn() => $this->record->travel_type === 'own_vehicle')
                         ->columnSpan('full'), // Make the input span the full width of the form
 
@@ -172,8 +217,33 @@ class EditVisitEntry extends EditRecord
                         ->helperText('Provide the travel expense incurred.')
                         ->visible(fn() => $this->record->travel_type === 'with_colleague'), // Only show if travel type is 'with_colleague'
 
-                    Forms\Components\FileUpload::make('travel_bill')
-                        ->label('Travel Bill (Bus/Train)')
+                        
+                        
+                        
+                        FileUpload::make('travel_bill')
+                            ->label('Travel Bill (Bus/Train)')
+                            ->disk('s3') // Upload to S3
+                            ->directory('CRM') // Store in "CRM" folder
+                            ->multiple() // Enable multiple file uploads
+                            ->preserveFilenames() // Preserve original file name
+                            ->saveUploadedFileUsing(function ($file) {
+                                try {
+                                    // Generate WebP file name
+                                    $optimizedFileName = 'CRM/' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                        
+                                    // Convert image to WebP format using Intervention Image
+                                    $image = Image::make($file)
+                                        ->encode('webp', 80); // Compress to 80% quality
+                        
+                                    // Store the optimized image in S3
+                                    Storage::disk('s3')->put($optimizedFileName, (string) $image, 'public');
+                        
+                                    return $optimizedFileName; // Save WebP filename in the database
+                                } catch (\Exception $e) {
+                                    \Log::error('Error optimizing image: ' . $e->getMessage());
+                                    return null; // If optimization fails, return null
+                                }
+                            })                       
                         ->visible(fn() => $this->record->travel_type === 'with_colleague'),
                 ])
                 ->action(fn(array $data) => $this->submitStopVisit($data))

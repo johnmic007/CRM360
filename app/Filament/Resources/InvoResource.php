@@ -564,9 +564,9 @@ class InvoResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('school_id')
-                    ->label('School')
-                    ->relationship('school', 'name'),
+                // SelectFilter::make('school_id')
+                //     ->label('School')
+                //     ->relationship('school', 'name'),
 
                 SelectFilter::make('company_id')
                     ->label('Company')

@@ -63,7 +63,7 @@ class ApprovalRequestResource extends Resource
 
             Select::make('school_id')
                 ->label('School')
-                ->options(School::pluck('name', 'id'))
+                ->relationship('school', 'name') 
                 ->searchable()
                 ->disabled()
                 ->required(),
