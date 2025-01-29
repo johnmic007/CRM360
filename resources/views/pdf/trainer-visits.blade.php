@@ -267,78 +267,158 @@
     </table>
 
     <div class="photos">
-        <div class="photo">
-            <p class="photo-title">Starting Meter Photo:</p>
-            @php
-            $prefixedPath = $trainerVisit->starting_meter_photo ? 'CRM/' . $trainerVisit->starting_meter_photo : null;
-            $startingMeterUrl = $prefixedPath && Storage::disk('s3')->exists($prefixedPath)
-            ? Storage::disk('s3')->url($prefixedPath)
-            : null;
-            @endphp
-            @if ($startingMeterUrl)
-            <p>{{ $startingMeterUrl }}</p>
-            <img src="{{ $startingMeterUrl }}" alt="Starting Meter Photo">
-            @else
-            <p>No Image</p>
-            @endif
-        </div>
+    <!-- Starting Meter Photo -->
+    <div class="photo">
+        <p class="photo-title">Starting Meter Photo:</p>
+        @php
+            $prefixedPath1 = 'CRM1/' . $trainerVisit->starting_meter_photo;
+            $prefixedPath2 = 'CRM/' . $trainerVisit->starting_meter_photo;
+            $originalPath = $trainerVisit->starting_meter_photo;
 
-        <div class="photo">
-            <p class="photo-title">Ending Meter Photo:</p>
-            @php
-            $prefixedPath = $trainerVisit->ending_meter_photo ? 'CRM/' . $trainerVisit->ending_meter_photo : null;
-            $endingMeterUrl = $prefixedPath && Storage::disk('s3')->exists($prefixedPath)
-            ? Storage::disk('s3')->url($prefixedPath)
-            : null;
-            @endphp
-            @if ($endingMeterUrl)
-            <p>{{ $endingMeterUrl }}</p>
-            <img src="{{ $endingMeterUrl }}" alt="Ending Meter Photo">
-            @else
-            <p>No Image</p>
-            @endif
-        </div>
+            if (Storage::disk('s3')->exists($prefixedPath1)) {
+                $startingMeterUrl = Storage::disk('s3')->url($prefixedPath1);
+            } elseif (Storage::disk('s3')->exists($prefixedPath2)) {
+                $startingMeterUrl = Storage::disk('s3')->url($prefixedPath2);
+            } elseif (Storage::disk('s3')->exists($originalPath)) {
+                $startingMeterUrl = Storage::disk('s3')->url($originalPath);
+            } else {
+                $startingMeterUrl = null;
+            }
 
-        <div class="photo">
-            <p class="photo-title">GPS Photo:</p>
-            @if ($trainerVisit->gps_photo)
-            @php
-            $gpsPhotoUrl = 'CRM/' . $trainerVisit->gps_photo;
-            $gpsPhotoFullUrl = Storage::disk('s3')->exists($gpsPhotoUrl)
-            ? Storage::disk('s3')->url($gpsPhotoUrl)
-            : null;
-            @endphp
-            @if ($gpsPhotoFullUrl)
-            <p>{{ $gpsPhotoFullUrl }}</p>
-            <img src="{{ $gpsPhotoFullUrl }}" alt="GPS Photo">
-            @else
-            <p>No Image</p>
-            @endif
-            @else
-            <p>No Image</p>
-            @endif
-        </div>
+            $base64StartingMeter = null;
+            if ($startingMeterUrl) {
+                try {
+                    $imageContent = file_get_contents($startingMeterUrl);
+                    $base64StartingMeter = 'data:image/png;base64,' . base64_encode($imageContent);
+                } catch (\Exception $e) {
+                    $base64StartingMeter = null;
+                }
+            }
+        @endphp
 
-        <div class="photo">
-            <p class="photo-title">Travel Bill:</p>
-            @if (is_array($trainerVisit->travel_bill) && count($trainerVisit->travel_bill) > 0)
-            @foreach ($trainerVisit->travel_bill as $billPath)
-            @php
-            $prefixedPath = 'CRM/' . $billPath;
-            $imageUrl = Storage::disk('s3')->exists($prefixedPath) ? Storage::disk('s3')->url($prefixedPath) : null;
-            @endphp
-            @if ($imageUrl)
-            <p>{{ $imageUrl }}</p>
-            <img src="{{ $imageUrl }}" alt="Travel Bill" style="max-width: 200px; max-height: 200px;">
-            @else
+        @if ($base64StartingMeter)
+            <img src="{{ $base64StartingMeter }}" alt="Starting Meter Photo">
+        @else
             <p>No Image</p>
-            @endif
-            @endforeach
-            @else
-            <p>No Image</p>
-            @endif
-        </div>
+        @endif
     </div>
+
+    <!-- Ending Meter Photo -->
+    <div class="photo">
+        <p class="photo-title">Ending Meter Photo:</p>
+        @php
+            $prefixedPath1 = 'CRM1/' . $trainerVisit->ending_meter_photo;
+            $prefixedPath2 = 'CRM/' . $trainerVisit->ending_meter_photo;
+            $originalPath = $trainerVisit->ending_meter_photo;
+
+            if (Storage::disk('s3')->exists($prefixedPath1)) {
+                $endingMeterUrl = Storage::disk('s3')->url($prefixedPath1);
+            } elseif (Storage::disk('s3')->exists($prefixedPath2)) {
+                $endingMeterUrl = Storage::disk('s3')->url($prefixedPath2);
+            } elseif (Storage::disk('s3')->exists($originalPath)) {
+                $endingMeterUrl = Storage::disk('s3')->url($originalPath);
+            } else {
+                $endingMeterUrl = null;
+            }
+
+            $base64EndingMeter = null;
+            if ($endingMeterUrl) {
+                try {
+                    $imageContent = file_get_contents($endingMeterUrl);
+                    $base64EndingMeter = 'data:image/png;base64,' . base64_encode($imageContent);
+                } catch (\Exception $e) {
+                    $base64EndingMeter = null;
+                }
+            }
+        @endphp
+
+        @if ($base64EndingMeter)
+            <img src="{{ $base64EndingMeter }}" alt="Ending Meter Photo">
+        @else
+            <p>No Image</p>
+        @endif
+    </div>
+
+    <!-- GPS Photo -->
+    <div class="photo">
+        <p class="photo-title">GPS Photo:</p>
+        @php
+            $prefixedPath1 = 'CRM1/' . $trainerVisit->gps_photo;
+            $prefixedPath2 = 'CRM/' . $trainerVisit->gps_photo;
+            $originalPath = $trainerVisit->gps_photo;
+
+            if (Storage::disk('s3')->exists($prefixedPath1)) {
+                $gpsPhotoUrl = Storage::disk('s3')->url($prefixedPath1);
+            } elseif (Storage::disk('s3')->exists($prefixedPath2)) {
+                $gpsPhotoUrl = Storage::disk('s3')->url($prefixedPath2);
+            } elseif (Storage::disk('s3')->exists($originalPath)) {
+                $gpsPhotoUrl = Storage::disk('s3')->url($originalPath);
+            } else {
+                $gpsPhotoUrl = null;
+            }
+
+            $base64GPSPhoto = null;
+            if ($gpsPhotoUrl) {
+                try {
+                    $imageContent = file_get_contents($gpsPhotoUrl);
+                    $base64GPSPhoto = 'data:image/png;base64,' . base64_encode($imageContent);
+                } catch (\Exception $e) {
+                    $base64GPSPhoto = null;
+                }
+            }
+        @endphp
+
+        @if ($base64GPSPhoto)
+            <img src="{{ $base64GPSPhoto }}" alt="GPS Photo">
+        @else
+            <p>No Image</p>
+        @endif
+    </div>
+
+    <!-- Travel Bills -->
+    <div class="photo">
+        <p class="photo-title">Travel Bill:</p>
+        @if (is_array($trainerVisit->travel_bill) && count($trainerVisit->travel_bill) > 0)
+            @foreach ($trainerVisit->travel_bill as $billPath)
+                @php
+                    $prefixedPath1 = 'CRM1/' . $billPath;
+                    $prefixedPath2 = 'CRM/' . $billPath;
+                    $originalPath = $billPath;
+
+                    if (Storage::disk('s3')->exists($prefixedPath1)) {
+                        $billImageUrl = Storage::disk('s3')->url($prefixedPath1);
+                    } elseif (Storage::disk('s3')->exists($prefixedPath2)) {
+                        $billImageUrl = Storage::disk('s3')->url($prefixedPath2);
+                    } elseif (Storage::disk('s3')->exists($originalPath)) {
+                        $billImageUrl = Storage::disk('s3')->url($originalPath);
+                    } else {
+                        $billImageUrl = null;
+                    }
+
+                    $base64Bill = null;
+                    if ($billImageUrl) {
+                        try {
+                            $imageContent = file_get_contents($billImageUrl);
+                            $base64Bill = 'data:image/png;base64,' . base64_encode($imageContent);
+                        } catch (\Exception $e) {
+                            $base64Bill = null;
+                        }
+                    }
+                @endphp
+
+                @if ($base64Bill)
+                    <img src="{{ $base64Bill }}" alt="Travel Bill" style="max-width: 200px; max-height: 200px;">
+                @else
+                    <p>No Image</p>
+                @endif
+            @endforeach
+        @else
+            <p>No Image</p>
+        @endif
+    </div>
+</div>
+
+
 
 
     <div class="lead-statuses">
@@ -353,21 +433,53 @@
             <p><strong>Visited Date:</strong> {{ $status->visited_date ?? 'N/A' }}</p>
             <p><strong>Image:</strong></p>
             @if ($status->image)
-            @php
-            $prefixedPath = 'CRM/' . $status->image;
-            $imageUrl = Storage::disk('s3')->exists($prefixedPath)
-            ? Storage::disk('s3')->url($prefixedPath)
-            : null;
-            @endphp
-            @if ($imageUrl)
-            <p>Generated URL: {{ $imageUrl }}</p>
-            <img src="{{ $imageUrl }}" alt="Lead Status Image" style="max-width: 200px;">
-            @else
-            <p>No Image Available</p>
-            @endif
-            @else
-            <p>No Image</p>
-            @endif
+    @php
+        $prefixedPath1 = 'CRM1/' . $status->image;
+        $prefixedPath2 = 'CRM/' . $status->image;
+        $originalPath = $status->image; // No prefix
+
+        // Check in CRM1 first
+        if (Storage::disk('s3')->exists($prefixedPath1)) {
+            $imageUrl = Storage::disk('s3')->url($prefixedPath1);
+        } 
+        // Check in CRM if not found in CRM1
+        elseif (Storage::disk('s3')->exists($prefixedPath2)) {
+            $imageUrl = Storage::disk('s3')->url($prefixedPath2);
+        } 
+        // If still not found, check the original file without a prefix
+        elseif (Storage::disk('s3')->exists($originalPath)) {
+            $imageUrl = Storage::disk('s3')->url($originalPath);
+        } 
+        // If no image is found
+        else {
+            $imageUrl = null;
+        }
+
+        // Convert to Base64 for PDF rendering
+        $base64Image = null;
+        if ($imageUrl) {
+            try {
+                $imageContent = file_get_contents($imageUrl);
+                $base64Image = 'data:image/png;base64,' . base64_encode($imageContent);
+            } catch (\Exception $e) {
+                $base64Image = null;
+            }
+        }
+    @endphp
+
+    @if ($base64Image)
+        <img src="{{ $base64Image }}" alt="Lead Status Image" style="max-width: 200px;">
+    @elseif ($imageUrl)
+        <p>{{ $imageUrl }}</p>
+        <p>Image could not be fetched in PDF</p>
+    @else
+        <p>No Image</p>
+    @endif
+@else
+    <p>No Image</p>
+@endif
+
+
 
         </div>
         <hr>
