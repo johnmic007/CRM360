@@ -232,7 +232,9 @@ class LeadStageReportResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
            
     }
 

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\VisitEntryResource\Pages;
 
 use App\Filament\Resources\VisitEntryResource;
+use App\Filament\Resources\VisitEntryResource\RelationManagers\FollowUpsRelationManager;
 use App\Filament\Resources\VisitEntryResource\RelationManagers\SchoolVisitRelationManager;
 use App\Jobs\StartVisitJob;
 use App\Jobs\StopVisitJob;
@@ -36,6 +37,7 @@ class EditVisitEntry extends EditRecord
         ) {
             return [
                 SchoolVisitRelationManager::class,
+                FollowUpsRelationManager::class
                 // Add other relation managers here if needed
             ];
         }
@@ -260,80 +262,80 @@ class EditVisitEntry extends EditRecord
         ];
     }
 
-    // public function submitStartVisit(array $data = [])
-    // {
-    //     // Update the VisitEntry record with the provided data
-    //     $this->record->update([
-    //         'travel_type' => $data['travel_type'] ?? null,
-    //         'travel_expense' => $data['travel_expense'] ?? null,
-    //         'starting_km' => $data['starting_km'] ?? null,
-    //         'head_id' => $data['head_id'] ?? null,
-    //         'belong_school' => $data['belong_school'] ?? null,
-    //         'starting_meter_photo' => $data['starting_meter_photo'] ?? null, // Save raw array
-    //         'travel_mode' => $data['travel_mode'] ?? null,
-    //         'start_time' => now(), // Set the start time
-    //         'end_time' => null, // Clear the end time
-    //     ]);
-
-    //     Notification::make()
-    //         ->title('Visit Started')
-    //         ->success()
-    //         ->body('The visit has been started successfully.')
-    //         ->send();
-    // }
-
-
     public function submitStartVisit(array $data = [])
-{
-    dispatch(new StartVisitJob($this->record, $data));
-}
+    {
+        // Update the VisitEntry record with the provided data
+        $this->record->update([
+            'travel_type' => $data['travel_type'] ?? null,
+            'travel_expense' => $data['travel_expense'] ?? null,
+            'starting_km' => $data['starting_km'] ?? null,
+            'head_id' => $data['head_id'] ?? null,
+            'belong_school' => $data['belong_school'] ?? null,
+            'starting_meter_photo' => $data['starting_meter_photo'] ?? null, // Save raw array
+            'travel_mode' => $data['travel_mode'] ?? null,
+            'start_time' => now(), // Set the start time
+            'end_time' => null, // Clear the end time
+        ]);
 
-public function submitStopVisit(array $data)
-{
-    dispatch(new StopVisitJob($this->record, $data));
-}
+        Notification::make()
+            ->title('Visit Started')
+            ->success()
+            ->body('The visit has been started successfully.')
+            ->send();
+    }
+
+
+//     public function submitStartVisit(array $data = [])
+// {
+//     dispatch(new StartVisitJob($this->record, $data));
+// }
+
+// public function submitStopVisit(array $data)
+// {
+//     dispatch(new StopVisitJob($this->record, $data));
+// }
 
 
 
 
-    // public function submitStopVisit(array $data)
-    // {
+    public function submitStopVisit(array $data)
+    {
 
-    //     $startingKm = $this->record->starting_km;
+        $startingKm = $this->record->starting_km;
 
-    //     // Validate that ending_km is greater than starting_km
-    //     if (isset($data['ending_km']) && $data['ending_km'] <= $startingKm) {
-    //         Notification::make()
-    //             ->title('Validation Error')
-    //             ->danger()
-    //             ->body('The ending kilometers must be greater than the starting kilometers.')
-    //             ->send();
+        // Validate that ending_km is greater than starting_km
+        if (isset($data['ending_km']) && $data['ending_km'] <= $startingKm) {
+            Notification::make()
+                ->title('Validation Error')
+                ->danger()
+                ->body('The ending kilometers must be greater than the starting kilometers.')
+                ->send();
 
-    //         return; // Stop execution if validation fails
-    //     }
+            return; // Stop execution if validation fails
+        }
 
-    //     // Combine start and stop data and save everything together
-    //     $this->record->update([
-    //         // Data collected during 'start'
-    //         'travel_type' => $data['travel_type'] ?? $this->record->travel_type,
-    //         'travel_expense' => $data['travel_expense'] ?? null,
-    //         'travel_bill' => $data['travel_bill'] ?? null, // Assuming the first uploaded file
-    //         'starting_km' => $data['starting_km'] ?? $this->record->starting_km,
-    //         'starting_meter_photo' => $data['starting_meter_photo'] ?? $this->record->starting_meter_photo,
-    //         'travel_mode' => $data['travel_mode'] ?? $this->record->travel_mode,
+        // Combine start and stop data and save everything together
+        $this->record->update([
+            // Data collected during 'start'
+            'travel_type' => $data['travel_type'] ?? $this->record->travel_type,
+            'travel_expense' => $data['travel_expense'] ?? null,
+            'travel_bill' => $data['travel_bill'] ?? null, // Assuming the first uploaded file
+            'starting_km' => $data['starting_km'] ?? $this->record->starting_km,
+            'starting_meter_photo' => $data['starting_meter_photo'] ?? $this->record->starting_meter_photo,
+            'travel_mode' => $data['travel_mode'] ?? $this->record->travel_mode,
 
-    //         // Data collected during 'stop'
-    //         'ending_km' => $data['ending_km'] ?? null,
-    //         'ending_meter_photo' => $data['ending_meter_photo'] ?? null,
-    //         'end_time' => now(), // Set the end time
-    //     ]);
+            // Data collected during 'stop'
+            'ending_km' => $data['ending_km'] ?? null,
+            'ending_meter_photo' => $data['ending_meter_photo'] ?? null,
+            'end_time' => now(), // Set the end time
+        ]);
 
-    //     Notification::make()
-    //         ->title('Visit Stopped')
-    //         ->success()
-    //         ->body('The visit has been stopped successfully with the provided ending details.')
-    //         ->send();
-    // }
+        Notification::make()
+            ->title('Visit Stopped')
+            ->success()
+            ->body('The visit has been stopped successfully with the provided ending details.')
+            ->send();
+    }
 
 
     protected function getWorkingHoursLabel(): string

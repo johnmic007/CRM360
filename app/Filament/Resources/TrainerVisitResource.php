@@ -582,7 +582,9 @@ class TrainerVisitResource extends Resource
                         }
                     }),
 
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
 
         // ->bulkActions([
         //     Tables\Actions\BulkAction::make('downloadPdf')

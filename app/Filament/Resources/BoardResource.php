@@ -66,7 +66,9 @@ class BoardResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

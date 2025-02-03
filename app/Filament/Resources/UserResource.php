@@ -394,7 +394,9 @@ class UserResource extends Resource
                             ->sendToDatabase($record);
                     })
                     ->requiresConfirmation()
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
 

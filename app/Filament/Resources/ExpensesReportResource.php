@@ -240,59 +240,81 @@ class ExpensesReportResource extends Resource
                 ->attribute('approval_status'), // Tells Filament which column/attribute to filter
                 // or you can use ->query(...) if you need custom logic
 
+
+                SelectFilter::make('user_id')
+    ->label('Filter by User') // Label for filter
+    ->options(function () {
+        return User::role(['zonal_manager', 'bdm', 'regional_manager']) // Fetch users with specific roles
+            ->pluck('name', 'id') // Return [id => name]
+            ->toArray();
+    })
+    ->searchable()
+    ->query(function (Builder $query, $data) {
+        if (empty($data['value'])) {
+            return; // Skip filtering if no user is selected
+        }
+
+        $selectedUserId = $data['value']; // Get selected user ID
+
+        // Apply filter only for the selected user (No subordinates)
+        $query->where('user_id', $selectedUserId);
+    }),
+
             /**
              * (C) Filter by Verify Status
              */
-            SelectFilter::make('verify_status')
-                ->label('Verify Status')
-                ->options([
-                    'verified'   => 'Verified',
-                    'pending'  => 'Pending',
-                ])
-                ->attribute('verify_status'),
+            // SelectFilter::make('verify_status')
+            //     ->label('Verify Status')
+            //     ->options([
+            //         'verified'   => 'Verified',
+            //         'pending'  => 'Pending',
+            //     ])
+            //     ->attribute('verify_status'),
 
                 
-                SelectFilter::make('selected_user')
-                ->label('User Team Visits') // Shortened label
-                ->options(function () {
-                    // Fetch users with specific roles (e.g., 'BDA' and 'BDM')
-                    return User::role(['zonal_manager', 'bdm', 'regional_manager']) // Use the `role` method from Spatie's package
-                        ->pluck('name', 'id') // Fetch users' names and IDs
-                        ->all();
-                })
-                ->searchable()
-                ->query(function (Builder $query, $data) {
-                    // Check if the 'value' key exists in the data and retrieve its value
-                    if (empty($data['value'])) {
-                        // If no value is provided, skip the filter logic
-                        return;
-                    }
+            //     SelectFilter::make('selected_user')
+            //     ->label('User Team Visits') // Shortened label
+            //     ->options(function () {
+            //         // Fetch users with specific roles (e.g., 'BDA' and 'BDM')
+            //         return User::role(['zonal_manager', 'bdm', 'regional_manager']) // Use the `role` method from Spatie's package
+            //             ->pluck('name', 'id') // Fetch users' names and IDs
+            //             ->all();
+            //     })
+            //     ->searchable()
+            //     ->query(function (Builder $query, $data) {
+            //         // Check if the 'value' key exists in the data and retrieve its value
+            //         if (empty($data['value'])) {
+            //             // If no value is provided, skip the filter logic
+            //             return;
+            //         }
 
-                    $selectedUserId = $data['value']; // Extract the selected user ID
+            //         $selectedUserId = $data['value']; // Extract the selected user ID
 
-                    // Fetch the selected user
-                    $selectedUser = User::find($selectedUserId);
+            //         // Fetch the selected user
+            //         $selectedUser = User::find($selectedUserId);
 
-                    if ($selectedUser) {
-                        // Fetch subordinate IDs
-                        try {
-                            $subordinateIds = $selectedUser->getAllSubordinateIds();
-                            $subordinateIds[] = $selectedUser->id; // Include the selected user's ID
+            //         if ($selectedUser) {
+            //             // Fetch subordinate IDs
+            //             try {
+            //                 $subordinateIds = $selectedUser->getAllSubordinateIds();
+            //                 $subordinateIds[] = $selectedUser->id; // Include the selected user's ID
 
-                            $query->whereIn('user_id', $subordinateIds); // Apply filter
-                        } catch (\Exception $e) {
-                            // Log or handle any errors
-                            logger()->error('Error fetching subordinate IDs:', ['message' => $e->getMessage()]);
-                        }
-                    } else {
-                        // Log when the selected user cannot be found
-                        logger()->warning('User not found for selected ID:', ['user_id' => $selectedUserId]);
-                    }
-                }),
+            //                 $query->whereIn('user_id', $subordinateIds); // Apply filter
+            //             } catch (\Exception $e) {
+            //                 // Log or handle any errors
+            //                 logger()->error('Error fetching subordinate IDs:', ['message' => $e->getMessage()]);
+            //             }
+            //         } else {
+            //             // Log when the selected user cannot be found
+            //             logger()->warning('User not found for selected ID:', ['user_id' => $selectedUserId]);
+            //         }
+            //     }),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
           
     }
 

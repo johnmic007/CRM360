@@ -52,7 +52,9 @@ class CustomerResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
            
     }
 

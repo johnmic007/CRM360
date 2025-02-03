@@ -30,8 +30,9 @@ class SchoolVisitRelationManager extends RelationManager
 
 
 
-    protected function beforeSave(array &$data): void
+    protected function beforeCreate(array &$data): void
     {
+        dd('jhidfv');
         dispatch(new StoreSchoolVisitJob($data));
     }
 

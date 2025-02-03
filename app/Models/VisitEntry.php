@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VisitEntry extends Model
 {
@@ -58,6 +60,14 @@ public function leadStatuses()
 }
 
 
+public function todaySchoolFollowups(): HasMany
+{
+    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id')
+        ->whereDate('follow_up_date', Carbon::today()) // Filter for today's follow-ups
+        ->whereHas('visitEntry.user.schoolUser', function ($query) {
+            $query->whereNotNull('school_id'); // Ensure the user is linked to a school
+        });
+}
 
 
 

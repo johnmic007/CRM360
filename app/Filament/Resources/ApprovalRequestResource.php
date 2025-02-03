@@ -172,7 +172,9 @@ class ApprovalRequestResource extends Resource
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\ViewAction::make(),
 
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
 

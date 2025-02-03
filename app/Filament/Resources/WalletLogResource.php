@@ -60,7 +60,9 @@ class WalletLogResource extends Resource
                 Tables\Actions\EditAction::make(),
 
             ])
-            ->bulkActions([]);
+            ->bulkActions([])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

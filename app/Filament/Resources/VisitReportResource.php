@@ -272,7 +272,9 @@ class VisitReportResource extends Resource
 
 
             ])
-            ->defaultSort('start_time', 'desc');
+            ->defaultSort('start_time', 'desc')
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

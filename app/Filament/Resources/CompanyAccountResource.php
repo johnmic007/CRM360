@@ -146,7 +146,9 @@ class CompanyAccountResource extends Resource
                     })
                     ->requiresConfirmation()
 
-                ]);
+                ])
+                ->paginated([10, 25,]);
+
           
     }
 

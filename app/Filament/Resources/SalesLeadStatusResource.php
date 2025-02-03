@@ -172,7 +172,9 @@ class SalesLeadStatusResource extends Resource
                 Tables\Actions\DeleteAction::make(), // Add Edit action
 
                 
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

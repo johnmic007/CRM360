@@ -54,7 +54,9 @@ class StateResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

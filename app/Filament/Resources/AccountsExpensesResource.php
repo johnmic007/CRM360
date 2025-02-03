@@ -123,7 +123,9 @@ class AccountsExpensesResource extends Resource
                         ExportFormat::Xlsx,
                         ExportFormat::Csv,
                     ])
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

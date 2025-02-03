@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Jobs\StoreSchoolVisitJob;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -59,10 +61,25 @@ class SalesLeadStatus extends Model
         return $this->belongsTo(User::class, 'visited_by');
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function visitEntry(): BelongsTo
+    {
+        return $this->belongsTo(VisitEntry::class);
+    }
+
 
     protected static function boot()
     {
         parent::boot();
+
+
+        static::creating(function ($status) {
+            dispatch(new StoreSchoolVisitJob($status    ->toArray()));
+        });
     
         static::saving(function ($status) {
             // Log the incoming data
@@ -73,7 +90,7 @@ class SalesLeadStatus extends Model
             // dd($data);
 
 
-
+            
 
             if ($status->status === 'Assigned to Another User') {
                 Log::warning('Attempt to save status "Assigned to Another User". Not creating entry.', [

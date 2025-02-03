@@ -85,7 +85,9 @@ class AccountsClosingResource extends Resource
             ], layout: FiltersLayout::AboveContent  )
             ->actions([
                 Tables\Actions\EditAction::make(),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
             
     }
 

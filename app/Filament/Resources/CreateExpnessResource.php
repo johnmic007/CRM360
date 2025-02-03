@@ -158,7 +158,9 @@ class CreateExpnessResource extends Resource
                 TextColumn::make('travel_type'),
 
                 TextColumn::make('travel_expense'),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
 
         // ->bulkActions([
         //     Tables\Actions\BulkAction::make('downloadPdf')

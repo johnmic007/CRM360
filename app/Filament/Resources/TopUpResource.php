@@ -208,7 +208,9 @@ class TopUpResource extends Resource
                     })
                     ->requiresConfirmation()
 
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

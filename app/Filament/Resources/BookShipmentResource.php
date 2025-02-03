@@ -215,7 +215,9 @@ class BookShipmentResource extends Resource
             ])
             ->filters([])
             ->actions([])
-            ->bulkActions([]);
+            ->bulkActions([])
+            ->paginated([10, 25,]);
+
     }
 
     public static function getRelations(): array

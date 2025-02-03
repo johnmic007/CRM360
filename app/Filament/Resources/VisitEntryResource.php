@@ -102,7 +102,9 @@ class VisitEntryResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->paginated([10, 25,]);
+
     }
 
 
