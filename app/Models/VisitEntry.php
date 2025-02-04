@@ -62,11 +62,9 @@ public function leadStatuses()
 
 public function todaySchoolFollowups(): HasMany
 {
-    return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id')
-        ->whereDate('follow_up_date', Carbon::today()) // Filter for today's follow-ups
-        ->whereHas('visitEntry.user.schoolUser', function ($query) {
-            $query->whereNotNull('school_id'); // Ensure the user is linked to a school
-        });
+    return $this->hasMany(SalesLeadStatus::class,  'created_by'  ,'user_id' )
+                ->whereDate('follow_up_date', Carbon::today()->toDateString());
+
 }
 
 
