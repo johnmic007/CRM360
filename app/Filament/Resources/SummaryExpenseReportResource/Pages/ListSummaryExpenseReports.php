@@ -10,10 +10,6 @@ class ListSummaryExpenseReports extends ListRecords
 {
     protected static string $resource = SummaryExpenseReportResource::class;
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\CreateAction::make(),
-        ];
-    }
+   
+    
 }
