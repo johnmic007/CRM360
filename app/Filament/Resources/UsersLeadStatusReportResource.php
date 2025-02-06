@@ -26,7 +26,7 @@ class UsersLeadStatusReportResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales_manager']);
+        return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head']);
     }
 
     public static function table(Table $table): Table
