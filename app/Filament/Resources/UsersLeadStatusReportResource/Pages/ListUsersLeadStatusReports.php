@@ -69,11 +69,11 @@ class ListUsersLeadStatusReports extends ListRecords
                 ->icon('heroicon-o-x-circle')
                 ->disabled(),
 
-            Actions\Action::make('download_pdf')
-                ->label('PDF')
-                ->color('success')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->action('downloadPDF'),
+            // Actions\Action::make('download_pdf')
+            //     ->label('PDF')
+            //     ->color('success')
+            //     ->icon('heroicon-o-arrow-down-tray')
+            //     ->action('downloadPDF'),
         ];
     }
 

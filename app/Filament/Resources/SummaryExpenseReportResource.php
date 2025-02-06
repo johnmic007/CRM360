@@ -32,22 +32,24 @@ class SummaryExpenseReportResource extends Resource
 {
     return $table
     ->query(fn (Builder $query) =>
-            TrainerVisit::query() // Ensures a model instance is returned
-                ->selectRaw('
-                    MIN(id) as id,
-                    user_id,
-                    COUNT(id) as total_requests,
-                    SUM(COALESCE(total_expense, 0)) as total_expense,
-                    SUM(COALESCE(travel_expense, 0)) as total_travel_expense,
-                    SUM(COALESCE(food_expense, 0)) as total_food_expense,
-                    SUM(CASE WHEN verify_status = "verified" THEN COALESCE(total_expense, 0) ELSE 0 END) as verified_expense,
-                    SUM(CASE WHEN approval_status = "approved" THEN COALESCE(total_expense, 0) ELSE 0 END) as approved_expense,
-                    SUM(CASE WHEN travel_type = "extra_expense" THEN COALESCE(total_expense, 0) ELSE 0 END) as total_extra_expense,
-                    (SUM(COALESCE(total_expense, 0)) / NULLIF(COUNT(id), 0)) as average_expense
-                ')
-                ->groupBy('user_id')
-                ->with('user')
-        )
+    TrainerVisit::query()
+        ->selectRaw('
+            MIN(id) as id,  -- Ensuring ID is an aggregated column
+            user_id,
+            COUNT(id) as total_requests,
+            SUM(COALESCE(total_expense, 0)) as total_expense,
+            SUM(COALESCE(travel_expense, 0)) as total_travel_expense,
+            SUM(COALESCE(food_expense, 0)) as total_food_expense,
+            SUM(CASE WHEN verify_status = "verified" THEN COALESCE(total_expense, 0) ELSE 0 END) as verified_expense,
+            SUM(CASE WHEN approval_status = "approved" THEN COALESCE(total_expense, 0) ELSE 0 END) as approved_expense,
+            SUM(CASE WHEN travel_type = "extra_expense" THEN COALESCE(total_expense, 0) ELSE 0 END) as total_extra_expense,
+            (SUM(COALESCE(total_expense, 0)) / NULLIF(COUNT(id), 0)) as average_expense
+        ')
+        ->groupBy('user_id')
+        ->orderBy('id', 'asc') // Using the aggregated ID
+        ->with('user') // Ensure relationships are loaded properly
+)
+
         ->filters([
             Filter::make('start_date')
                 ->label('Start Date')

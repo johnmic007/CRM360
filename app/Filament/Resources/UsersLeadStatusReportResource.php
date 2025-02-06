@@ -32,28 +32,27 @@ class UsersLeadStatusReportResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-        ->query(function (Builder $query) {
-            return $query
-                ->selectRaw('
-                    MIN(id) as min_id,
-                    created_by as user_id,
-                    COUNT(id) as total_visits,
-                    SUM(CASE WHEN potential_meet = true THEN 1 ELSE 0 END) as total_potential_meet,
-                    SUM(CASE WHEN is_book_issued = 1 THEN 1 ELSE 0 END) as total_books_issued,
-                    SUM(CASE WHEN status = "follow_up" THEN 1 ELSE 0 END) as total_follow_ups,
-                    SUM(CASE WHEN status = "closed" THEN 1 ELSE 0 END) as total_closed_leads,
-                    SUM(CASE WHEN status = "School Nurturing" THEN 1 ELSE 0 END) as total_school_nurturing,
-                    SUM(CASE WHEN status = "Demo Reschedule" THEN 1 ELSE 0 END) as total_demo_reschedule,
-                    SUM(CASE WHEN status = "Demo Completed" THEN 1 ELSE 0 END) as total_demo_completed,
-                    SUM(CASE WHEN status = "deal_won" THEN 1 ELSE 0 END) as total_deal_won,
-                    SUM(CASE WHEN status = "deal_lost" THEN 1 ELSE 0 END) as total_deal_lost
-                ')
-                ->groupBy('created_by')
-                // Optionally, if you want to sort by the earliest ID in each group:
-                ->orderBy('min_id', 'asc')
-                ->with('user');
-        })
-        
+        ->query(fn (Builder $query) =>
+        SalesLeadStatus::query()
+            ->selectRaw('
+                MIN(id) as id,  -- Ensuring ID is an aggregated column
+                created_by as user_id,
+                COUNT(id) as total_visits,
+                SUM(CASE WHEN potential_meet = true THEN 1 ELSE 0 END) as total_potential_meet,
+                SUM(CASE WHEN is_book_issued = 1 THEN 1 ELSE 0 END) as total_books_issued,
+                SUM(CASE WHEN status = "follow_up" THEN 1 ELSE 0 END) as total_follow_ups,
+                SUM(CASE WHEN status = "closed" THEN 1 ELSE 0 END) as total_closed_leads,
+                SUM(CASE WHEN status = "School Nurturing" THEN 1 ELSE 0 END) as total_school_nurturing,
+                SUM(CASE WHEN status = "Demo Reschedule" THEN 1 ELSE 0 END) as total_demo_reschedule,
+                SUM(CASE WHEN status = "Demo Completed" THEN 1 ELSE 0 END) as total_demo_completed,
+                SUM(CASE WHEN status = "deal_won" THEN 1 ELSE 0 END) as total_deal_won,
+                SUM(CASE WHEN status = "deal_lost" THEN 1 ELSE 0 END) as total_deal_lost
+            ')
+            ->groupBy('created_by')
+            ->orderBy('id', 'asc') // Ordering by the aggregated ID
+            ->with('user') // Ensure relationships are loaded properly
+    )
+    
             ->filters([
                 Filter::make('start_date')
                 ->label('Start Date')
