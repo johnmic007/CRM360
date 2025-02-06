@@ -11,6 +11,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
 use App\Models\TrainerVisit; // Ensure this import exists
 use App\Filament\Resources\SummaryExpenseReportResource\Pages;
 
@@ -109,6 +110,39 @@ class SummaryExpenseReportResource extends Resource
                             $query->where('verify_status', $data['verify_status']);
                         }
                     }),
+
+                // Exclude Selected Users Filter
+                    Filter::make('exclude_users')
+                    ->label('Exclude Selected Users')
+                    ->form([
+                        Select::make('exclude_users')
+                            ->multiple()
+                            ->options(User::pluck('name', 'id')->toArray()) // Correct User model reference
+                            ->searchable()
+                            ->placeholder('Select users to exclude'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['exclude_users'])) {
+                            $query->whereNotIn('user_id', $data['exclude_users']);
+                        }
+                    }),
+
+                    // Include Only Selected Users Filter
+                    Filter::make('include_users')
+                    ->label('Include Only Selected Users')
+                    ->form([
+                        Select::make('include_users')
+                            ->multiple()
+                            ->options(User::pluck('name', 'id')->toArray()) // Correct User model reference
+                            ->searchable()
+                            ->placeholder('Select users to include'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['include_users'])) {
+                            $query->whereIn('user_id', $data['include_users']);
+                        }
+                    }),
+
 
         ])
         ->columns([
