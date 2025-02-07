@@ -9,7 +9,7 @@
         "php": "^8.2",
         "althinect/filament-spatie-roles-permissions": "^2.2",
         "awcodes/filament-tiptap-editor": "^3.4",
-        "barryvdh/laravel-dompdf": "^3.0",
+        "barryvdh/laravel-dompdf": "^3.1",
         "dompdf/dompdf": "^3.0",
         "filament/filament": "3.2.57",
         "guava/calendar": "^1.10",
