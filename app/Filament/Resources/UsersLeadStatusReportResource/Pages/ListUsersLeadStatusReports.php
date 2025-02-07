@@ -183,14 +183,14 @@ class ListUsersLeadStatusReports extends ListRecords
         $user = auth()->user();
 
         // Allow all reports for admin role
-        if ($user->roles()->whereIn('name', ['admin'])->exists()) {
+        if ($user->roles()->whereIn('name', ['admin','sales_operation_head'])->exists()) {
             return $query;
         }
 
         // Show reports for the logged-in user's company for specific roles
-        if ($user->roles()->whereIn('name', ['sales_operation_head', 'head', 'sales_operation', 'company'])->exists()) {
-            return $query->where('company_id', $user->company_id);
-        }
+        // if ($user->roles()->whereIn('name', ['sales_operation_head', 'head', 'sales_operation', 'company'])->exists()) {
+        //     return $query->where('company_id', $user->company_id);
+        // }
 
         // Fetch subordinate user IDs for other roles
         $subordinateIds = $user->getAllSubordinateIds();
