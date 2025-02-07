@@ -114,7 +114,7 @@ class SalesLeadStatusResource extends Resource
     public static function table(Tables\Table $table): Tables\Table
     {
         return $table->columns([
-            TextColumn::make('user.name'),
+            TextColumn::make('user.name')->searchable(),
             Tables\Columns\TextColumn::make('start_time')
                 ->label('Start Time')
                 ->dateTime(),

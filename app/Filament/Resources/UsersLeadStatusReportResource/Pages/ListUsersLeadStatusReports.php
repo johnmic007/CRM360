@@ -30,13 +30,43 @@ class ListUsersLeadStatusReports extends ListRecords
                 ->icon('heroicon-o-paper-clip')
                 ->disabled(),
                 Actions\Action::make('total_school_nurturing')
-                ->label(fn () => "School Nurturing: " . $this->getTableQuery()->where('status', 'School Nurturing')->count())
+                // ->label(fn () => "School Nurturing: " . $this->getTableQuery()->where('status', 'School Nurturing')->count())
+                ->label(function () {
+                    $query = $this->getTableQuery();
+                    if (method_exists($this, 'applyFiltersToTableQuery')) {
+                        $this->applyFiltersToTableQuery($query);
+                    }
+                    $totalDealsWon = $query->where('status', 'School Nurturing')->count();
+                    return "School Nurturing: {$totalDealsWon}";
+                })
                 ->color('gray')
                 ->icon('heroicon-o-academic-cap')
                 ->disabled(),
 
                 Actions\Action::make('total_demo_reschedule')
                 ->label(fn () => "Demo Reschedule: " . $this->getTableQuery()->where('status', 'Demo Reschedule')->count())
+                ->label(function () {
+                    $query = $this->getTableQuery();
+                    if (method_exists($this, 'applyFiltersToTableQuery')) {
+                        $this->applyFiltersToTableQuery($query);
+                    }
+                    $totalDealsWon = $query->where('status', 'Demo Reschedule')->count();
+                    return "Demo Scheduled: {$totalDealsWon}";
+                })
+                ->color('warning')
+                ->icon('heroicon-o-arrow-path')
+                ->disabled(),
+
+                Actions\Action::make('total_demo_reschedule')
+                // ->label(fn () => "Demo Completed: " . $this->getTableQuery()->where('status', 'Demo Reschedule')->count())
+                ->label(function () {
+                    $query = $this->getTableQuery();
+                    if (method_exists($this, 'applyFiltersToTableQuery')) {
+                        $this->applyFiltersToTableQuery($query);
+                    }
+                    $totalDealsWon = $query->where('status', 'Demo Completed')->count();
+                    return "Demo Completed: {$totalDealsWon}";
+                })
                 ->color('warning')
                 ->icon('heroicon-o-arrow-path')
                 ->disabled(),

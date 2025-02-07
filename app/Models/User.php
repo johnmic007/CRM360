@@ -57,6 +57,17 @@ class User extends Authenticatable
 
     ];
 
+
+
+    public function visits() {
+        return $this->hasMany(SalesLeadStatus::class, 'visited_by');
+    }
+    
+    public function closedInvoices() {
+        return $this->hasMany(Invoice::class, 'closed_by');
+    }
+    
+
     /**
      * Define the relationship between the user and their roles.
      */

@@ -132,8 +132,8 @@ class UsersLeadStatusReportResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Created By')
-                    ->sortable()
-                    ->searchable(),
+                    ->sortable(),
+                    // ->searchable(),
 
                 Tables\Columns\TextColumn::make('total_visits')
                     ->label('Total Visits')

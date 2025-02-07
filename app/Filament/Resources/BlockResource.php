@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BlockResource\Pages;
 use App\Models\Block;
 use App\Models\District;
+use Filament\Actions\DeleteAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -27,6 +28,14 @@ class BlockResource extends Resource
     public static function canEdit(Model $record): bool
     {
         return auth()->user()->hasRole(['admin' ,'sales_operation'  ]);
+
+        
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+
+        return auth()->user()->hasRole(['admin'  ]);
 
         
     }
@@ -60,6 +69,7 @@ class BlockResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

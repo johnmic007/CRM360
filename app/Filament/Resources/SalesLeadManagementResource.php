@@ -35,8 +35,17 @@ class SalesLeadManagementResource extends Resource
                 ->options(District::pluck('name', 'id')->toArray()) // Fetch districts using Eloquent
                 ->reactive()
                 ->required()
-                ->disabled(fn($record) => $record !== null), // Disable if a record is being edited
-
+                ->disabled(function ($record) {
+                    // Get the currently authenticated user
+                    $user = auth()->user();
+            
+                    // If a record is being edited AND the user is NOT an admin or sales head, disable it
+                    if ($record !== null) {
+                        return !$user->hasRole(['admin', 'sales_head', 'sales_operation_head']);
+                    }
+            
+                    return false; // Keep it enabled otherwise
+                }),
 
             Forms\Components\Select::make('block_id')
                 ->label('Block')
@@ -49,10 +58,19 @@ class SalesLeadManagementResource extends Resource
                 })
                 ->reactive()
                 ->required()
-                ->disabled(fn($record) => $record !== null), // Disable if a record is being edited
+                ->disabled(function ($record) {
+                    // Get the currently authenticated user
+                    $user = auth()->user();
+            
+                    // If a record is being edited AND the user is NOT an admin or sales head, disable it
+                    if ($record !== null) {
+                        return !$user->hasRole(['admin', 'sales_head', 'sales_operation_head']);
+                    }
+            
+                    return false; // Keep it enabled otherwise
+                }),
 
-
-            Forms\Components\Select::make('school_id')
+                Forms\Components\Select::make('school_id')
                 ->label('School')
                 ->options(function (callable $get) {
                     $blockId = $get('block_id');
@@ -62,8 +80,19 @@ class SalesLeadManagementResource extends Resource
                     return School::where('block_id', $blockId)->pluck('name', 'id')->toArray(); // Fetch schools using Eloquent
                 })
                 ->reactive()
-                ->disabled(fn($record) => $record !== null) // Disable if a record is being edited
+                ->disabled(function ($record) {
+                    // Get the currently authenticated user
+                    $user = auth()->user();
+            
+                    // If a record is being edited AND the user is NOT an admin or sales head, disable it
+                    if ($record !== null) {
+                        return !$user->hasRole(['admin', 'sales_head', 'sales_operation_head']);
+                    }
+            
+                    return false; // Keep it enabled otherwise
+                })
                 ->required(),
+            
 
             Forms\Components\Select::make('status')
                 ->label('Status')
