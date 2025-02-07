@@ -41,6 +41,7 @@ class SummaryExpenseReportResource extends Resource
                         (SUM(COALESCE(total_expense, 0)) / NULLIF(COUNT(id), 0)) as average_expense
                     ')
                     ->groupBy('user_id')
+                    ->orderBy('id', 'asc') // Ordering by the aggregated ID
                     ->with('user')
             )
             ->filters([
