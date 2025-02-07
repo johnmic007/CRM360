@@ -31,30 +31,23 @@ class SummaryExpenseReportResource extends Resource
     public static function table(Table $table): Table
 {
     return $table
-    ->query(function (Builder $query) {
-        return TrainerVisit::query()
-            ->when(request('tableFilters.start_date.start_date'), fn($q) => $q->whereDate('trainer_visits.created_at', '>=', request('tableFilters.start_date.start_date')))
-            ->when(request('tableFilters.end_date.end_date'), fn($q) => $q->whereDate('trainer_visits.created_at', '<=', request('tableFilters.end_date.end_date')))
-            ->when(request('tableFilters.approval_status.approval_status'), fn($q) => $q->where('approval_status', request('tableFilters.approval_status.approval_status')))
-            ->when(request('tableFilters.verify_status.verify_status'), fn($q) => $q->where('verify_status', request('tableFilters.verify_status.verify_status')))
-            ->when(request('tableFilters.exclude_users.exclude_users'), fn($q) => $q->whereNotIn('user_id', request('tableFilters.exclude_users.exclude_users')))
-            ->when(request('tableFilters.include_users.include_users'), fn($q) => $q->whereIn('user_id', request('tableFilters.include_users.include_users')))
-            ->selectRaw('
-                MIN(id) as id,
-                user_id,
-                COUNT(id) as total_requests,
-                SUM(COALESCE(total_expense, 0)) as total_expense,
-                SUM(COALESCE(travel_expense, 0)) as total_travel_expense,
-                SUM(COALESCE(food_expense, 0)) as total_food_expense,
-                SUM(CASE WHEN verify_status = "verified" THEN COALESCE(total_expense, 0) ELSE 0 END) as verified_expense,
-                SUM(CASE WHEN approval_status = "approved" THEN COALESCE(total_expense, 0) ELSE 0 END) as approved_expense,
-                SUM(CASE WHEN travel_type = "extra_expense" THEN COALESCE(total_expense, 0) ELSE 0 END) as total_extra_expense,
-                (SUM(COALESCE(total_expense, 0)) / NULLIF(COUNT(id), 0)) as average_expense
-            ')
-            ->groupBy('user_id')
-            ->with('user');
-    })
-
+    ->query(fn (Builder $query) =>
+            TrainerVisit::query() // Ensures a model instance is returned
+                ->selectRaw('
+                    MIN(id) as id,
+                    user_id,
+                    COUNT(id) as total_requests,
+                    SUM(COALESCE(total_expense, 0)) as total_expense,
+                    SUM(COALESCE(travel_expense, 0)) as total_travel_expense,
+                    SUM(COALESCE(food_expense, 0)) as total_food_expense,
+                    SUM(CASE WHEN verify_status = "verified" THEN COALESCE(total_expense, 0) ELSE 0 END) as verified_expense,
+                    SUM(CASE WHEN approval_status = "approved" THEN COALESCE(total_expense, 0) ELSE 0 END) as approved_expense,
+                    SUM(CASE WHEN travel_type = "extra_expense" THEN COALESCE(total_expense, 0) ELSE 0 END) as total_extra_expense,
+                    (SUM(COALESCE(total_expense, 0)) / NULLIF(COUNT(id), 0)) as average_expense
+                ')
+                ->groupBy('user_id')
+                ->with('user')
+        )
         ->filters([
             Filter::make('start_date')
     ->label('Start Date')
