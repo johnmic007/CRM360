@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\BlockResource\Pages;
 use App\Models\Block;
 use App\Models\District;
-use Filament\Actions\DeleteAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -69,7 +68,7 @@ class BlockResource extends Resource
             ->filters([])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                DeleteAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
