@@ -15,9 +15,10 @@
             background-color: white;
         }
         h3 {
-            color: #004b7a;
+            background-color: #004b7a;
             text-align: center;
             margin-top: 5%;
+            color: white;
         }
         .text-center {
             text-align: center;
@@ -78,12 +79,12 @@
     <p style="text-align: left">Both parties collectively referred to as the "Parties", agree to the terms and conditions outlined in this MoU for the delivery of educational services.</p>
 
     <h3>SERVICE DETAILS & COST STRUCTURE</h3>
-    <p>1. Scope of Services Provided</p>
+    <p><b>1. Scope of Services Provided</b></p>
     <p style="text-align: left">The Service Provider shall deliver the following services to the School for the academic year <strong>{{ $mou->academic_year_start }}</strong>:</p>
     <ul>
         <li>{{ $mou->services }}</li>
     </ul>
-    <p>2. Student Count & Cost Structure</p>
+    <p><b>2. Student Count & Cost Structure</b></p>
     <table>
         <tr>
             <th>Class</th>
@@ -125,7 +126,7 @@
     </table>
 
     <h3>TERMS & CONDITIONS</h3>
-    <p>3. Payment Terms</p>
+    <p><b>3. Payment Terms</b></p>
     <ul>
         <li>The total contract value is &#8377;{{ $mou->total_contract_value }}</li>
         <li>Payment shall be made in three installments as follows:
@@ -138,31 +139,31 @@
         <li>Payment shall be made via [Bank Transfer / Cheque / Online Payment] to the Service Provider's designated account.</li>
     </ul>
 
-    <p>4. Late Payment Clause</p>
+    <p><b>4. Late Payment Clause</b></p>
     <ul>
         <li>If payment is not made within [X] days from the due date, a penalty of XX% per month will be applicable.</li>
         <li>If non-payment exceeds [X] days, the Service Provider reserves the right to pause or terminate services.</li>
     </ul>
 
-    <p>5. Deliverables & Responsibilities</p>
+    <p><b>5. Deliverables & Responsibilities</b></p>
     <ul>
         <li>The Service Provider will ensure the quality and timely delivery of all agreed services.</li>
         <li>The School shall provide necessary infrastructure, internet connectivity, and administrative support.</li>
     </ul>
 
-    <p>6. Confidentiality & Data Protection</p>
+    <p><b>6. Confidentiality & Data Protection</b></p>
     <ul>
         <li>The Service Provider will not share student data with third parties without prior consent.</li>
         <li>Both parties agree to comply with data privacy laws and ensure secure handling of student information.</li>
     </ul>
 
-    <p class="mt-4">7. Term & Termination</p>
+    <p class="mt-4"><b>7. Term & Termination</b></p>
         <ul class="pl-6 list-disc">
             <li>This MoU shall remain in effect for [1 year / 2 years] from the date of signing.</li>
             <li>Either party may terminate this MoU by providing a [30-day] written notice.</li>
             <li>In the event of termination, the School shall settle all pending payments before disengagement.</li>
         </ul>
-        <p class="mt-4">8. Dispute Resolution</p>
+        <p class="mt-4"><b>8. Dispute Resolution</b></p>
         <ul class="pl-6 list-disc">
             <li>Any disputes arising under this MoU shall be resolved through mutual discussion and mediation.</li>
             <li>If a resolution is not achieved, disputes will be settled under the jurisdiction of [City, State]
@@ -176,20 +177,20 @@
             <th colspan="2">For and on behalf of {{ $mou->school_name }}</th>
         </tr>
         <tr>
-            <td style="width: 20%">Signature:</td><td style="width: 30%">_________________</td>
-            <td style="width: 20%">Signature:</td><td style="width: 30%">_________________</td>
+            <td style="width: 20%">Signature:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
+            <td style="width: 20%">Signature:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
         </tr>
         <tr>
-            <td style="width: 20%">Name:</td><td style="width: 30%">_________________</td>
-            <td style="width: 20%">Name:</td><td style="width: 30%">_________________</td>
+            <td style="width: 20%">Name:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
+            <td style="width: 20%">Name:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
         </tr>
         <tr>
-            <td style="width: 20%">Designation:</td><td style="width: 30%">_________________</td>
-            <td style="width: 20%">Designation:</td><td style="width: 30%">_________________</td>
+            <td style="width: 20%">Designation:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
+            <td style="width: 20%">Designation:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
         </tr>
         <tr>
-            <td style="width: 20%">Date:</td><td style="width: 30%">_________________</td>
-            <td style="width: 20%">Date:</td><td style="width: 30%">_________________</td>
+            <td style="width: 20%">Date:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
+            <td style="width: 20%">Date:</td><td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
         </tr>
     </table>
 
