@@ -14,11 +14,18 @@
             padding: 20px;
             background-color: white;
         }
+        p{
+            font-size: 12px;
+        }
+        li{
+            font-size: 12px;
+        }
         h3 {
             background-color: #004b7a;
             text-align: center;
-            margin-top: 5%;
+            margin-top: 2%;
             color: white;
+            font-size: 16px;
         }
         .text-center {
             text-align: center;
@@ -26,18 +33,25 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 2%;
             table-layout: fixed;
             word-wrap: break-word;
         }
-        th, td {
+        th {
             padding: 8px;
             text-align: center;
             border: solid 1px black;
+            font-size: 12px;
+        }
+        td {
+            padding: 8px;
+            text-align: center;
+            border: solid 1px black;
+            font-size: 12px;
         }
         .sign {
             width: 100%;
-            margin-top: 20px;
+            margin-top: 2%;
             border-collapse: separate;
         }
 
@@ -46,17 +60,17 @@
             text-align: left;
             border: none;
             color: #004b7a;
-            font-size: 18px;
+            font-size: 14px;
         }
         .sign td {
             padding: 0px;
             text-align: left;
             border: none;
-            font-size: 14px;
+            font-size: 12px;
         }
         .headerimg {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 2%;
         }
         .footer {
             position: fixed;
@@ -71,10 +85,10 @@
 </head>
 <body>
     <div class="headerimg">
-        <img src="logo.png" alt="Company Logo" style="max-width: 200px;">
+        <img src="{{ asset('images/mgc_logo.png') }}" alt="Company Logo" style="max-width: 200px;">
     </div>
     <h3>MEMORANDUM OF UNDERSTANDING (MoU)</h3>
-    <  style="text-align: left">This Memorandum of Understanding (MoU) is made and entered into on <strong>{{ $mou->date }}</strong>,<br><span class="text-center" style="text-align: center;">between:</span><br><strong>[Your Organization Name]</strong>, having its registered office at <strong>[Address]</strong>, hereinafter referred to as the "Service Provider".</p>
+    <p  style="text-align: left">This Memorandum of Understanding (MoU) is made and entered into on <strong>{{ $mou->date }}</strong>,<br><span class="text-center" style="text-align: center;">between:</span><br><strong>[Your Organization Name]</strong>, having its registered office at <strong>[Address]</strong>, hereinafter referred to as the "Service Provider".</p>
     <p style="text-align: left"><strong>{{ $mou->school_name }}</strong>, located at <strong>{{ $mou->school_address }}</strong>, hereinafter referred to as the "School".</p>
     <p style="text-align: left">Both parties collectively referred to as the "Parties", agree to the terms and conditions outlined in this MoU for the delivery of educational services.</p>
 
@@ -85,7 +99,7 @@
         <li>{{ $mou->services }}</li>
     </ul>
     <p><b>2. Student Count & Cost Structure</b></p>
-    <table>
+    {{-- <table>
         <tr>
             <th>Class</th>
             <th>No. of Students</th>
@@ -100,7 +114,48 @@
             <td>&#8377;{{ $class['total_cost'] }}</td>
         </tr>
         @endforeach
+    </table>  --}}
+    <table>
+        <tr>
+            <th>Class</th>
+            <th>No. of Students</th>
+            <th>Cost Per Student (₹)</th>
+            <th>Total Cost (₹)</th>
+        </tr>
+        @php
+            $totalStudents = 0;
+            $totalCost = 0;
+        @endphp
+        @for ($i = 1; $i <= 9; $i++)
+            @php
+                $classData = collect($mou->classes)->firstWhere('class', "{$i}th");
+                $students = !empty($classData['no_of_students']) ? $classData['no_of_students'] : '---';
+                $costPerStudent = !empty($classData['cost_per_student']) ? $classData['cost_per_student'] : '---';
+                $totalClassCost = !empty($classData['total_cost']) ? $classData['total_cost'] : '---';
+
+                if ($students !== '---') {
+                    $totalStudents += (int) $students;
+                }
+                if ($totalClassCost !== '---') {
+                    $totalCost += (int) str_replace('₹', '', $totalClassCost);
+                }
+            @endphp
+            <tr>
+                <td>{{ $i }}th</td>
+                <td>{{ $students }}</td>
+                <td>{{ is_numeric($costPerStudent) ? '₹' . $costPerStudent : $costPerStudent }}</td>
+                <td>{{ is_numeric($totalClassCost) ? '₹' . $totalClassCost : $totalClassCost }}</td>
+            </tr>
+        @endfor
+        <tr>
+            <td><strong>Total</strong></td>
+            <td><strong>{{ $totalStudents ?: '---' }}</strong></td>
+            <td><strong>--</strong></td>
+            <td><strong>₹{{ $totalCost ?: '---' }}</strong></td>
+        </tr>
     </table>
+
+
 
     <table class="sign">
         <tr>
@@ -108,20 +163,20 @@
             <th colspan="2">For and on behalf of {{ $mou->school_name }}</th>
         </tr>
         <tr>
-            <td>Signature:</td><td>_________________</td>
-            <td>Signature:</td><td>_________________</td>
+            <td>Signature:</td><td>_ _ _ _ _ _ _ _ _</td>
+            <td>Signature:</td><td>_ _ _ _ _ _ _ _ _</td>
         </tr>
         <tr>
-            <td>Name:</td><td>_________________</td>
-            <td>Name:</td><td>_________________</td>
+            <td>Name:</td><td>_ _ _ _ _ _ _ _ _</td>
+            <td>Name:</td><td>_ _ _ _ _ _ _ _ _</td>
         </tr>
         <tr>
-            <td>Designation:</td><td>_________________</td>
-            <td>Designation:</td><td>_________________</td>
+            <td>Designation:</td><td>_ _ _ _ _ _ _ _ _</td>
+            <td>Designation:</td><td>_ _ _ _ _ _ _ _ _</td>
         </tr>
         <tr>
-            <td>Date:</td><td>_________________</td>
-            <td>Date:</td><td>_________________</td>
+            <td>Date:</td><td>_ _ _ _ _ _ _ _ _</td>
+            <td>Date:</td><td>_ _ _ _ _ _ _ _ _</td>
         </tr>
     </table>
 
