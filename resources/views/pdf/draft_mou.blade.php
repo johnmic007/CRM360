@@ -84,9 +84,19 @@
     </style>
 </head>
 <body>
-    <div class="headerimg">
-        <img src="{{ asset('images/mgc_logo.png') }}" alt="Company Logo" style="max-width: 200px;">
-    </div>
+@php
+    $path = public_path('images/mgc_logo.jpeg');
+    $base64 = is_file($path) ? 'data:image/png;base64,' . base64_encode(file_get_contents($path)) : null;
+@endphp
+
+<div class="headerimg">
+    @if($base64)
+        <img src="{{ $base64 }}" alt="Company Logo" style="max-width: 200px;">
+    @else
+        <p>Image not found</p>
+    @endif
+</div>
+
     <h3>MEMORANDUM OF UNDERSTANDING (MoU)</h3>
     <p  style="text-align: left">This Memorandum of Understanding (MoU) is made and entered into on <strong>{{ $mou->date }}</strong>,<br><span class="text-center" style="text-align: center;">between:</span><br><strong>[Your Organization Name]</strong>, having its registered office at <strong>[Address]</strong>, hereinafter referred to as the "Service Provider".</p>
     <p style="text-align: left"><strong>{{ $mou->school_name }}</strong>, located at <strong>{{ $mou->school_address }}</strong>, hereinafter referred to as the "School".</p>
