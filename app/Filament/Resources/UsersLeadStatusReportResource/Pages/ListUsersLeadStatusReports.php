@@ -226,6 +226,6 @@ class ListUsersLeadStatusReports extends ListRecords
         $subordinateIds = $user->getAllSubordinateIds();
 
         // Show only reports for the subordinates
-        return $query->whereIn('user_id', $subordinateIds);
+        return $query->whereIn('created_by', $subordinateIds);
     }
 }

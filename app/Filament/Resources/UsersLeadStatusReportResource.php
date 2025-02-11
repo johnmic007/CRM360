@@ -24,10 +24,10 @@ class UsersLeadStatusReportResource extends Resource
     protected static ?string $navigationLabel = 'users Lead Status Report';
     protected static ?string $navigationGroup = 'Reports';
 
-    public static function canViewAny(): bool
-    {
-        return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head']);
-    }
+    // public static function canViewAny(): bool
+    // {
+    //     return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head']);
+    // }
 
     public static function table(Table $table): Table
     {
