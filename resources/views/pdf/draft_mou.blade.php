@@ -11,6 +11,7 @@
             width: 180mm;
             height: 297mm;
             margin: 0;
+            padding-top: 0px
             padding: 20px;
             background-color: white;
         }
@@ -84,7 +85,7 @@
     </style>
 </head>
 <body>
-@php
+    @php
     $path = public_path('images/mgc_logo.jpeg');
     $base64 = is_file($path) ? 'data:image/png;base64,' . base64_encode(file_get_contents($path)) : null;
 @endphp
