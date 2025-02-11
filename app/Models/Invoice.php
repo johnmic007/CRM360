@@ -150,26 +150,29 @@ class Invoice extends Model
         });
 
 
+
         // Trigger the total calculation before saving or updating
         static::saving(function ($invoice) {
+            // dd($invoice);
+
 
         //     $items = $invoice->items()->get();
         // $invoice->total_amount = $items->sum(fn($item) => $item->quantity * $item->price);
         
             $totalAmount = $invoice->total_amount;
 
-            // Ensure relationships are loaded if using them
-            $invoice->load(['books', 'items']); // Eager load books and items relationships
+            // // Ensure relationships are loaded if using them
+            // $invoice->load(['books', 'items']); // Eager load books and items relationships
 
-            // Loop through books and calculate total
-            foreach ($invoice->books as $book) {
-                $totalAmount += $book->total ?? 0;
-            }
+            // // Loop through books and calculate total
+            // foreach ($invoice->books as $book) {
+            //     $totalAmount += $book->total ?? 0;
+            // }
 
-            // Loop through items and calculate total
-            foreach ($invoice->items as $item) {
-                $totalAmount += $item->total ?? 0;
-            }
+            // // Loop through items and calculate total
+            // foreach ($invoice->items as $item) {
+            //     $totalAmount += $item->total ?? 0;
+            // }
 
             // Set the total amount for the invoice
             $invoice->total_amount = $totalAmount;
