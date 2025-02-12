@@ -18,7 +18,7 @@
         } */
 
         html{
-            font-size: 17px;
+            font-size: 17.5px;
         }
         @page {
             margin: 20px;
