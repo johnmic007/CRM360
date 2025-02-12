@@ -27,8 +27,8 @@
         body {
             font-family: serif;
             background-color: white;
-                margin: 5%;
-                padding: 5%;
+            margin: 3%;
+            padding: 3%;
         }
 
         h3 {
@@ -69,7 +69,8 @@
 
         .headerimg {
             text-align: center;
-            margin: 10px;
+            margin: 2%;
+            padding: 2%;
         }
 
         .footer {
@@ -103,24 +104,115 @@
         <strong>BETWEEN</strong><br>
         <ol>
             <li>
-                <strong>[Your Organization Name]</strong>, powered by KGISL Educational Institutions, a company incorporated under the provisions of the Companies Act, 1956, and having its principal place of business at 365, Thudiyalur Rd, Saravanampatti, Coimbatore, Tamil Nadu 641035 (hereinafter referred to as "MGC"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors and assigns, of the <strong>FIRST PART</strong> ;<br><br>
-                AND
+                <strong>MILLION GENIUS CODERS</strong>, powered by KGISL Educational Institutions, a company incorporated under the provisions of the Companies Act, 1956, and having its principal place of business at 365, Thudiyalur Rd, Saravanampatti, Coimbatore, Tamil Nadu 641035 (hereinafter referred to as "MGC"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors and assigns, of the <strong>FIRST PART</strong>;
             </li>
+            <br><br>
+            <p>AND</p>
             <br><br>
             <li>
                 <strong>{{ $mou->school_name ?? 'School Name' }}</strong>, having its principal place of business at <strong>{{ $mou->school_address ?? 'School Address' }}</strong> (hereinafter referred to as the "CLIENT"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its trustees, beneficiaries, members, successors, and assigns, of the <strong> SECOND PART</strong>.
             </li>
         </ol>
         <br>
-        <strong>{{ $mou->school_name ?? 'School Name' }}</strong> and <strong>{{ $mou->school_address ?? 'School Address' }}</strong> are hereinafter collectively referred to as the <strong>"Parties"</strong> and individually as <strong>a "Party"</strong>.
+        <strong>MGC</strong> and <strong>CLIENT</strong> are hereinafter collectively referred to as the <strong>"Parties"</strong> and individually as <strong>a "Party"</strong>.
     </p>
     <br>
     <br>
     <!-- Signature Section -->
     <table class="sign">
         <tr>
-            <td colspan="2">For and on behalf of Million Genius Coders</td>
-            <td colspan="2">For and on behalf of {{ $mou->school_name ?? 'School Name' }}</td>
+            <td colspan="2"><b>For and on behalf of Million Genius Coders</b></td>
+            <td colspan="2"><b>For and on behalf of {{ $mou->school_name ?? 'School Name' }}</b></td>
+        </tr><br>
+        <tr>
+            <td><b>Signature:</b></td>
+            <td>_________________</td>
+            <td><b>Signature:</b></td>
+            <td>_________________</td>
+        </tr>
+        <br>
+        <br>
+        <tr>
+            <td><b>Name:</b></td>
+            <td>_________________</td>
+            <td><b>Name:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Designation:</b></td>
+            <td>_________________</td>
+            <td><b>Designation:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Date:</b></td>
+            <td>_________________</td>
+            <td><b>Date:</b></td>
+            <td>_________________</td>
+        </tr>
+    </table>
+    <p style="text-decoration: underline;"><b>WHEREAS</b>
+        <br>
+        <ul style="list-style-type: upper-alpha;">
+            <li>MGC has conceptualized, created and developed and is the proprietor of the Million
+                Genius Coders Academic System (as defined later) and the Components (as defined later)
+                that empowers schools such as the School (as defined below) with excellent student
+                learning and serves as a one stop, technology blended system for all academic
+                requirements of such schools;
+            </li>
+            <li>
+                CLIENT runs and operates a school by and under the name <strong>{{ $mou->school_name ?? 'School Name' }}</strong> and has seen the demo of the Million Genius
+Coders Academic System and the Components and is now desirous of enhancing the
+education and learning of its students by availing the same from MGC; and
+            </li>
+            <li>
+                MGC has agreed to provide the Million Genius Coders Academic System and the
+Components to the CLIENT for the Term (as defined later) and upon the terms as
+hereinafter appearing.
+            </li>
+        </ul>
+        <ul style="list-style-type: lower-alpha;">
+            <li>
+                “Million Genius Coders Academic System” shall mean and refer to an integrated,
+technology blended solution consisting of all the Components designed for and
+implemented by MGC at schools to improve student learning.
+            </li>
+        </ul>
+    </p>
+    <p>
+        <b>MGC's Responsibilities</b>
+        <ol>
+            <li>
+                <b>High-Quality Instructional Resources:</b> <br>
+                Provide high-quality, well-structured instructional materials to support student learning.
+            </li>
+            <li>
+                <b>Up-to-Date and Relevant Courses:</b> <br>
+Ensure that all courses are continuously updated and aligned with the latest educational
+standards and industry trends.
+            </li>
+            <li>
+                <b>Technical Support:</b> <br>
+                Offer technical support to ensure smooth operation and address any issues that arise
+throughout the duration of the course.
+            </li>
+            <li>
+                <b>Teacher Training:</b> <br>
+                Provide comprehensive training to teachers before the commencement of the courses to
+ensure they are well-prepared to facilitate learning.
+            </li>
+            <li>
+                <b>Certificates of Completion:</b> <br>
+                Issue certificates of completion to students who successfully finish each course.
+            </li>
+        </ol>
+    </p>
+
+    <!-- Signature Section -->
+    <table class="sign">
+        <tr>
+            <td colspan="2"><b>For and on behalf of Million Genius Coders</b></td>
+            <td colspan="2"><b>For and on behalf of {{ $mou->school_name ?? 'School Name' }}</b></td>
         </tr><br>
         <tr>
             <td><b>Signature:</b></td>
