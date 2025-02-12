@@ -54,6 +54,11 @@ class DraftMou extends Model
     {
         return Attribute::get(fn () => collect($this->classes)->sum('no_of_students'));
     }
+    
+    public function school()
+    {
+        return $this->belongsTo(School::class);
+    }
 
     /** 💰 Get total revenue */
     protected function totalRevenue(): Attribute

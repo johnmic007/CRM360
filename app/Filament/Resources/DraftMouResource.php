@@ -284,7 +284,7 @@ class DraftMouResource extends Resource
                     ->label('Date')
                     ->sortable(),
 
-                TextColumn::make('school_name')
+                TextColumn::make('school.name')
                     ->label('School Name')
                     ->sortable(),
 
