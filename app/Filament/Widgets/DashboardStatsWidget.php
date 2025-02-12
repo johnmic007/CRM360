@@ -42,11 +42,15 @@ class DashboardStatsWidget extends BaseWidget
         $walletBalance = $user->wallet_balance ?? 0;
         Log::info('DashboardStatsWidget: Wallet Balance:', ['amount' => $walletBalance]);
 
-        // ✅ Check if the user is an admin
         if ($user->hasRole('admin')) {
             // Admin should see all data
             Log::info('DashboardStatsWidget: Admin detected, fetching data for all users.');
             $subordinateIds = User::pluck('id')->toArray(); // Fetch all user IDs
+        } elseif ($user->hasRole('sales_operation_head')) {
+            // Fetch all users with the same company ID
+            $companyId = $user->company_id;
+            Log::info('DashboardStatsWidget: sales_operation_head detected, fetching data for company:', ['company_id' => $companyId]);
+            $subordinateIds = User::where('company_id', $companyId)->pluck('id')->toArray();
         } else {
             // Non-admins see their own data + subordinates
             $subordinateIds = $user->getAllSubordinateIds();
@@ -80,18 +84,21 @@ class DashboardStatsWidget extends BaseWidget
             Card::make('Wallet Balance', '₹' . number_format($walletBalance, 2))
                 ->description('Available balance in your wallet')
                 ->icon('heroicon-o-currency-rupee')
+                ->chart([1,2,3,4,3,2,1])
                 ->color($walletBalance > 0 ? 'success' : 'danger'),
 
             // Total Amount Closed Card
             Card::make('Total Amount Closed', '₹' . number_format($totalAmount, 2))
                 ->description('Total amount closed by you and your team')
                 ->icon('heroicon-o-currency-rupee')
+                ->chart([1,2,3,4,5,6,7])
                 ->color('success'),
 
             // Total Paid Amount Card
             Card::make('Total Paid Amount', '₹' . number_format($totalPaid, 2))
                 ->description('Total amount collected by you and your team')
                 ->icon('heroicon-o-currency-rupee')
+                ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('success'),
         ];
     }
