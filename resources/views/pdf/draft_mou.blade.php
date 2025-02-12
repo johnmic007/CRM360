@@ -17,9 +17,9 @@
             src: url('{{ public_path('fonts/NotoSans-Regular.ttf') }}') format('truetype');
         } */
 
-        /* html{
-            font-size: 18px;
-        } */
+        html{
+            font-size: 17px;
+        }
         @page {
             margin: 20px;
         }
@@ -157,6 +157,7 @@
             <td>_________________</td>
         </tr>
     </table>
+    <br>
     <p style="text-decoration: underline;"><b>WHEREAS</b>
         <br>
         <ul style="list-style-type: upper-alpha;">
