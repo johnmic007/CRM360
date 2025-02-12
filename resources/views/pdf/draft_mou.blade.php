@@ -33,7 +33,7 @@
 
         h3 {
             text-align: center;
-            margin: 10%;
+            margin: 5%;
             color: #009dff;
             text-decoration: underline;
         }
