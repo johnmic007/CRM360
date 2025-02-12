@@ -110,7 +110,7 @@
             <p>AND</p>
             <br>
             <li>
-                <strong>{{ $mou->school_name ?? 'School Name' }}</strong>, having its principal place of business at <strong>{{ $mou->school_address ?? 'School Address' }}</strong> (hereinafter referred to as the "CLIENT"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its trustees, beneficiaries, members, successors, and assigns, of the <strong> SECOND PART</strong>.
+                <strong>{{ $mou->school->name ?? 'School Name' }}</strong>, having its principal place of business at <strong>{{ $mou->school_address ?? 'School Address' }}</strong> (hereinafter referred to as the "CLIENT"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its trustees, beneficiaries, members, successors, and assigns, of the <strong> SECOND PART</strong>.
             </li>
         </ol>
         <br>
@@ -122,7 +122,7 @@
     <table class="sign">
         <tr>
             <td colspan="2"><b>For and on behalf of Million Genius Coders</b></td>
-            <td colspan="2"><b>For and on behalf of {{ $mou->school_name ?? 'School Name' }}</b></td>
+            <td colspan="2"><b>For and on behalf of {{ $mou->school->name ?? 'School Name' }}</b></td>
         </tr><br>
         <tr>
             <td><b>Signature:</b></td>
@@ -168,7 +168,7 @@
                 requirements of such schools;
             </li>
             <li>
-                CLIENT runs and operates a school by and under the name <strong>{{ $mou->school_name ?? 'School Name' }}</strong> and has seen the demo of the Million Genius
+                CLIENT runs and operates a school by and under the name {{ $mou->school->name ?? 'School Name' }} and has seen the demo of the Million Genius
 Coders Academic System and the Components and is now desirous of enhancing the
 education and learning of its students by availing the same from MGC; and
             </li>
@@ -219,7 +219,7 @@ ensure they are well-prepared to facilitate learning.
     <table class="sign">
         <tr>
             <td colspan="2"><b>For and on behalf of Million Genius Coders</b></td>
-            <td colspan="2"><b>For and on behalf of {{ $mou->school_name ?? 'School Name' }}</b></td>
+            <td colspan="2"><b>For and on behalf of {{ $mou->school->name ?? 'School Name' }}</b></td>
         </tr><br>
         <tr>
             <td><b>Signature:</b></td>
@@ -255,6 +255,206 @@ ensure they are well-prepared to facilitate learning.
         </tr>
     </table>
 
+    <ol>
+        <li>
+            <b>TERM</b> <br><br>
+            The Duration of this Agreement shall be for a period of _________ Years commencing from
+__________ to _________ unless the term is renewed prior to termination for such period and
+upon same, similar or such terms and conditions are mutually agreed by the Parties in writing.
+        </li><br><br><br>
+        <li>
+            <b>SERVICE DETAILS & COST STRUCTURE</b>
+            <br><br>
+            <ul><li>Scope of Services Provided:</li></ul><br>
+                <ol>
+                    <li>{{ $mou->services }}</li>
+                </ol><br>
+                <ul><li>Student Count Grade Wise & Cost Structure for <b>Junior Coders :</b></li></ul>
+        <br><br>
+
+    <table>
+    <tr>
+        <th>Class</th>
+        <th>No. of Students( Tentative )</th>
+        <th>Cost Per Student (₹)</th>
+    </tr>
+
+    @php
+        function classOrdinal($num) {
+            return match ($num) {
+                1 => 'Grade 1',
+                2 => 'Grade 2',
+                3 => 'Grade 3',
+                4 => 'Grade 4',
+                5 => 'Grade 5',
+                6 => 'Grade 6',
+                7 => 'Grade 7',
+                8 => 'Grade 8',
+                9 => 'Grade 9',
+                10 => 'Grade 10-12(O*)',
+            };
+        }
+
+        $totalStudents = 0;
+    @endphp
+
+    @for ($i = 1; $i <= 5; $i++)
+        @php
+            $classData = collect($mou->classes)->firstWhere('class', $i);
+            $students = $classData['no_of_students'] ?? 0;
+            $costPerStudent = $classData['cost_per_student'] ?? 0;
+
+        @endphp
+
+        <tr>
+            <td>{{ classOrdinal($i) }}</td>
+            <td>{{ $students ?: '---' }}</td>
+            <td>{{ $costPerStudent ? number_format($costPerStudent, 2) : '---' }}</td>
+        </tr>
+    @endfor
+    </table>
+    <br><br>
+    <!-- Signature Section -->
+    <table class="sign">
+        <tr>
+            <td colspan="2"><b>For and on behalf of Million Genius Coders</b></td>
+            <td colspan="2"><b>For and on behalf of {{ $mou->school->name ?? 'School Name' }}</b></td>
+        </tr><br>
+        <tr>
+            <td><b>Signature:</b></td>
+            <td>_________________</td>
+            <td><b>Signature:</b></td>
+            <td>_________________</td>
+        </tr>
+        <br>
+        <br>
+        <tr>
+            <td><b>Name:</b></td>
+            <td>_________________</td>
+            <td><b>Name:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Designation:</b></td>
+            <td>_________________</td>
+            <td><b>Designation:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Date:</b></td>
+            <td>_________________</td>
+            <td><b>Date:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Email:</b></td>
+            <td>_________________</td>
+            <td><b>Email:</b></td>
+            <td>_________________</td>
+        </tr>
+    </table>
+
+    <br><br><br>
+    <ul><li>Student Count Grade Wise & Cost Structure for <b>Senior Coders :</b></ul>
+    <br><br>
+    <table>
+        <tr>
+            <th>Class</th>
+            <th>No. of Students( Tentative )</th>
+            <th>Cost Per Student (₹)</th>
+        </tr>
+
+
+        @for ($i = 6; $i <= 10; $i++)
+            @php
+                $classData = collect($mou->classes)->firstWhere('class', $i);
+                $students = $classData['no_of_students'] ?? 0;
+                $costPerStudent = $classData['cost_per_student'] ?? 0;
+
+            @endphp
+
+            <tr>
+                <td>{{ classOrdinal($i) }}</td>
+                <td>{{ $students ?: '---' }}</td>
+                <td>{{ $costPerStudent ? number_format($costPerStudent, 2) : '---' }}</td>
+            </tr>
+        @endfor
+        </table><br>
+        <b>(O)-Optional</b>
+    </li>
+</li><br><br><br>
+<li>
+    <b>PAYMENT TERMS</b><br><br>
+    The payment for the services under this Agreement shall be made by the CLIENT to MGC in
+________ equal installments as follows:
+<ol>
+    <li>
+        First Payment: _____% of the total payment shall be made in the month of
+_______ 2025
+    </li><br><br>
+    <li>Second Payment: _____% of the total payment shall be made in the month of
+        _________2025</li><br><br>
+
+
+</ol>Payments shall be made via [ Bank Transfer / Cheque / NEFT / RTGS ] to the service
+provider's designated account.
+</li><br><br><br>
+<li>
+    <b>DELIVERABLES & RESPONSIBILITIES</b><br><br>
+    The Service Provider will ensure the quality and timely delivery of all agreed services.
+The School shall provide necessary infrastructure, internet connectivity and administrative
+support for smooth execution.
+</li><br><br><br>
+<li><b>CONFIDENTIALITY & DATA PROTECTION   </b><br><br>
+    The Service Provider will not share the student data with third parties without prior consent both parties agree to comply with data protection.
+</li><br><br><br>
+<li><b>TERMINATION</b><br><br>
+    Either Party may terminate this MoU by providing [ 30 - day ] written notice. In the event of
+    termination, the school shall settle all the pending payments.</li><br><br><br>
+    <li><b>DISPUTE RESOLUTION</b><br><br>
+        Any disputes arising under this MoU shall be resolved through mutual discussion and
+        mediation</li>
+        </ol>
+<br><br><br>
+        <!-- Signature Section -->
+    <table class="sign">
+        <tr>
+            <td colspan="2"><b>For and on behalf of Million Genius Coders</b></td>
+            <td colspan="2"><b>For and on behalf of {{ $mou->school->name ?? 'School Name' }}</b></td>
+        </tr><br>
+        <tr>
+            <td><b>Signature:</b></td>
+            <td>_________________</td>
+            <td><b>Signature:</b></td>
+            <td>_________________</td>
+        </tr>
+        <br>
+        <br>
+        <tr>
+            <td><b>Name:</b></td>
+            <td>_________________</td>
+            <td><b>Name:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Designation:</b></td>
+            <td>_________________</td>
+            <td><b>Designation:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Date:</b></td>
+            <td>_________________</td>
+            <td><b>Date:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Email:</b></td>
+            <td>_________________</td>
+            <td><b>Email:</b></td>
+            <td>_________________</td>
+        </tr>
+    </table>
 </body>
 </html>
 
