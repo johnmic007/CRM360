@@ -106,9 +106,9 @@
             <li>
                 <strong>MILLION GENIUS CODERS</strong>, powered by KGISL Educational Institutions, a company incorporated under the provisions of the Companies Act, 1956, and having its principal place of business at 365, Thudiyalur Rd, Saravanampatti, Coimbatore, Tamil Nadu 641035 (hereinafter referred to as "MGC"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors and assigns, of the <strong>FIRST PART</strong>;
             </li>
-            <br><br>
+            <br>
             <p>AND</p>
-            <br><br>
+            <br>
             <li>
                 <strong>{{ $mou->school_name ?? 'School Name' }}</strong>, having its principal place of business at <strong>{{ $mou->school_address ?? 'School Address' }}</strong> (hereinafter referred to as the "CLIENT"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its trustees, beneficiaries, members, successors, and assigns, of the <strong> SECOND PART</strong>.
             </li>
@@ -148,6 +148,12 @@
             <td><b>Date:</b></td>
             <td>_________________</td>
             <td><b>Date:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Email:</b></td>
+            <td>_________________</td>
+            <td><b>Email:</b></td>
             <td>_________________</td>
         </tr>
     </table>
@@ -238,6 +244,12 @@ ensure they are well-prepared to facilitate learning.
             <td><b>Date:</b></td>
             <td>_________________</td>
             <td><b>Date:</b></td>
+            <td>_________________</td>
+        </tr>
+        <tr>
+            <td><b>Email:</b></td>
+            <td>_________________</td>
+            <td><b>Email:</b></td>
             <td>_________________</td>
         </tr>
     </table>
