@@ -17,9 +17,9 @@
             src: url('{{ public_path('fonts/NotoSans-Regular.ttf') }}') format('truetype');
         } */
 
-        html{
+        /* html{
             font-size: 18px;
-        }
+        } */
         @page {
             margin: 20px;
         }
