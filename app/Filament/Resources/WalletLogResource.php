@@ -73,12 +73,7 @@ class WalletLogResource extends Resource
         ];
     }
 
-    public static function getWidgets(): array
-    {
-        return [
-            // WalletBalanceWidget::class,
-        ];
-    }
+ 
 
     public static function getPages(): array
     {
