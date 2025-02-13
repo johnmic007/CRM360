@@ -197,10 +197,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply date filters
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
 
                         // Apply approval status
@@ -224,10 +224,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply filters (same pattern)
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['approval_status']['approval_status'])) {
                             $query->where('approval_status', $filters['approval_status']['approval_status']);
@@ -248,10 +248,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply filters
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['approval_status']['approval_status'])) {
                             $query->where('approval_status', $filters['approval_status']['approval_status']);
@@ -272,10 +272,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply filters...
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['approval_status']['approval_status'])) {
                             $query->where('approval_status', $filters['approval_status']['approval_status']);
@@ -296,10 +296,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply filters...
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['approval_status']['approval_status'])) {
                             $query->where('approval_status', $filters['approval_status']['approval_status']);
@@ -321,10 +321,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply date/approval filters...
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['approval_status']['approval_status'])) {
                             $query->where('approval_status', $filters['approval_status']['approval_status']);
@@ -344,10 +344,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply date/verify filters...
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['verify_status']['verify_status'])) {
                             $query->where('verify_status', $filters['verify_status']['verify_status']);
@@ -367,10 +367,10 @@ class SummaryExpenseReportResource extends Resource
 
                         // Apply date/approval/verify filters...
                         if (! empty($filters['start_date']['start_date'])) {
-                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                            $query->whereDate('visit_date', '>=', $filters['start_date']['start_date']);
                         }
                         if (! empty($filters['end_date']['end_date'])) {
-                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                            $query->whereDate('visit_date', '<=', $filters['end_date']['end_date']);
                         }
                         if (! empty($filters['approval_status']['approval_status'])) {
                             $query->where('approval_status', $filters['approval_status']['approval_status']);

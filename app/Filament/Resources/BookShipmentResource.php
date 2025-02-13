@@ -45,9 +45,64 @@ class BookShipmentResource extends Resource
     {
         return $form
             ->schema([
-                //
-            ]);
+                // School Name
+                TextInput::make('name')
+                    ->label('🏫 School Name')
+                    ->disabled()
+                    ->required()
+                    ->formatStateUsing(fn (School $record) => $record->name)
+                    ->suffixIcon('heroicon-o-building-library'),
+    
+                // Total Books Count - Green if high, Yellow if moderate
+                TextInput::make('total_books')
+                    ->label('📚 Total Books')
+                    ->disabled()
+                    ->formatStateUsing(fn (School $record) => 
+                        $record->schoolBook->sum('books_count') ?? 0
+                    )
+                    ->suffixIcon('heroicon-o-book-open')
+                    ->prefixIcon('heroicon-o-circle-stack')
+                    ->extraAttributes(fn ($state) => [
+                        'class' => $state > 100 
+                            ? 'text-green-700 font-bold bg-green-100 px-3 py-2 rounded-lg'
+                            : 'text-yellow-700 font-bold bg-yellow-100 px-3 py-2 rounded-lg'
+                    ]),
+    
+                // Issued Books Count - Red if high, Blue if low
+                TextInput::make('issued_books')
+                    ->label('📦 Issued Books')
+                    ->disabled()
+                    ->formatStateUsing(fn (School $record) => 
+                        $record->schoolBook->sum('issued_books_count') ?? 0
+                    )
+                    ->suffixIcon('heroicon-o-check')
+                    ->prefixIcon('heroicon-o-document-text')
+                    ->extraAttributes(fn ($state) => [
+                        'class' => $state > 50 
+                            ? 'text-red-700 font-bold bg-red-100 px-3 py-2 rounded-lg'
+                            : 'text-blue-700 font-bold bg-blue-100 px-3 py-2 rounded-lg'
+                    ]),
+    
+                // Available Books Count - Traffic Light Colors
+                TextInput::make('available_books')
+                    ->label('📖 Available Books')
+                    ->disabled()
+                    ->formatStateUsing(fn (School $record) => 
+                        ($record->schoolBook->sum('books_count') ?? 0) - ($record->schoolBook->sum('issued_books_count') ?? 0)
+                    )
+                    ->suffixIcon('heroicon-o-clipboard')
+                    ->prefixIcon('heroicon-o-building-library')
+                    ->extraAttributes(fn ($state) => [
+                        'class' => $state > 50 
+                            ? 'text-green-700 font-bold bg-green-100 px-3 py-2 rounded-lg'
+                            : ($state > 10 
+                                ? 'text-yellow-700 font-bold bg-yellow-100 px-3 py-2 rounded-lg'
+                                : 'text-red-700 font-bold bg-red-100 px-3 py-2 rounded-lg')
+                    ]),
+            ])
+            ->columns(2); // Two-column layout for a better appearance
     }
+    
 
     public static function table(Table $table): Table
     {

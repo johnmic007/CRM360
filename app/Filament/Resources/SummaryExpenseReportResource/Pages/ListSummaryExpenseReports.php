@@ -21,24 +21,24 @@ use Illuminate\Support\Facades\Response as ResponseFacade;
             {
                 return [
 
-                    Actions\Action::make('total_requests')
-                    ->label(function () {
-                        // Get the base query for TrainerVisit
-                        $query = TrainerVisit::query();
+                    // Actions\Action::make('total_requests')
+                    // ->label(function () {
+                    //     // Get the base query for TrainerVisit
+                    //     $query = TrainerVisit::query();
                 
-                        // Apply filters if available
-                        if (method_exists($this, 'applyFiltersToTableQuery')) {
-                            $this->applyFiltersToTableQuery($query);
-                        }
+                    //     // Apply filters if available
+                    //     if (method_exists($this, 'applyFiltersToTableQuery')) {
+                    //         $this->applyFiltersToTableQuery($query);
+                    //     }
                 
-                        // Sum a valid column (replace 'total_expense' with the correct field)
-                        $totalRequests = $query->sum('total_expense'); 
+                    //     // Sum a valid column (replace 'total_expense' with the correct field)
+                    //     $totalRequests = $query->sum('total_expense'); 
                 
-                        return "Total Requests: ₹" . number_format($totalRequests, 2);
-                    })
-                    ->color('primary')
-                    ->icon('heroicon-o-paper-clip')
-                    ->disabled(),
+                    //     return "Total Requests: ₹" . number_format($totalRequests, 2);
+                    // })
+                    // ->color('primary')
+                    // ->icon('heroicon-o-paper-clip')
+                    // ->disabled(),
                 
 
                  // Make it a display-only label

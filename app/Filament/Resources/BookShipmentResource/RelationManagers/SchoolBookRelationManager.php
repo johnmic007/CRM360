@@ -67,12 +67,7 @@ class SchoolBookRelationManager extends RelationManager
                     ->sortable()
                     ->searchable()
                     ->placeholder('--'),
-
-                TextColumn::make('books_count')
-                    ->label('Books Count')
-                    ->sortable(),
-
-                // TextColumn::make('price')
+                      // TextColumn::make('price')
                 //     ->label('Price per Book')
                 //     ->money('INR')
                 //     ->sortable(),
@@ -81,6 +76,12 @@ class SchoolBookRelationManager extends RelationManager
                 //     ->label('Total Price')
                 //     ->money('INR')
                 //     ->sortable(),
+
+                TextColumn::make('books_count')
+                    ->label('Books Count')
+                    ->sortable(),
+
+              
 
                 TextColumn::make('issued_books_count')
                     ->label('Issued Books Count')
