@@ -25,6 +25,12 @@ class UsersLeadStatusReportResource extends Resource
 
     protected static ?string $navigationGroup = 'Reports';
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
+    }
+
+
     public static function table(Table $table): Table
     {
         return $table
