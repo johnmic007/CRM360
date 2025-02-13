@@ -35,7 +35,7 @@ class SalesLeadStatusResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return auth()->user()->hasRole(['sales_operation_head', 'admin']);
+        return auth()->user()->hasRole(['sales_operation_head','admin']);
     }
 
     public static function canDelete(Model $record): bool
@@ -81,7 +81,7 @@ class SalesLeadStatusResource extends Resource
                         ->hidden(fn($get) => $get('travel_type') !== 'with_head'),
 
 
-                        Select::make('head_id')
+                    Select::make('head_id')
                         ->label('Select Head you travel with')
                         ->options(function () {
                             return \App\Models\User::role(['zonal_manager', 'regional_manager', 'sales_operation_head'])

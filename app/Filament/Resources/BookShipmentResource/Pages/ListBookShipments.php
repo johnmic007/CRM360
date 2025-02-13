@@ -20,7 +20,7 @@ class ListBookShipments extends ListRecords
         $user = Auth::user();
 
         // If the user has 'admin' or 'sales_operation' role, show all records
-        if ($user->hasRole(['admin', 'sales_operation'])) {
+        if ($user->hasRole(['admin', 'head' , 'sales_operation'])) {
             return $query;
         }
 

@@ -105,6 +105,8 @@ protected function getTableQuery(): Builder
 
     // Fetch subordinate user IDs
     $subordinateIds = $user->getAllSubordinateIds();
+
+    // dd($subordinateIds);
     $allowedUserIds = array_merge([$user->id], $subordinateIds);
 
     // Filter query to show only records where leadStatuses has an entry created by user or subordinates

@@ -24,7 +24,7 @@ class WalletLogResource extends Resource
     
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'accounts_head' , 'sales_operation' , 'trainer']);
+        return auth()->user()->hasRole(['admin', 'sales_head'  , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'accounts_head' , 'sales_operation' , 'trainer']);
     }
 
     public static function form(Forms\Form $form): Forms\Form

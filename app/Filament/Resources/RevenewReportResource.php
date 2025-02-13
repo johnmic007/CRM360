@@ -31,16 +31,16 @@ class RevenewReportResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-rupee';
 
-    protected static ?string $navigationLabel = 'Revenew Report';
+    protected static ?string $navigationLabel = 'Revenue Report';
 
-    protected static ?string $pluralLabel = 'Revenew Report';
+    protected static ?string $pluralLabel = 'Revenue Report';
 
 
     protected static ?string $navigationGroup = 'Reports';
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
+        return auth()->user()->hasRole(['admin', 'sales_head', 'head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
     }
 
 

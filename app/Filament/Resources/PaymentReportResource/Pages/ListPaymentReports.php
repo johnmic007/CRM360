@@ -20,7 +20,7 @@ class ListPaymentReports extends ListRecords
         $query->where('type', 'payment');
     
         // Allow all reports for admin and sales_operation_head roles
-        if ($user->roles()->whereIn('name', ['admin', 'sales_operation_head'])->exists()) {
+        if ($user->roles()->whereIn('name', ['admin', 'head', 'sales_operation_head'])->exists()) {
             return $query;
         }
     

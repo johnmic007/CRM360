@@ -43,6 +43,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Actions\ActionGroup as ActionsActionGroup;
 use Filament\Tables\Actions\GroupAction;
+use Illuminate\Database\Eloquent\Model;
+use PhpParser\Node\Stmt\Static_;
 
 class InvoResource extends Resource
 {
@@ -55,7 +57,22 @@ class InvoResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales_operation' , 'sales_operation_head' , ]);
+        return auth()->user()->hasRole(['admin', 'sales_head', 'head', 'sales_operation' , 'sales_operation_head' , ]);
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+
+        return auth()->user()->hasRole(['admin', 'sales_head',  'sales_operation' , 'sales_operation_head' , ]);
+
+        
+    }
+
+    public Static function canDelete(Model $record): bool
+    {
+        return auth()->user()->hasRole(['admin',]);
+
+        
     }
 
     public static function form(Form $form): Form
@@ -721,9 +738,7 @@ class InvoResource extends Resource
                     ->visible(fn(Invoice $record) => $record->paid < $record->total_amount),
 
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ])
+            
             ->paginated([10, 25,]);
 
     }

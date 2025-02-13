@@ -242,7 +242,7 @@ class ListUsersLeadStatusReports extends ListRecords
 
     // 2) If the logged-in user is Admin or Sales Operation Head:
     //    - They can see all bda/bdm, but exclude admin users if you still want.
-    if ($user->roles()->whereIn('name', ['admin','sales_operation_head'])->exists()) {
+    if ($user->roles()->whereIn('name', ['admin','head','sales_operation_head'])->exists()) {
         return $query->whereDoesntHave('roles', function ($q) {
             $q->where('name', 'admin');
         });

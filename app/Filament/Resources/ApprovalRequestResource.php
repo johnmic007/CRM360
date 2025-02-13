@@ -33,7 +33,7 @@ class ApprovalRequestResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'company', 'bda', 'sales_operation_head', 'bdm', 'zonal_manager', 'regional_manager', 'head', 'sales_operation']);
+        return auth()->user()->hasRole(['admin', 'company', 'bda', 'sales_operation_head', 'bdm', 'zonal_manager', 'regional_manager', 'head', 'sales_head', 'sales_operation']);
     }
 
     public static function canEdit(Model $record): bool
