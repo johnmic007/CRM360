@@ -88,30 +88,30 @@ class ListLeadStageReports extends ListRecords
 }
 
 
-    protected function getTableQuery(): Builder
-    {
-        $query = parent::getTableQuery(); // Get the default query
+protected function getTableQuery(): Builder
+{
+    $query = parent::getTableQuery(); // Get the default query
+    $user = auth()->user();
 
-        $user = auth()->user();
-
-        // Allow all reports for admin and accounts_head roles
-        if ($user->roles()->whereIn('name', ['admin'])->exists()) {
-            return $query;
-        }
-
-        // Show reports for the logged-in user's company for sales_operation role
-        if ($user->roles()->whereIn('name', ['sales_operation_head' ,'head' , 'sales_operation', 'company'])->exists()) {
-            // return $query->where('company_id', $user->company_id);
-
-            return $query;
-
-        }
-
-        // Fetch subordinate user IDs for other roles
-        $subordinateIds = $user->getAllSubordinateIds();
-
-        // Show only reports for the subordinates
-        return $query->whereIn('user_id', $subordinateIds);
+    // Allow all reports for admin role
+    if ($user->roles()->whereIn('name', ['admin'])->exists()) {
+        return $query;
     }
+
+    // Show reports for specific roles without restrictions
+    if ($user->roles()->whereIn('name', ['sales_operation_head', 'head', 'sales_operation', 'company'])->exists()) {
+        return $query;
+    }
+
+    // Fetch subordinate user IDs
+    $subordinateIds = $user->getAllSubordinateIds();
+    $allowedUserIds = array_merge([$user->id], $subordinateIds);
+
+    // Filter query to show only records where leadStatuses has an entry created by user or subordinates
+    return $query->whereHas('leadStatuses', function ($q) use ($allowedUserIds) {
+        $q->whereIn('created_by', $allowedUserIds);
+    });
+}
+
   
 }

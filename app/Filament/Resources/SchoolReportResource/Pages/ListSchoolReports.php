@@ -77,29 +77,29 @@ class ListSchoolReports extends ListRecords
 }
 
 
-    protected function getTableQuery(): Builder
-    {
-        $query = parent::getTableQuery(); // Get the default query
+protected function getTableQuery(): Builder
+{
+    $query = parent::getTableQuery(); // Get the default query
 
-        $user = auth()->user();
+    $user = auth()->user();
 
-        // Allow all reports for admin and accounts_head roles
-        if ($user->roles()->whereIn('name', ['admin'])->exists()) {
-            return $query;
-        }
-
-        // Show reports for the logged-in user's company for sales_operation role
-        if ($user->roles()->whereIn('name', ['sales_operation_head' ,'head' , 'sales_operation', 'company' ])->exists()) {
-            // return $query->where('company_id', $user->company_id);
-
-            return $query;
-
-        }
-
-        // Fetch subordinate user IDs for other roles
-        $subordinateIds = $user->getAllSubordinateIds();
-
-        // Show only reports for the subordinates
-        return $query->whereIn('user_id', $subordinateIds);
+    // Allow all reports for admin role
+    if ($user->roles()->whereIn('name', ['admin'])->exists()) {
+        return $query;
     }
+
+    // Allow `sales_operation_head`, `head`, `sales_operation`, `company` to see all records
+    if ($user->roles()->whereIn('name', ['sales_operation_head', 'head', 'sales_operation', 'company'])->exists()) {
+        return $query;
+    }
+
+    // Fetch subordinate user IDs & include the current user's ID
+    $subordinateIds = $user->getAllSubordinateIds();
+    
+    $allowedUserIds = array_merge([$user->id], $subordinateIds);
+
+    // Show only reports for the logged-in user and their subordinates
+    return $query->whereIn('visited_by', $allowedUserIds);
+}
+
 }

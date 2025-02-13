@@ -28,12 +28,15 @@ class UsersPerformanceReportResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationLabel = 'users Performance Report';
+    protected static ?string $navigationLabel = 'Users Performance Report';
+
+        protected static ?string $pluralLabel = 'users Performance Report';
+
     protected static ?string $navigationGroup = 'Reports';
 
     // public static function canViewAny(): bool
     // {
-    //     return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head']);
+    //     return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head', 'zonal_manager', 'regional_manager', 'head']);
     // }
 
     public static function table(Table $table): Table

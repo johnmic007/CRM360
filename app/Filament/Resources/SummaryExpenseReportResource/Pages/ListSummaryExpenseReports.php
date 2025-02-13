@@ -10,7 +10,8 @@
         use Filament\Resources\Pages\ListRecords;
         use Illuminate\Database\Eloquent\Builder;
         use App\Filament\Resources\SummaryExpenseReportResource;
-        use Illuminate\Support\Facades\Response as ResponseFacade;
+use App\Models\TrainerVisit;
+use Illuminate\Support\Facades\Response as ResponseFacade;
 
         class ListSummaryExpenseReports extends ListRecords
         {
@@ -20,6 +21,27 @@
             {
                 return [
 
+                    Actions\Action::make('total_requests')
+                    ->label(function () {
+                        // Get the base query for TrainerVisit
+                        $query = TrainerVisit::query();
+                
+                        // Apply filters if available
+                        if (method_exists($this, 'applyFiltersToTableQuery')) {
+                            $this->applyFiltersToTableQuery($query);
+                        }
+                
+                        // Sum a valid column (replace 'total_expense' with the correct field)
+                        $totalRequests = $query->sum('total_expense'); 
+                
+                        return "Total Requests: ₹" . number_format($totalRequests, 2);
+                    })
+                    ->color('primary')
+                    ->icon('heroicon-o-paper-clip')
+                    ->disabled(),
+                
+
+                 // Make it a display-only label
                 //     Actions\Action::make('total_cash_in_hand')
                 //     ->label(function () {
                 //         $query = $this->getTableQuery();
@@ -189,16 +211,34 @@
 
 
             protected function getTableQuery(): Builder
-        {
-            $query = parent::getTableQuery();
-
-            if (method_exists($this, 'applyFiltersToTableQuery')) {
-                $this->applyFiltersToTableQuery($query); // Apply filters to ensure consistency
+            {
+                // Start with the default query
+                $query = parent::getTableQuery();
+                $user = auth()->user();
+            
+                // 1) First, ensure the list only includes users who have EITHER the 'bda' or 'bdm' role.
+                $query->whereHas('roles', function ($q) {
+                    $q->whereIn('name', ['bda', 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation_head',]);
+                });
+            
+                // 2) If the logged-in user is Admin or Sales Operation Head:
+                //    - They can see all bda/bdm, but exclude admin users if you still want.
+                if ($user->roles()->whereIn('name', ['admin','sales_operation_head'])->exists()) {
+                    return $query->whereDoesntHave('roles', function ($q) {
+                        $q->where('name', 'admin');
+                    });
+                }
+            
+                // 3) Otherwise, only show subordinate users (with bda/bdm) and exclude admin.
+                $subordinateIds = $user->getAllSubordinateIds();
+            
+                return $query
+                    ->whereIn('id', $subordinateIds)
+                    ->whereDoesntHave('roles', function ($q) {
+                        $q->where('name', 'admin');
+                    });
             }
-
-            return $query;
-        }
-
+            
 
             // Add this method to handle the download action
             public function downloadTableData()
@@ -246,6 +286,9 @@
                 return response()->json(['error' => 'Failed to generate PDF. Please try again.'], 500);
             }
         }
+
+
+        
 
 
         }

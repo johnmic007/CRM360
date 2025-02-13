@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Forms;
+use App\Models\User;
+use App\Models\TrainerVisit;
 use Filament\Tables;
+use Filament\Forms;
+use Carbon\Carbon;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
@@ -11,57 +14,44 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
-use App\Models\User;
-use App\Models\TrainerVisit;
 use App\Filament\Resources\SummaryExpenseReportResource\Pages;
+use Filament\Tables\Columns\TextColumn;
 
 class SummaryExpenseReportResource extends Resource
 {
-    protected static ?string $model = TrainerVisit::class;
+    /**
+     * Use the User model now (instead of TrainerVisit).
+     */
+    protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
     protected static ?string $navigationLabel = 'Summary Expense Report';
+
+    protected static ?string $pluralLabel = 'Summary Expense Report';
+
     protected static ?string $navigationGroup = 'Reports';
 
     public static function table(Table $table): Table
     {
         return $table
-            ->query(fn (Builder $query) =>
-                TrainerVisit::query()
-                    ->selectRaw('
-                        MIN(id) as id,
-                        user_id,
-                        COUNT(id) as total_requests,
-                        SUM(COALESCE(total_expense, 0)) as total_expense,
-                        SUM(COALESCE(travel_expense, 0)) as total_travel_expense,
-                        SUM(COALESCE(food_expense, 0)) as total_food_expense,
-                        SUM(CASE WHEN verify_status = "verified" THEN COALESCE(total_expense, 0) ELSE 0 END) as verified_expense,
-                        SUM(CASE WHEN approval_status = "approved" THEN COALESCE(total_expense, 0) ELSE 0 END) as approved_expense,
-                        SUM(CASE WHEN travel_type = "extra_expense" THEN COALESCE(total_expense, 0) ELSE 0 END) as total_extra_expense,
-                        (SUM(COALESCE(total_expense, 0)) / NULLIF(COUNT(id), 0)) as average_expense
-                    ')
-                    ->groupBy('user_id')
-                    ->orderBy('id', 'asc') // Ordering by the aggregated ID
-                    ->with('user')
-            )
+            
+
+            /**
+             * 2) FILTERS
+             */
             ->filters([
                 // Start Date Filter
                 Filter::make('start_date')
                     ->label('Start Date')
                     ->form([
-                        DatePicker::make('start_date')
-                            ->placeholder('Select a start date'),
+                        DatePicker::make('start_date')->placeholder('Select a start date'),
                     ])
-                    ->query(fn (Builder $query, array $data) =>
-                        $query->when($data['start_date'] ?? null, fn ($q) =>
-                            $q->whereDate('trainer_visits.created_at', '>=', $data['start_date'])
-                        )
-                    )
+                    // We won't attach a ->query() here because
+                    // we’ll apply the date filter inside each column’s TrainerVisit query
                     ->indicateUsing(function (array $data): ?string {
                         if (! $data['start_date']) {
                             return null;
                         }
-
                         return 'Start Date: ' . $data['start_date'];
                     }),
 
@@ -69,19 +59,14 @@ class SummaryExpenseReportResource extends Resource
                 Filter::make('end_date')
                     ->label('End Date')
                     ->form([
-                        DatePicker::make('end_date')
-                            ->placeholder('Select an end date'),
+                        DatePicker::make('end_date')->placeholder('Select an end date'),
                     ])
-                    ->query(fn (Builder $query, array $data) =>
-                        $query->when($data['end_date'] ?? null, fn ($q) =>
-                            $q->whereDate('trainer_visits.created_at', '<=', $data['end_date'])
-                        )
-                    )
+                    // Same logic: no direct table query on the users,
+                    // because the date filter is for trainer_visits
                     ->indicateUsing(function (array $data): ?string {
                         if (! $data['end_date']) {
                             return null;
                         }
-
                         return 'End Date: ' . $data['end_date'];
                     }),
 
@@ -97,16 +82,10 @@ class SummaryExpenseReportResource extends Resource
                             ])
                             ->placeholder('All'),
                     ])
-                    ->query(fn (Builder $query, array $data) =>
-                        $query->when($data['approval_status'] ?? null, fn ($q) =>
-                            $q->where('approval_status', $data['approval_status'])
-                        )
-                    )
                     ->indicateUsing(function (array $data): ?string {
                         if (! $data['approval_status']) {
                             return null;
                         }
-
                         return 'Approval Status: ' . $data['approval_status'];
                     }),
 
@@ -121,20 +100,14 @@ class SummaryExpenseReportResource extends Resource
                             ])
                             ->placeholder('All'),
                     ])
-                    ->query(fn (Builder $query, array $data) =>
-                        $query->when($data['verify_status'] ?? null, fn ($q) =>
-                            $q->where('verify_status', $data['verify_status'])
-                        )
-                    )
                     ->indicateUsing(function (array $data): ?string {
                         if (! $data['verify_status']) {
                             return null;
                         }
-
                         return 'Verify Status: ' . $data['verify_status'];
                     }),
 
-                // Exclude Users Filter
+                // Exclude Users Filter (applied at the user level)
                 Filter::make('exclude_users')
                     ->label('Exclude Selected Users')
                     ->form([
@@ -145,21 +118,22 @@ class SummaryExpenseReportResource extends Resource
                             ->placeholder('Select users to exclude'),
                     ])
                     ->query(function (Builder $query, array $data) {
-                        if (!empty($data['exclude_users'])) {
-                            $query->whereNotIn('user_id', $data['exclude_users']);
+                        if (! empty($data['exclude_users'])) {
+                            // Exclude these user IDs from listing
+                            $query->whereNotIn('id', $data['exclude_users']);
                         }
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if (empty($data['exclude_users'])) {
                             return null;
                         }
-
-                        $userNames = User::whereIn('id', $data['exclude_users'])->pluck('name')->implode(', ');
-
+                        $userNames = User::whereIn('id', $data['exclude_users'])
+                            ->pluck('name')
+                            ->implode(', ');
                         return 'Excluded Users: ' . $userNames;
                     }),
 
-                // Include Users Filter
+                // Include Users Filter (applied at the user level)
                 Filter::make('include_users')
                     ->label('Include Selected Users')
                     ->form([
@@ -170,68 +144,237 @@ class SummaryExpenseReportResource extends Resource
                             ->placeholder('Select users to include'),
                     ])
                     ->query(function (Builder $query, array $data) {
-                        if (!empty($data['include_users'])) {
-                            $query->whereIn('user_id', $data['include_users']);
+                        if (! empty($data['include_users'])) {
+                            // Show ONLY these user IDs
+                            $query->whereIn('id', $data['include_users']);
                         }
                     })
                     ->indicateUsing(function (array $data): ?string {
                         if (empty($data['include_users'])) {
                             return null;
                         }
-
-                        $userNames = User::whereIn('id', $data['include_users'])->pluck('name')->implode(', ');
-
+                        $userNames = User::whereIn('id', $data['include_users'])
+                            ->pluck('name')
+                            ->implode(', ');
                         return 'Included Users: ' . $userNames;
                     }),
             ])
+
+            /**
+             * 3) COLUMNS
+             *
+             * Each column uses `->getStateUsing(...)` to query the trainer_visits table
+             * for that user, applying the relevant filters from $livewire->tableFilters.
+             */
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
+                // Basic user info:
+                Tables\Columns\TextColumn::make('name')
                     ->label('User Name')
                     ->sortable()
                     ->searchable(),
 
-                Tables\Columns\TextColumn::make('user.wallet_balance')
+                Tables\Columns\TextColumn::make('wallet_balance')
                     ->label('Cash in Hand')
                     ->sortable()
+                    ->placeholder('0')
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
+                // -------------- AGGREGATE COLUMNS --------------
                 Tables\Columns\TextColumn::make('total_requests')
                     ->label('Total Requests')
-                    ->sortable(),
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+
+                        // Base query for this user
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply date filters
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+
+                        // Apply approval status
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+
+                        // Apply verify status
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+
+                        return $query->count();
+                    }),
 
                 Tables\Columns\TextColumn::make('total_expense')
                     ->label('Total Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply filters (same pattern)
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+
+                        return $query->sum('total_expense');
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
                 Tables\Columns\TextColumn::make('total_travel_expense')
                     ->label('Total Travel Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply filters
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+
+                        return $query->sum('travel_expense');
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
                 Tables\Columns\TextColumn::make('total_food_expense')
                     ->label('Total Food Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply filters...
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+
+                        return $query->sum('food_expense');
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
                 Tables\Columns\TextColumn::make('total_extra_expense')
                     ->label('Total Extra Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply filters...
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+
+                        // 'extra_expense' often indicated by travel_type = "extra_expense"
+                        return $query->where('travel_type', 'extra_expense')->sum('total_expense');
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
                 Tables\Columns\TextColumn::make('verified_expense')
                     ->label('Verified Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply date/approval filters...
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+                        // We specifically want "verified" here:
+                        $query->where('verify_status', 'verified');
+
+                        return $query->sum('total_expense');
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
                 Tables\Columns\TextColumn::make('approved_expense')
                     ->label('Approved Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply date/verify filters...
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+                        // We specifically want "approved" here:
+                        $query->where('approval_status', 'approved');
+
+                        return $query->sum('total_expense');
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
 
                 Tables\Columns\TextColumn::make('average_expense')
                     ->label('Average Expense')
-                    ->sortable()
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $query = TrainerVisit::where('user_id', $record->id);
+
+                        // Apply date/approval/verify filters...
+                        if (! empty($filters['start_date']['start_date'])) {
+                            $query->whereDate('created_at', '>=', $filters['start_date']['start_date']);
+                        }
+                        if (! empty($filters['end_date']['end_date'])) {
+                            $query->whereDate('created_at', '<=', $filters['end_date']['end_date']);
+                        }
+                        if (! empty($filters['approval_status']['approval_status'])) {
+                            $query->where('approval_status', $filters['approval_status']['approval_status']);
+                        }
+                        if (! empty($filters['verify_status']['verify_status'])) {
+                            $query->where('verify_status', $filters['verify_status']['verify_status']);
+                        }
+
+                        $avg = $query->avg('total_expense') ?? 0;
+                        return $avg;
+                    })
                     ->formatStateUsing(fn ($state) => number_format($state, 2) . ' ₹'),
             ]);
     }
