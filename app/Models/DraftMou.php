@@ -38,6 +38,7 @@ class DraftMou extends Model
         'dispute_resolution',
         'company_city',
         'company_state',
+        'item_remarks',
     ];
 
 

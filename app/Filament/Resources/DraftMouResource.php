@@ -109,11 +109,20 @@ class DraftMouResource extends Resource
                                     ->rows(2)
                                     ->required(),
 
-                                    Select::make('items_id') // Change to a select input for items
+                                Select::make('items_id') // Change to a select input for items
                                     ->label('Item')
                                     ->options(Items::pluck('name', 'id')->toArray()) // Fetch items from the Items model
                                     ->required()
-                                    ->reactive(),
+                                    ->reactive()
+                                    ->afterStateUpdated(fn (callable $set, $state) =>
+                                        $set('item_remarks', Items::where('id', $state)->value('remarks'))
+                                    ),
+
+
+                                Textarea::make('item_remarks') // ✅ Auto-populated field
+                                    ->label('Item Remarks')
+                                    ->disabled()
+                                    ->dehydrated(),
 
                             ]),
                     ])

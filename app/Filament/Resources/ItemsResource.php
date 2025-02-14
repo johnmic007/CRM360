@@ -2,18 +2,19 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ItemsResource\Pages;
-use App\Filament\Resources\ItemsResource\RelationManagers;
-use App\Models\Items;
 use Filament\Forms;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use App\Models\Items;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Forms\Components\Textarea;
+use Filament\Resources\Resource;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\TextInput;
 use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\ItemsResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Filament\Resources\ItemsResource\RelationManagers;
 
 class ItemsResource extends Resource
 {
@@ -42,7 +43,12 @@ class ItemsResource extends Resource
 
                 TextInput::make('price')
                 ->label('Price')
-                ->required()
+                ->required(),
+
+                TextInput::make('remarks')
+                ->label('Remarks')
+                ->maxLength(255)
+                ->nullable()
             ]);
     }
 
@@ -59,6 +65,12 @@ class ItemsResource extends Resource
                     ->label('Price')
                     ->sortable()
                     ->searchable(),
+
+                TextColumn::make('remarks') // ✅ Add Remarks Column in Table
+                ->label('Remarks')
+                ->wrap()
+                ->sortable()
+                ->searchable(),
             ])
             ->filters([
                 //

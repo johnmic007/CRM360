@@ -75,8 +75,7 @@
 
         .headerimg {
             text-align: center;
-            margin: 2%;
-            padding: 2%;
+            height: 100px;
         }
 
         .footer {
@@ -96,7 +95,7 @@
     <!-- Company Logo -->
     <div class="headerimg">
         @if($base64)
-            <img src="{{ $base64 }}" alt="Company Logo" style="max-width: 150px;">
+            <img src="{{ $base64 }}" alt="Company Logo" style="max-width: 150px; height: 150px;">
         @else
             <p>Image not found</p>
         @endif
@@ -273,10 +272,15 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
             <br><br>
             <ul><li>Scope of Services Provided:</li></ul><br>
                 <ol>
-                    <li>{{ $mou->items_id }}</li>
+                    @php
+                        $item = \App\Models\Items::find($mou->items_id);
+                    @endphp
+
+                    <li>
+                         {{ $item->remarks ?? 'No remarks available' }}
+                    </li>
                 </ol><br>
                 <ul><li>Student Count Grade Wise & Cost Structure for <b>Junior Coders :</b></li></ul>
-        <br>
 
         <table>
             <tr>
@@ -309,7 +313,7 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
             @endforeach
         </table>
 
-    <br><br>
+    <br>
     <!-- Signature Section -->
     <table class="sign">
         <tr>
@@ -350,9 +354,9 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
         </tr>
     </table>
 
-    <br><br><br>
-    <ul><li>Student Count Grade Wise & Cost Structure for <b>Senior Coders :</b></ul>
     <br>
+    <ul><li>Student Count Grade Wise & Cost Structure for <b>Senior Coders :</b></ul>
+
     <table>
         <tr>
             <th>Class</th>
