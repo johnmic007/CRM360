@@ -21,7 +21,7 @@ class BlockResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' ,'sales_operation' , 'company' ]);
+        return auth()->user()->hasRole(['admin' ,'sales_operation' , 'company' , 'head' ]);
     }
 
     public static function canEdit(Model $record): bool

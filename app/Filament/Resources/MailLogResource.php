@@ -28,7 +28,7 @@ class MailLogResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
+        return auth()->user()->hasRole(['admin' , 'sales_head' , 'bda' , 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation']);
     }
 
 

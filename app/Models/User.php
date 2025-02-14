@@ -77,6 +77,15 @@ class User extends Authenticatable
             ->where('model_has_roles.model_type', self::class);
     }
 
+    // app/Models/User.php
+
+public function salesLeadStatuses()
+{
+    // Adjust 'created_by' if your foreign key is different
+    return $this->hasMany(\App\Models\SalesLeadStatus::class, 'created_by');
+}
+
+
 
     public function schoolUser(): HasOne
     {

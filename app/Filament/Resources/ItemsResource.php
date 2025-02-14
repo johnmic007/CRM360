@@ -28,7 +28,7 @@ class ItemsResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin' , 'head' , 'sales_operation']);
+        return auth()->user()->hasRole(['admin', 'sales_head' , 'head' , 'sales_operation']);
     }
 
     public static function form(Form $form): Form

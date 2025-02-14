@@ -61,6 +61,19 @@ class School extends Model
         return $this->belongsTo(Book::class);
     }
 
+    public function bookShipments()
+{
+    return $this->hasMany(BookShipment::class);
+}
+
+
+
+public function schoolBook()
+{
+    return $this->hasMany(SchoolBook::class);
+}
+
+
     public function books()
     {
         return $this->belongsToMany(Book::class, 'school_book');

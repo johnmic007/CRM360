@@ -84,10 +84,10 @@ class ListWalletLogs extends ListRecords
 
     
 
-    public  function getHeaderWidgets(): array
-    {
-        return [
-            WalletBalanceWidget::class,
-        ];
-    }
+    // public  function getHeaderWidgets(): array
+    // {
+    //     return [
+    //         WalletBalanceWidget::class,
+    //     ];
+    // }
 }

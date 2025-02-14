@@ -2,195 +2,246 @@
 
 namespace App\Filament\Resources;
 
+use App\Models\User;
 use Filament\Forms;
 use Filament\Tables;
+use Carbon\Carbon;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Tables\Filters\Filter;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\DatePicker;
-use Illuminate\Database\Eloquent\Builder;
-use App\Models\SalesLeadStatus;
-use App\Filament\Resources\SalesLeadStatusReportResource\Pages;
+use Filament\Tables\Columns\TextColumn;
 use App\Filament\Resources\UsersLeadStatusReportResource\Pages\ListUsersLeadStatusReports;
-use Carbon\Carbon;
 
 class UsersLeadStatusReportResource extends Resource
 {
-    protected static ?string $model = SalesLeadStatus::class;
+    protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationLabel = 'users Lead Status Report';
+    protected static ?string $navigationLabel = 'Users Lead Status Report';
+
+    protected static ?string $pluralLabel = 'Users Lead Status Report';
+
     protected static ?string $navigationGroup = 'Reports';
 
-    // public static function canViewAny(): bool
-    // {
-    //     return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head']);
-    // }
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales_head', 'head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
+    }
+
 
     public static function table(Table $table): Table
     {
         return $table
-        ->query(fn (Builder $query) =>
-        SalesLeadStatus::query()
-            ->selectRaw('
-                MIN(id) as id,  -- Ensuring ID is an aggregated column
-                created_by as user_id,
-                COUNT(id) as total_visits,
-                SUM(CASE WHEN potential_meet = true THEN 1 ELSE 0 END) as total_potential_meet,
-                SUM(CASE WHEN is_book_issued = 1 THEN 1 ELSE 0 END) as total_books_issued,
-                SUM(CASE WHEN status = "follow_up" THEN 1 ELSE 0 END) as total_follow_ups,
-                SUM(CASE WHEN status = "closed" THEN 1 ELSE 0 END) as total_closed_leads,
-                SUM(CASE WHEN status = "School Nurturing" THEN 1 ELSE 0 END) as total_school_nurturing,
-                SUM(CASE WHEN status = "Demo Reschedule" THEN 1 ELSE 0 END) as total_demo_reschedule,
-                SUM(CASE WHEN status = "Demo Completed" THEN 1 ELSE 0 END) as total_demo_completed,
-                SUM(CASE WHEN status = "deal_won" THEN 1 ELSE 0 END) as total_deal_won,
-                SUM(CASE WHEN status = "deal_lost" THEN 1 ELSE 0 END) as total_deal_lost
-            ')
-            ->groupBy('created_by')
-            ->orderBy('id', 'asc') // Ordering by the aggregated ID
-            ->with('user') // Ensure relationships are loaded properly
-    )
-    
-            ->filters([
-                Filter::make('start_date')
-                ->label('Start Date')
-                ->form([
-                    DatePicker::make('start_date')
-                        ->default(now()->subMonth())
-                        ->native(false),
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (!empty($data['start_date'])) {
-                        $query->whereDate('visited_date', '>=', $data['start_date']);
-                    }
-                })
-                ->indicateUsing(function (array $data) {
-                    return !empty($data['start_date']) 
-                        ? 'Start Date: ' . Carbon::parse($data['start_date'])->format('Y-m-d') 
-                        : null;
-                }),
-            
-            Filter::make('end_date')
-                ->label('End Date')
-                ->form([
-                    DatePicker::make('end_date')->native(false),
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (!empty($data['end_date'])) {
-                        $query->whereDate('visited_date', '<=', $data['end_date']);
-                    }
-                })
-                ->indicateUsing(function (array $data) {
-                    return !empty($data['end_date']) 
-                        ? 'End Date: ' . Carbon::parse($data['end_date'])->format('Y-m-d') 
-                        : null;
-                }),
-            
-            Filter::make('status')
-                ->label('Lead Status')
-                ->form([
-                    Select::make('status')
-                        ->options([
-                            'School Nurturing' => 'School Nurturing',
-                            'Demo Reschedule' => 'Demo Reschedule',
-                            'Demo Completed' => 'Demo Completed',
-                            'deal_won' => 'Deal Won',
-                            'deal_lost' => 'Deal Lost',
-                        ])
-                        ->placeholder('All')
-                        ->native(false),
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (!empty($data['status'])) {
-                        $query->where('status', $data['status']);
-                    }
-                })
-                ->indicateUsing(function (array $data) {
-                    return !empty($data['status']) ? 'Status: ' . ucwords(str_replace('_', ' ', $data['status'])) : null;
-                }),
-            
-            Filter::make('created_by')
-                ->label('Created By')
-                ->form([
-                    Select::make('created_by')
-                        ->relationship('user', 'name')
-                        ->searchable()
-                        ->placeholder('All'),
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (!empty($data['created_by'])) {
-                        $query->where('created_by', $data['created_by']);
-                    }
-                })
-                ->indicateUsing(function (array $data) {
-                    return !empty($data['created_by']) ? 'Created By: ' . \App\Models\User::find($data['created_by'])?->name : null;
-                }),
-            
-            ])
+            // 1) Define the columns we want to display
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->label('Created By')
-                    ->sortable(),
-                    // ->searchable(),
+                TextColumn::make('name')
+                    ->label('User')
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('total_visits')
+                // Example: Count of all SalesLeadStatus (visited) in the date range
+                TextColumn::make('total_visits_in_range')
                     ->label('Total Visits')
-                    ->sortable(),
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
 
-                // Tables\Columns\TextColumn::make('total_books_issued')
-                //     ->label('Books Issued')
-                //     ->sortable(),
+                        // Query the user's lead statuses
+                        $query = $record->salesLeadStatuses();
 
-                // Tables\Columns\TextColumn::make('total_follow_ups')
-                //     ->label('Follow Ups')
-                //     ->sortable(),
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
 
-                // Tables\Columns\TextColumn::make('total_closed_leads')
-                //     ->label('Closed Leads')
-                //     ->sortable(),
+                        return $query->count();
+                    }),
 
-                Tables\Columns\TextColumn::make('total_school_nurturing')
-                    ->label('School Nurturing')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('total_demo_reschedule')
-                    ->label('Demo Schedule')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('total_demo_completed')
-                    ->label('Demo Completed')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('total_deal_won')
-                    ->label('Deal Won')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('total_deal_lost')
-                    ->label('Deal Lost')
-                    ->sortable(),
-
-                    Tables\Columns\TextColumn::make('total_potential_meet')
+                // Example: Potential meets count
+                TextColumn::make('potential_meet_in_range')
                     ->label('Potential Meets')
-                    ->sortable(),
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
 
-                    
-            ])
-            ->actions([
-                // Tables\Actions\ViewAction::make(),
-            ])
-            ->paginated([10, 25,]);
+                        $query = $record->salesLeadStatuses()->where('potential_meet', true);
 
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+
+                // Example: Count of "closed" leads in the date range
+                TextColumn::make('School Nurturing')
+                    ->label('School Nurturing')
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
+
+                        $query = $record->salesLeadStatuses()->where('status', 'School Nurturing');
+
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+
+
+                    TextColumn::make('Demo Completed')
+                    ->label('Demo Completed')
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
+
+                        $query = $record->salesLeadStatuses()->where('status', 'Demo Completed');
+
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+
+                    TextColumn::make('Demo Schedule')
+                    ->label('Demo Schedule')
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
+
+                        $query = $record->salesLeadStatuses()->where('status', 'Demo reschedule');
+
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+
+                    TextColumn::make('School Nurturing')
+                    ->label('School Nurturing')
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
+
+                        $query = $record->salesLeadStatuses()->where('status', 'School Nurturing');
+
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+                // Example: Count of "deal_won" leads in the date range
+
+                TextColumn::make('deal_lost_in_range')
+                    ->label('Deals lost')
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
+
+                        $query = $record->salesLeadStatuses()->where('status', 'deal_lost');
+
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+
+
+                TextColumn::make('deal_won_in_range')
+                    ->label('Deals Won')
+                    ->getStateUsing(function (User $record, \Livewire\Component $livewire) {
+                        $filters = $livewire->tableFilters;
+                        $startDate = data_get($filters['date_range'], 'start_date');
+                        $endDate   = data_get($filters['date_range'], 'end_date');
+
+                        $query = $record->salesLeadStatuses()->where('status', 'deal_won');
+
+                        if ($startDate) {
+                            $query->whereDate('visited_date', '>=', $startDate);
+                        }
+                        if ($endDate) {
+                            $query->whereDate('visited_date', '<=', $endDate);
+                        }
+
+                        return $query->count();
+                    }),
+            ])
+
+            // 2) Define our filters (similar to date_range in your Performance Report)
+            ->filters([
+                Filter::make('date_range')
+                    ->form([
+                        DatePicker::make('start_date')
+                            ->label('Start Date')
+                            ->closeOnDateSelection(false),
+
+                        DatePicker::make('end_date')
+                            ->label('End Date')
+                            ->closeOnDateSelection(false),
+                    ])
+                    ->indicateUsing(function ($data) {
+                        $start = data_get($data, 'start_date') 
+                            ? Carbon::parse($data['start_date'])->format('d M Y') 
+                            : '...';
+                        $end   = data_get($data, 'end_date') 
+                            ? Carbon::parse($data['end_date'])->format('d M Y') 
+                            : '...';
+
+                        return ($data['start_date'] ?? null) || ($data['end_date'] ?? null)
+                            ? "From {$start} to {$end}"
+                            : null;
+                    }),
+                ]);
+
+            // 3) Choose pagination or other table configurations
+            // ->paginate(10);
     }
 
+    /**
+     * Define relations if needed
+     */
     public static function getRelations(): array
     {
         return [];
     }
 
-
-
+    /**
+     * Define pages
+     */
     public static function getPages(): array
     {
         return [

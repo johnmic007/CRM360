@@ -9,7 +9,9 @@ use App\Models\SalesLeadStatus;
 use App\Models\VisitEntry;
 use Filament\Resources\Resource;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -33,7 +35,7 @@ class SalesLeadStatusResource extends Resource
 
     public static function canEdit(Model $record): bool
     {
-        return auth()->user()->hasRole(['sales_operation_head', 'admin']);
+        return auth()->user()->hasRole(['sales_operation_head','admin']);
     }
 
     public static function canDelete(Model $record): bool
@@ -67,10 +69,32 @@ class SalesLeadStatusResource extends Resource
                     ->options([
                         'own_vehicle' => 'Travel by Own Vehicle',
                         'with_colleague' => 'Travel with Colleague',
+                        'with_head' => 'Travel with Head',
+
                     ])
                     ->required()
                     ->reactive()
                     ->label('Travel Type'),
+
+                    Checkbox::make('belong_school')
+                        ->label('Is this school belongs to you ')
+                        ->hidden(fn($get) => $get('travel_type') !== 'with_head'),
+
+
+                    Select::make('head_id')
+                        ->label('Select Head you travel with')
+                        ->options(function () {
+                            return \App\Models\User::role(['zonal_manager', 'regional_manager', 'sales_operation_head'])
+                                ->get()
+                                ->mapWithKeys(function ($user) {
+                                    return [$user->id => "{$user->name} ({$user->email})"];
+                                });
+                        })
+                        ->searchable()
+                        ->hidden(fn($get) => $get('travel_type') !== 'with_head')
+                        ->helperText('Select a user with the role Zonal Manager, Senior Manager, or Sales Head.'),
+
+
 
 
                 Forms\Components\FileUpload::make('starting_meter_photo')

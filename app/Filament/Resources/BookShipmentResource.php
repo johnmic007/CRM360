@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\BookShipmentResource\Pages;
 use App\Filament\Resources\BookShipmentResource\RelationManagers;
+use App\Filament\Resources\BookShipmentResource\RelationManagers\BookShipmentsRelationManager;
+use App\Filament\Resources\BookShipmentResource\RelationManagers\SchoolBookRelationManager;
 use App\Models\Block;
 use App\Models\Book;
 use App\Models\BookShipment;
@@ -24,206 +26,122 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BookShipmentResource extends Resource
 {
-    protected static ?string $model = BookShipment::class;
+    protected static ?string $model = School::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
+    
+    protected static ?string $navigationLabel = 'Book Shipment ';
+
+    protected static ?string $pluralLabel = 'Book Shipment ';
+
+
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation', 'sales_operation_head' ,]);
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'company' , 'sales_operation_head' , 'head' ,'sales_head' , 'zonal_manager' , 'regional_manager' , 'bda' , 'bdm' ]);
     }
 
     public static function form(Form $form): Form
     {
-        return $form->schema([
-            Forms\Components\Card::make()
-                ->schema([
-                    Forms\Components\Grid::make(2)
-                        ->schema([
-                            Forms\Components\Select::make('state_id')
-                                ->label('State')
-                                ->options(\App\Models\State::pluck('name', 'id')->toArray()) // Fetch states using Eloquent
-                                ->reactive()
-                                ->required()
-                                ->afterStateUpdated(fn(callable $set) => $set('district_id', null)), // Reset district when state changes
-
-                            Forms\Components\Select::make('district_id')
-                                ->label('District')
-                                ->options(function (callable $get) {
-                                    $stateId = $get('state_id');
-                                    if (!$stateId) {
-                                        return [];
-                                    }
-                                    // Fetch districts for the chosen state
-                                    return \App\Models\District::where('state_id', $stateId)->pluck('name', 'id')->toArray();
-                                })
-                                ->reactive()
-                                ->required()
-                                ->afterStateUpdated(fn(callable $set) => $set('block_id', null)),
-
-                            Forms\Components\Select::make('block_id')
-                                ->label('Block')
-                                ->options(function (callable $get) {
-                                    $districtId = $get('district_id');
-                                    if (!$districtId) {
-                                        return [];
-                                    }
-                                    return Block::where('district_id', $districtId)->pluck('name', 'id')->toArray(); // Fetch blocks using Eloquent
-                                })
-                                ->reactive()
-                                ->required(),
-
-                            Forms\Components\Select::make('school_id')
-                                ->label('School')
-                               
-                                ->options(function (callable $get) {
-                                    $blockId = $get('block_id');
-                                    if (!$blockId) {
-                                        return [];
-                                    }
-                                    return School::where('block_id', $blockId)->pluck('name', 'id');
-                                })
-
-                                ->reactive()
-                                ->required()
-                                ->helperText('Select the school to which books will be shipped.'),
-
-                            Select::make('mode_of_transport')
-                                ->label('Mode of Transport')
-                                ->options([
-                                    'own' => 'Own Delivery',
-                                    'courier' => 'Courier',
-                                ])
-                                ->required()
-                                ->reactive()
-                                ->helperText('Choose the transport mode.'),
-                        ]),
-
-                    Forms\Components\Grid::make(2)
-                        ->schema([
-                            Select::make('closed_by')
-                                ->label('Closed By')
-                                ->options(function () {
-                                    $currentUser = auth()->user();
-
-                                    // Get subordinates with specific roles (BDA and BDM) and the same company_id
-                                    $subordinates = User::query()
-                                        ->viewableBy($currentUser) // Assuming this scope limits to viewable users
-                                        ->where('company_id', $currentUser->company_id) // Filter by the same company_id
-                                        ->whereHas('roles', function ($query) {
-                                            $query->whereIn('name', ['BDA', 'BDM']); // Filter roles to BDA and BDM
-                                        })
-                                        ->pluck('name', 'id');
-
-                                    return $subordinates;
-                                })
-                                ->required()
-                                ->searchable()->label('Delivered By')
-                                ->placeholder('Person delivering the shipment')
-                                ->visible(fn($get) => $get('mode_of_transport') === 'own'),
-
-                            TextInput::make('tracking_number')
-                                ->label('Tracking Number')
-                                ->placeholder('Courier tracking number')
-                                ->visible(fn($get) => $get('mode_of_transport') === 'courier'),
-                        ]),
-
-                    Forms\Components\FileUpload::make('bills_and_gatepass')
-                        ->label('Bills / Gate Pass')
-                      
-                        ->directory('shipment_documents')
-                        ->helperText('Upload related documents.')
-                        ->nullable(),
-
-                    Forms\Components\Grid::make(2)
-                        ->schema([
-                            Select::make('status')
-                                ->label('Shipment Status')
-                                ->options([
-                                    'initiated' => 'Initiated',
-                                    'delivery_initiated' => 'Delivery Initiated',
-                                    'on_the_way' => 'On the Way',
-                                    'delivered' => 'Delivered',
-                                ])
-                                ->required()
-                                ->helperText('Track the progress of the shipment.'),
-
-                            Forms\Components\Textarea::make('remarks')
-                                ->label('Remarks')
-                                ->placeholder('Additional comments or notes.')
-                                ->rows(2),
-                        ]),
-                ])
-                ->columns(1),
-
-            Forms\Components\Section::make('Books to Ship')
-                ->schema([
-                    Repeater::make('details')
-                        ->relationship('details') // Refers to the books relationship in the model
-
-                        ->schema([
-                            Select::make('book_id')
-                                ->label('Book')
-                                ->options(
-                                    \App\Models\Book::whereNotNull('title')->pluck('title', 'id')->toArray()
-                                )
-                                ->searchable()
-                                ->required()
-                                ->placeholder('Select a book'),
-
-                            TextInput::make('quantity')
-                                ->label('Quantity')
-                                ->numeric()
-                                ->minValue(1)
-                                ->required(),
-                        ])
-                        ->columns(2)
-                        ->minItems(1)
-                        ->grid([
-                            'default' => 2, // Ensures two repeater items appear per row
-                        ])
-                        ->defaultItems(1)
-                        ->createItemButtonLabel('Add Another Book'),
-                ])
-                ->collapsible()
-                ->description('Add books to the shipment and specify their quantities.'),
-        ]);
+        return $form
+            ->schema([
+                // School Name
+                TextInput::make('name')
+                    ->label('🏫 School Name')
+                    ->disabled()
+                    ->required()
+                    ->formatStateUsing(fn (School $record) => $record->name)
+                    ->suffixIcon('heroicon-o-building-library'),
+    
+                // Total Books Count - Green if high, Yellow if moderate
+                TextInput::make('total_books')
+                    ->label('📚 Total Books')
+                    ->disabled()
+                    ->formatStateUsing(fn (School $record) => 
+                        $record->schoolBook->sum('books_count') ?? 0
+                    )
+                    ->suffixIcon('heroicon-o-book-open')
+                    ->prefixIcon('heroicon-o-circle-stack')
+                    ->extraAttributes(fn ($state) => [
+                        'class' => $state > 100 
+                            ? 'text-green-700 font-bold bg-green-100 px-3 py-2 rounded-lg'
+                            : 'text-yellow-700 font-bold bg-yellow-100 px-3 py-2 rounded-lg'
+                    ]),
+    
+                // Issued Books Count - Red if high, Blue if low
+                TextInput::make('issued_books')
+                    ->label('📦 Issued Books')
+                    ->disabled()
+                    ->formatStateUsing(fn (School $record) => 
+                        $record->schoolBook->sum('issued_books_count') ?? 0
+                    )
+                    ->suffixIcon('heroicon-o-check')
+                    ->prefixIcon('heroicon-o-document-text')
+                    ->extraAttributes(fn ($state) => [
+                        'class' => $state > 50 
+                            ? 'text-red-700 font-bold bg-red-100 px-3 py-2 rounded-lg'
+                            : 'text-blue-700 font-bold bg-blue-100 px-3 py-2 rounded-lg'
+                    ]),
+    
+                // Available Books Count - Traffic Light Colors
+                TextInput::make('available_books')
+                    ->label('📖 Available Books')
+                    ->disabled()
+                    ->formatStateUsing(fn (School $record) => 
+                        ($record->schoolBook->sum('books_count') ?? 0) - ($record->schoolBook->sum('issued_books_count') ?? 0)
+                    )
+                    ->suffixIcon('heroicon-o-clipboard')
+                    ->prefixIcon('heroicon-o-building-library')
+                    ->extraAttributes(fn ($state) => [
+                        'class' => $state > 50 
+                            ? 'text-green-700 font-bold bg-green-100 px-3 py-2 rounded-lg'
+                            : ($state > 10 
+                                ? 'text-yellow-700 font-bold bg-yellow-100 px-3 py-2 rounded-lg'
+                                : 'text-red-700 font-bold bg-red-100 px-3 py-2 rounded-lg')
+                    ]),
+            ])
+            ->columns(2); // Two-column layout for a better appearance
     }
-
+    
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('id')
-                    ->label('Shipment ID')
-                    ->sortable(),
-
-                TextColumn::make('school.name')
-                    ->label('School')
+                TextColumn::make('name')
+                    ->label('School Name')
                     ->sortable()
                     ->searchable(),
-
-                TextColumn::make('status')
-                    ->label('Status')
+    
+                // Total Books Count (Summing up all books assigned to the school)
+                TextColumn::make('total_books')
+                    ->label('Total Books')
+                    ->getStateUsing(fn (School $record) => 
+                        $record->schoolBook->sum('books_count') // Summing total books count
+                    )
                     ->sortable(),
 
-                TextColumn::make('created_at')
-                    ->label('Date Created')
-                    ->dateTime()
+                    
+    
+                // Issued Books Count (Summing up issued books from SchoolBook model)
+                TextColumn::make('issued_books')
+                    ->label('Issued Books')
+                    ->getStateUsing(fn (School $record) => 
+                        $record->schoolBook->sum('issued_books_count') // Summing issued books
+                    )
                     ->sortable(),
             ])
             ->filters([])
             ->actions([])
             ->bulkActions([])
-            ->paginated([10, 25,]);
-
+            ->paginated([10, 25]);
     }
-
+    
     public static function getRelations(): array
     {
         return [
-            //
+            SchoolBookRelationManager::class,
+            BookShipmentsRelationManager::class,
         ];
     }
 

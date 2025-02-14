@@ -31,16 +31,16 @@ class RevenewReportResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-currency-rupee';
 
-    protected static ?string $navigationLabel = 'Revenew Report';
+    protected static ?string $navigationLabel = 'Revenue Report';
 
-    protected static ?string $pluralLabel = 'Revenew Report';
+    protected static ?string $pluralLabel = 'Revenue Report';
 
 
     protected static ?string $navigationGroup = 'Reports';
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'head', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head']);
+        return auth()->user()->hasRole(['admin', 'sales_head', 'head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
     }
 
 
@@ -58,9 +58,12 @@ class RevenewReportResource extends Resource
         return $table
             ->columns([
                 // TextColumn::make('invoice_number')->label('Invoice #')->sortable(),
-                TextColumn::make('closedBy.name')->label('Closed By')->sortable(),
-                TextColumn::make('school.name')->label('school name')->sortable(),
-
+                TextColumn::make('closedBy.name')->label('Closed By'),
+                TextColumn::make('school.name')
+                ->label('School Name')
+                ->limit(25)
+                ->tooltip(fn ($record) => $record->school?->name),
+            
                 TextColumn::make('total_amount')->label('Total Amount')->sortable(),
                 TextColumn::make('paid')->label('Paid')->sortable(),
                 TextColumn::make('due_amount')->label('Due Amount')->sortable(),

@@ -15,23 +15,20 @@ class ListRevenewReports extends ListRecords
     protected function getTableQuery(): Builder
     {
         $query = parent::getTableQuery(); // Get the default query
-
+    
         $user = auth()->user();
-
-        // Allow all reports for admin role
-        if ($user->roles()->whereIn('name', ['admin','sales_operation_head'])->exists()) {
+    
+        // Allow all reports for admin and sales_operation_head roles
+        if ($user->roles()->whereIn('name', ['admin','head','sales_operation_head'])->exists()) {
             return $query;
         }
-
-        // Show reports for the logged-in user's company for specific roles
-        // if ($user->roles()->whereIn('name', ['sales_operation_head', 'head', 'sales_operation', 'company'])->exists()) {
-        //     return $query->where('company_id', $user->company_id);
-        // }
-
-        // Fetch subordinate user IDs for other roles
+    
+        // Fetch subordinate user IDs & include the current user's ID
         $subordinateIds = $user->getAllSubordinateIds();
-
-        // Show only reports for the subordinates
-        return $query->whereIn('closed_by', $subordinateIds);
+        $allowedUserIds = array_merge([$user->id], $subordinateIds);
+    
+        // Show only reports for the logged-in user and their subordinates
+        return $query->whereIn('closed_by', $allowedUserIds);
     }
+    
 }
