@@ -285,22 +285,29 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
             </tr>
 
             @php
+                $classes = ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5']; // Ensure 6 rows
                 $totalStudentsJunior = 0;
             @endphp
 
-            @foreach ($mou->classes as $class)
-            @if (in_array($class['class'], ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5']))
-                    @php
-                        $totalStudentsJunior += $class['no_of_students'];
-                    @endphp
-                    <tr>
-                        <td>{{ $class['class'] }}</td>
-                        <td>{{ $class['no_of_students'] }}</td>
-                        <td>₹{{ number_format($class['cost_per_student'], 2) }}</td>
-                    </tr>
-                @endif
+            @foreach ($classes as $className)
+                @php
+                    $classData = collect($mou->classes)->firstWhere('class', $className);
+                    $students = $classData['no_of_students'] ?? '---';
+                    $costPerStudent = $classData['cost_per_student'] ?? '---';
+
+                    if (is_numeric($students)) {
+                        $totalStudentsJunior += $students;
+                    }
+                @endphp
+
+                <tr>
+                    <td>{{ $className }}</td>
+                    <td>{{ $students }}</td>
+                    <td>{{ is_numeric($costPerStudent) ? '₹' . number_format($costPerStudent, 2) : '---' }}</td>
+                </tr>
             @endforeach
         </table>
+
     <br><br>
     <!-- Signature Section -->
     <table class="sign">
@@ -353,22 +360,49 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
         </tr>
 
         @php
+            $defaultClasses = ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9']; // Always displayed
+            $optionalClasses = ['Grade 10', 'Grade 11', 'Grade 12']; // Only displayed if data is available
             $totalStudentsSenior = 0;
         @endphp
 
-        @foreach ($mou->classes as $class)
-        @if (in_array($class['class'], ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']))
-                @php
-                    $totalStudentsSenior += $class['no_of_students'];
-                @endphp
+        {{-- Display Default Classes (Grade 6 to 9) --}}
+        @foreach ($defaultClasses as $className)
+            @php
+                $classData = collect($mou->classes)->firstWhere('class', $className);
+                $students = $classData['no_of_students'] ?? '---';
+                $costPerStudent = $classData['cost_per_student'] ?? '---';
+
+                if (is_numeric($students)) {
+                    $totalStudentsSenior += $students;
+                }
+            @endphp
+
+            <tr>
+                <td>{{ $className }}</td>
+                <td>{{ $students }}</td>
+                <td>{{ is_numeric($costPerStudent) ? '₹' . number_format($costPerStudent, 2) : '---' }}</td>
+            </tr>
+        @endforeach
+
+        {{-- Display Optional Classes (Grade 10 to 12) Only If Data Exists --}}
+        @foreach ($optionalClasses as $className)
+            @php
+                $classData = collect($mou->classes)->firstWhere('class', $className);
+                $students = $classData['no_of_students'] ?? null;
+                $costPerStudent = $classData['cost_per_student'] ?? null;
+            @endphp
+
+            @if (!is_null($students) || !is_null($costPerStudent))
                 <tr>
-                    <td>{{ $class['class'] }}</td>
-                    <td>{{ $class['no_of_students'] }}</td>
-                    <td>₹{{ number_format($class['cost_per_student'], 2) }}</td>
+                    <td>{{ $className }}</td>
+                    <td>{{ $students ?? '---' }}</td>
+                    <td>{{ is_numeric($costPerStudent) ? '₹' . number_format($costPerStudent, 2) : '---' }}</td>
                 </tr>
             @endif
         @endforeach
     </table>
+
+
     <br>
         {{-- <b>(O)-Optional</b> --}}
     </li>

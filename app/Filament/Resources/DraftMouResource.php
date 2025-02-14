@@ -207,7 +207,6 @@ class DraftMouResource extends Resource
                                 ]),
                         ])
                         ->defaultItems(9) // Pre-loads the first 9 classes
-                        ->minItems(9) // Ensures at least 9 default classes
                         ->maxItems(12) // Allows adding up to Grade 12
                         ->collapsible(),
                 ])
