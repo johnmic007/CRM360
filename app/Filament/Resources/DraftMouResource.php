@@ -39,6 +39,9 @@ class DraftMouResource extends Resource
         return auth()->user()->hasRole(['admin' , 'sales_operation']);
     }
 
+
+
+
     public static function form(Form $form): Form
     {
         return $form
@@ -60,7 +63,7 @@ class DraftMouResource extends Resource
                                     ->reactive()
                                     ->required()
                                     ->afterStateUpdated(fn(callable $set) => $set('district_id', null)), // Reset district when state changes
-    
+
                                 Forms\Components\Select::make('district_id')
                                     ->label('District')
                                     ->options(function (callable $get) {
@@ -74,7 +77,7 @@ class DraftMouResource extends Resource
                                     ->reactive()
                                     ->required()
                                     ->afterStateUpdated(fn(callable $set) => $set('block_id', null)),
-    
+
                                 Forms\Components\Select::make('block_id')
                                     ->label('Block')
                                     ->options(function (callable $get) {
@@ -86,10 +89,10 @@ class DraftMouResource extends Resource
                                     })
                                     ->reactive()
                                     ->required(),
-    
+
                                 Forms\Components\Select::make('school_id')
                                     ->label('School')
-                                   
+
                                     ->options(function (callable $get) {
                                         $blockId = $get('block_id');
                                         if (!$blockId) {
@@ -97,7 +100,7 @@ class DraftMouResource extends Resource
                                         }
                                         return School::where('block_id', $blockId)->pluck('name', 'id');
                                     })
-    
+
                                     ->reactive()
                                     ->required(),
 
@@ -111,7 +114,7 @@ class DraftMouResource extends Resource
                                     ->options(Items::pluck('name', 'id')->toArray()) // Fetch items from the Items model
                                     ->required()
                                     ->reactive(),
-                                    
+
                             ]),
                     ])
                     ->collapsible(),
@@ -122,6 +125,12 @@ class DraftMouResource extends Resource
                     ->schema([
                         Grid::make(3)
                             ->schema([
+                                TextInput::make('agreement_period')
+                                    ->label('Agreement Period (in years)')
+                                    ->numeric()
+                                    ->required()
+                                    ->live(),
+
                                 DatePicker::make('academic_year_start')
                                     ->label('Start Date')
                                     ->required()
@@ -144,109 +153,177 @@ class DraftMouResource extends Resource
 
                 /*** 🏷️ Class-wise Student & Cost Details ***/
                 Section::make('Class-wise Student & Fee Structure')
-                    ->description('Add details about each class, including student count and per-student cost.')
-                    ->schema([
-                        Repeater::make('classes')
-                            ->label('Class-wise Student Data')
-                            ->schema([
-                                Grid::make(4)
-                                    ->schema([
-                                        TextInput::make('class')
-                                            ->label('Class')
-                                            ->numeric()
-                                            ->placeholder('Enter class (e.g. 1, 2, 3)')
-                                            ->required(),
+                ->description('Add details about each class, including student count and per-student cost.')
+                ->schema([
+                    Repeater::make('classes')
+                        ->label('Class-wise Student Data')
+                        ->schema([
+                            Grid::make(4)
+                                ->schema([
+                                    Select::make('class')
+                                        ->label('Class')
+                                        ->options([
+                                            'Grade 1' => 'Grade 1',
+                                            'Grade 2' => 'Grade 2',
+                                            'Grade 3' => 'Grade 3',
+                                            'Grade 4' => 'Grade 4',
+                                            'Grade 5' => 'Grade 5',
+                                            'Grade 6' => 'Grade 6',
+                                            'Grade 7' => 'Grade 7',
+                                            'Grade 8' => 'Grade 8',
+                                            'Grade 9' => 'Grade 9',
+                                            'Grade 10' => 'Grade 10',
+                                            'Grade 11' => 'Grade 11',
+                                            'Grade 12' => 'Grade 12',
+                                        ])
+                                        ->required(),
 
-                                        TextInput::make('no_of_students')
-                                            ->label('Number of Students')
-                                            ->numeric()
-                                            ->minValue(0)
-                                            ->required()
-                                            ->live()
-                                            ->afterStateUpdated(fn ($state, callable $set, $get) => 
-                                                $set('total_cost', ($get('no_of_students') ?? 0) * ($get('cost_per_student') ?? 0))
-                                            ),
+                                    TextInput::make('no_of_students')
+                                        ->label('Number of Students')
+                                        ->numeric()
+                                        ->minValue(0)
+                                        ->required()
+                                        ->live()
+                                        ->afterStateUpdated(fn ($state, callable $set, $get) =>
+                                            $set('total_cost', ($get('no_of_students') ?? 0) * ($get('cost_per_student') ?? 0))
+                                        ),
 
-                                        TextInput::make('cost_per_student')
-                                            ->label('Cost Per Student')
-                                            ->numeric()
-                                            ->prefix('₹')
-                                            ->required()
-                                            ->live()
-                                            ->afterStateUpdated(fn ($state, callable $set, $get) => 
-                                                $set('total_cost', ($get('no_of_students') ?? 0) * ($get('cost_per_student') ?? 0))
-                                            ),
+                                    TextInput::make('cost_per_student')
+                                        ->label('Cost Per Student')
+                                        ->numeric()
+                                        ->prefix('₹')
+                                        ->required()
+                                        ->live()
+                                        ->afterStateUpdated(fn ($state, callable $set, $get) =>
+                                            $set('total_cost', ($get('no_of_students') ?? 0) * ($get('cost_per_student') ?? 0))
+                                        ),
 
-                                        TextInput::make('total_cost')
-                                            ->label('Total Cost')
-                                            ->numeric()
-                                            ->prefix('₹')
-                                            ->disabled()
-                                            ->dehydrated(),
-                                    ]),
-                            ])
-                            ->minItems(1) // Default to one row, user can add more
-                            ->maxItems(12) // Limit the number of class entries
-                            ->collapsible(),
-                    ])
+                                    TextInput::make('total_cost')
+                                        ->label('Total Cost')
+                                        ->numeric()
+                                        ->prefix('₹')
+                                        ->disabled()
+                                        ->dehydrated(),
+                                ]),
+                        ])
+                        ->defaultItems(9) // Pre-loads the first 9 classes
+                        ->minItems(9) // Ensures at least 9 default classes
+                        ->maxItems(12) // Allows adding up to Grade 12
+                        ->collapsible(),
+                ])
+
                     ->collapsible(),
 
-                /*** 💳 Payment Details ***/
-                Section::make('Payment Information')
-                    ->description('Define the payment breakdown and payment mode.')
+              /*** 💳 Payment Details ***/
+Section::make('Payment Information')
+->description('Define the payment breakdown and payment mode.')
+->schema([
+    Grid::make(2)
+        ->schema([
+            Select::make('payment_type')
+                ->label('Payment Type')
+                ->options([
+                    'amount' => 'Amount',
+                    'percentage' => 'Percentage',
+                ])
+                ->required()
+                ->live(),
+
+            TextInput::make('payment_value')
+                ->label('Total Payment Amount / Percentage')
+                ->numeric()
+                ->required(),
+        ]),
+
+    // Field to enter the number of installments
+    TextInput::make('installments_count')
+        ->label('Number of Installments')
+        ->numeric()
+        ->minValue(1)
+        ->maxValue(12)
+        ->required()
+        ->live(),
+
+    // Grid::make(3)
+    //     ->schema([
+            // Repeater to generate installment details dynamically
+            // Repeater to generate installment details dynamically
+            Repeater::make('installments')
+            ->label('Installment Details')
+            ->schema([
+                Grid::make(4)
                     ->schema([
-                        Grid::make(3)
-                            ->schema([
-                                TextInput::make('advance_payment')
-                                    ->label('Advance Payment')
-                                    ->numeric()
-                                    ->prefix('₹'),
-
-                                TextInput::make('mid_payment')
-                                    ->label('Mid Payment')
-                                    ->numeric()
-                                    ->prefix('₹'),
-
-                                TextInput::make('final_payment')
-                                    ->label('Final Payment')
-                                    ->numeric()
-                                    ->prefix('₹'),
-                            ]),
-
-                        Grid::make(2)
-                            ->schema([
-                                Select::make('payment_type')
-                                    ->label('Payment Type')
-                                    ->options([
-                                        'amount' => 'Amount',
-                                        'percentage' => 'Percentage',
-                                    ])
-                                    ->required()
-                                    ->live(),
-
-                                TextInput::make('payment_value')
-                                    ->label('Payment Amount / Percentage')
-                                    ->numeric()
-                                    ->required(),
-                            ]),
-
-                        Select::make('mode_of_payment')
-                            ->label('Mode of Payment')
+                        Select::make('installment')
+                            ->label('Installment')
                             ->options([
-                                'cash' => 'Cash',
-                                'bank_transfer' => 'Bank Transfer',
-                                'cheque' => 'Cheque',
-                                'upi' => 'UPI',
+                                1 => "First Payment",
+                                2 => "Second Payment",
+                                3 => "Third Payment",
+                                4 => "Fourth Payment",
+                                5 => "Fifth Payment",
+                                6 => "Sixth Payment",
+                                7 => "Seventh Payment",
+                                8 => "Eighth Payment",
+                                9 => "Ninth Payment",
+                                10 => "Tenth Payment",
+                                11 => "Eleventh Payment",
+                                12 => "Twelfth Payment",
                             ])
                             ->required(),
 
-                        TextInput::make('due_days')
-                            ->label('Due Days')
-                            ->default(30)
+                        TextInput::make('installment_payment')
+                            ->label('Payment Amount/Percentage')
                             ->numeric()
                             ->required(),
-                    ])
-                    ->collapsible(),
+
+                        Select::make('installment_month')
+                            ->label('Month')
+                            ->options([
+                                'January' => 'January', 'February' => 'February', 'March' => 'March',
+                                'April' => 'April', 'May' => 'May', 'June' => 'June',
+                                'July' => 'July', 'August' => 'August', 'September' => 'September',
+                                'October' => 'October', 'November' => 'November', 'December' => 'December',
+                            ])
+                            ->required(),
+
+                        TextInput::make('installment_year')
+                            ->label('Year')
+                            ->numeric()
+                            ->minValue(date('Y'))
+                            ->maxValue(date('Y') + 5)
+                            ->required(),
+                    ]),
+            ])
+            ->default([]) // ✅ Prevents the "foreach()" error when it's NULL
+            ->dehydrated() // ✅ Ensures the data is saved in JSON format
+            ->live(), // ✅ Ensures real-time updates
+
+
+
+
+
+        // ]),
+
+    Grid::make(2)
+        ->schema([
+            Select::make('mode_of_payment')
+                ->label('Mode of Payment')
+                ->options([
+                    'bank_transfer' => 'Bank Transfer',
+                    'cheque' => 'Cheque',
+                    'neft' => 'NEFT',
+                    'rtgs' => 'RTGS',
+                ])
+                ->required(),
+
+            TextInput::make('due_days')
+                ->label('Due Days')
+                ->default(30)
+                ->numeric()
+                ->required(),
+        ]),
+    ]),
+
 
                 /*** 📌 Dispute & Legal Details ***/
                 Section::make('Legal & Dispute Resolution')
@@ -309,8 +386,8 @@ class DraftMouResource extends Resource
                             ->numeric()
                             ->placeholder('Enter class number')
                     ])
-                    ->query(fn (Builder $query, array $data) => 
-                        $query->when($data['class'] ?? null, fn ($q, $value) => 
+                    ->query(fn (Builder $query, array $data) =>
+                        $query->when($data['class'] ?? null, fn ($q, $value) =>
                             $q->whereJsonContains('classes', [['class' => (int)$value]])
                         )
                     ),
@@ -318,8 +395,8 @@ class DraftMouResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
-               
-                
+
+
                 Action::make('download_pdf')
                 ->label('Download PDF')
                 ->icon('heroicon-o-arrow-down-tray')

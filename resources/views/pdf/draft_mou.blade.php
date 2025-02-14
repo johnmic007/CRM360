@@ -15,7 +15,13 @@
         /* @font-face {
             font-family: 'Noto Sans';
             src: url('{{ public_path('fonts/NotoSans-Regular.ttf') }}') format('truetype');
-        } */
+        }*/
+        @font-face {
+        font-family: 'DejaVu Sans';
+        font-style: normal;
+        font-weight: normal;
+        src: url("{{ public_path('fonts/DejaVuSans.ttf') }}") format('truetype');
+    }
 
         html{
             font-size: 17.5px;
@@ -25,7 +31,7 @@
         }
 
         body {
-            font-family: serif;
+            font-family: 'DejaVu Sans', sans-serif;
             background-color: white;
             margin: 3%;
             padding: 3%;
@@ -258,8 +264,7 @@ ensure they are well-prepared to facilitate learning.
     <ol>
         <li>
             <b>TERM</b> <br><br>
-            The Duration of this Agreement shall be for a period of _________ Years commencing from
-__________ to _________ unless the term is renewed prior to termination for such period and
+            The Duration of this Agreement shall be for a period of <strong>{{ $mou->agreement_period ?? 'Agreement Period' }}</strong> Year(s) commencing from <strong>{{ \Carbon\Carbon::parse($mou->academic_year_start)->toDateString() }}</strong> to <strong>{{ \Carbon\Carbon::parse($mou->academic_year_end)->toDateString() }}</strong> unless the term is renewed prior to termination for such period and
 upon same, similar or such terms and conditions are mutually agreed by the Parties in writing.
         </li><br><br><br>
         <li>
@@ -267,52 +272,35 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
             <br><br>
             <ul><li>Scope of Services Provided:</li></ul><br>
                 <ol>
-                    <li>{{ $mou->services }}</li>
+                    <li>{{ $mou->items_id }}</li>
                 </ol><br>
                 <ul><li>Student Count Grade Wise & Cost Structure for <b>Junior Coders :</b></li></ul>
-        <br><br>
+        <br>
 
-    <table>
-    <tr>
-        <th>Class</th>
-        <th>No. of Students( Tentative )</th>
-        <th>Cost Per Student (₹)</th>
-    </tr>
+        <table>
+            <tr>
+                <th>Class</th>
+                <th>No. of Students (Tentative)</th>
+                <th>Cost Per Student (₹)</th>
+            </tr>
 
-    @php
-        function classOrdinal($num) {
-            return match ($num) {
-                1 => 'Grade 1',
-                2 => 'Grade 2',
-                3 => 'Grade 3',
-                4 => 'Grade 4',
-                5 => 'Grade 5',
-                6 => 'Grade 6',
-                7 => 'Grade 7',
-                8 => 'Grade 8',
-                9 => 'Grade 9',
-                10 => 'Grade 10-12(O*)',
-            };
-        }
+            @php
+                $totalStudentsJunior = 0;
+            @endphp
 
-        $totalStudents = 0;
-    @endphp
-
-    @for ($i = 1; $i <= 5; $i++)
-        @php
-            $classData = collect($mou->classes)->firstWhere('class', $i);
-            $students = $classData['no_of_students'] ?? 0;
-            $costPerStudent = $classData['cost_per_student'] ?? 0;
-
-        @endphp
-
-        <tr>
-            <td>{{ classOrdinal($i) }}</td>
-            <td>{{ $students ?: '---' }}</td>
-            <td>{{ $costPerStudent ? number_format($costPerStudent, 2) : '---' }}</td>
-        </tr>
-    @endfor
-    </table>
+            @foreach ($mou->classes as $class)
+            @if (in_array($class['class'], ['Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5']))
+                    @php
+                        $totalStudentsJunior += $class['no_of_students'];
+                    @endphp
+                    <tr>
+                        <td>{{ $class['class'] }}</td>
+                        <td>{{ $class['no_of_students'] }}</td>
+                        <td>₹{{ number_format($class['cost_per_student'], 2) }}</td>
+                    </tr>
+                @endif
+            @endforeach
+        </table>
     <br><br>
     <!-- Signature Section -->
     <table class="sign">
@@ -356,47 +344,74 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
 
     <br><br><br>
     <ul><li>Student Count Grade Wise & Cost Structure for <b>Senior Coders :</b></ul>
-    <br><br>
+    <br>
     <table>
         <tr>
             <th>Class</th>
-            <th>No. of Students( Tentative )</th>
+            <th>No. of Students (Tentative)</th>
             <th>Cost Per Student (₹)</th>
         </tr>
 
+        @php
+            $totalStudentsSenior = 0;
+        @endphp
 
-        @for ($i = 6; $i <= 10; $i++)
-            @php
-                $classData = collect($mou->classes)->firstWhere('class', $i);
-                $students = $classData['no_of_students'] ?? 0;
-                $costPerStudent = $classData['cost_per_student'] ?? 0;
-
-            @endphp
-
-            <tr>
-                <td>{{ classOrdinal($i) }}</td>
-                <td>{{ $students ?: '---' }}</td>
-                <td>{{ $costPerStudent ? number_format($costPerStudent, 2) : '---' }}</td>
-            </tr>
-        @endfor
-        </table><br>
-        <b>(O)-Optional</b>
+        @foreach ($mou->classes as $class)
+        @if (in_array($class['class'], ['Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12']))
+                @php
+                    $totalStudentsSenior += $class['no_of_students'];
+                @endphp
+                <tr>
+                    <td>{{ $class['class'] }}</td>
+                    <td>{{ $class['no_of_students'] }}</td>
+                    <td>₹{{ number_format($class['cost_per_student'], 2) }}</td>
+                </tr>
+            @endif
+        @endforeach
+    </table>
+    <br>
+        {{-- <b>(O)-Optional</b> --}}
     </li>
 </li><br><br><br>
+@php
+    $installmentNames = [
+        1 => "First Payment",
+        2 => "Second Payment",
+        3 => "Third Payment",
+        4 => "Fourth Payment",
+        5 => "Fifth Payment",
+        6 => "Sixth Payment",
+        7 => "Seventh Payment",
+        8 => "Eighth Payment",
+        9 => "Ninth Payment",
+        10 => "Tenth Payment",
+        11 => "Eleventh Payment",
+        12 => "Twelfth Payment",
+    ];
+@endphp
 <li>
     <b>PAYMENT TERMS</b><br><br>
     The payment for the services under this Agreement shall be made by the CLIENT to MGC in
-________ equal installments as follows:
-<ol>
-    <li>
-        First Payment: _____% of the total payment shall be made in the month of
-_______ 2025
-    </li><br><br>
-    <li>Second Payment: _____% of the total payment shall be made in the month of
-        _________2025</li><br><br>
+    <strong>{{ $mou->installments_count ?? 'Installment count' }}</strong> equal installments as follows:
+    <ol>
+        <br>
+        @foreach ($mou->installments as $installment)
+            <li>
+                {{ $installmentNames[$installment['installment']] ?? 'Payment' }}:
 
+                @if ($mou->payment_type === 'amount')
+                    <strong>₹{{ number_format($installment['installment_payment'], 2) }}</strong>
+                @else
+                    <strong>{{ number_format($installment['installment_payment'], 2) }}</strong>%
+                @endif
 
-</ol>Payments shall be made via [ Bank Transfer / Cheque / NEFT / RTGS ] to the service
+                of the total payment shall be made in the month of
+                <strong>{{ $installment['installment_month'] }} {{ $installment['installment_year'] }}</strong>.
+            </li>
+            <br>
+        @endforeach
+    </ol>
+    Payments shall be made via [ Bank Transfer / Cheque / NEFT / RTGS ] to the service
 provider's designated account.
 </li><br><br><br>
 <li>
@@ -455,6 +470,9 @@ support for smooth execution.
             <td>_________________</td>
         </tr>
     </table>
+    <div class="footer">
+        <p>https://milliongeniuscoders.com | +91 8248826374</p>
+    </div>
 </body>
 </html>
 

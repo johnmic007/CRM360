@@ -24,13 +24,13 @@ class DraftMou extends Model
         'district_id',
         'block_id',
         'school_id',
+        'installments',
+        'agreement_period',
         'academic_year_start',
         'academic_year_end',
         'course_duration_end',
         'classes', // Stored as JSON
-        'advance_payment',
-        'mid_payment',
-        'final_payment',
+        'installments_count',
         'payment_type',
         'payment_value',
         'mode_of_payment',
@@ -40,21 +40,28 @@ class DraftMou extends Model
         'company_state',
     ];
 
-    /** 🎯 Casts */
-    protected $casts = [
-        'date' => 'date',
-        'academic_year_start' => 'date',
-        'academic_year_end' => 'date',
-        'course_duration_end' => 'date',
-        'classes' => 'array', // JSON array for class-wise data
-    ];
+
+    /** 🎯 Casts */protected $casts = [
+    'date' => 'date',
+    'academic_year_start' => 'date',
+    'academic_year_end' => 'date',
+    'course_duration_end' => 'date',
+    'classes' => 'array', // Ensure classes are stored as JSON
+    'installments' => 'array', // ✅ Convert installments to array
+];
+
+// Ensure installments is always an array to prevent errors
+public function getInstallmentsAttribute($value)
+{
+    return $value ? json_decode($value, true) : [];
+}
 
     /** 🏫 Get total students */
     protected function totalStudents(): Attribute
     {
         return Attribute::get(fn () => collect($this->classes)->sum('no_of_students'));
     }
-    
+
     public function school()
     {
         return $this->belongsTo(School::class);
@@ -63,7 +70,7 @@ class DraftMou extends Model
     /** 💰 Get total revenue */
     protected function totalRevenue(): Attribute
     {
-        return Attribute::get(fn () => collect($this->classes)->sum(fn ($class) => 
+        return Attribute::get(fn () => collect($this->classes)->sum(fn ($class) =>
             ($class['no_of_students'] ?? 0) * ($class['cost_per_student'] ?? 0)
         ));
     }
