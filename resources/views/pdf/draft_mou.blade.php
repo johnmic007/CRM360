@@ -75,8 +75,8 @@
 
         .headerimg {
             text-align: center;
-            height: 100px;
         }
+
 
         .footer {
             position: fixed;
@@ -95,7 +95,7 @@
     <!-- Company Logo -->
     <div class="headerimg">
         @if($base64)
-            <img src="{{ $base64 }}" alt="Company Logo" style="max-width: 150px; height: 150px;">
+            <img src="{{ $base64 }}" alt="Company Logo" style="max-width: 150px; max-height: 150 px;">
         @else
             <p>Image not found</p>
         @endif
@@ -281,7 +281,7 @@ upon same, similar or such terms and conditions are mutually agreed by the Parti
                     </li>
                 </ol><br>
                 <ul><li>Student Count Grade Wise & Cost Structure for <b>Junior Coders :</b></li></ul>
-
+<br>
         <table>
             <tr>
                 <th>Class</th>
@@ -469,7 +469,7 @@ support for smooth execution.
         Any disputes arising under this MoU shall be resolved through mutual discussion and
         mediation</li>
         </ol>
-<br><br><br>
+<br><br><br><br><br><br><br><br>
         <!-- Signature Section -->
     <table class="sign">
         <tr>
@@ -514,200 +514,3 @@ support for smooth execution.
     </div>
 </body>
 </html>
-
-
-
-
-
-
-
-{{-- <p style="text-align: left"><strong>{{ $mou->school_name }}</strong>, located at <strong>{{ $mou->school_address }}</strong>, hereinafter referred to as the "School".</p>
-<p style="text-align: left">Both parties collectively referred to as the "Parties", agree to the terms and conditions outlined in this MoU for the delivery of educational services.</p>
-
-<h3>SERVICE DETAILS & COST STRUCTURE</h3>
-<p><b>1. Scope of Services Provided</b></p>
-<p style="text-align: left">The Service Provider shall deliver the following services to the School for the academic year <strong>{{ $mou->academic_year_start->format('Y-m-d') }}
-    </strong>:</p>
-<ul>
-    <li>{{ $mou->services }}</li>
-</ul>
-<p><b>2. Student Count & Cost Structure</b></p> --}}
-{{-- <table>
-    <tr>
-        <th>Class</th>
-        <th>No. of Students</th>
-        <th>Cost Per Student</th>
-        <th>Total Cost</th>
-    </tr>
-    @foreach ($mou->classes as $class)
-    <tr>
-        <td>{{ $class['class'] }}</td>
-<td>{{ $class['no_of_students'] }}</td>
-<td>&#8377;{{ $class['cost_per_student'] }}</td>
-<td>&#8377;{{ $class['total_cost'] }}</td>
-</tr>
-@endforeach
-</table> --}}
-
-{{-- <table>
-<tr>
-    <th>Class</th>
-    <th>No. of Students</th>
-    <th>Cost Per Student (₹)</th>
-    <th>Total Cost (₹)</th>
-</tr>
-
-@php
-    function classOrdinal($num) {
-        return match ($num) {
-            1 => '1st',
-            2 => '2nd',
-            3 => '3rd',
-            default => $num . 'th',
-        };
-    }
-
-    $totalStudents = 0;
-    $totalCost = 0;
-@endphp
-
-@for ($i = 1; $i <= 9; $i++)
-    @php
-        $classData = collect($mou->classes)->firstWhere('class', $i);
-        $students = $classData['no_of_students'] ?? 0;
-        $costPerStudent = $classData['cost_per_student'] ?? 0;
-        $totalClassCost = $classData['total_cost'] ?? 0;
-
-        // Sum up total students and total cost
-        $totalStudents += $students;
-        $totalCost += $totalClassCost;
-    @endphp
-
-    <tr>
-        <td>{{ classOrdinal($i) }}</td>
-        <td>{{ $students ?: '---' }}</td>
-        <td>{{ $costPerStudent ? number_format($costPerStudent, 2) : '---' }}</td>
-        <td>{{ $totalClassCost ? number_format($totalClassCost, 2) : '---' }}</td>
-    </tr>
-@endfor
-
-<tr>
-    <th colspan="2">Total</th>
-    <th>---</th>
-    <td><strong>₹{{ number_format($totalCost, 2) }}</strong></td>
-</tr>
-</table>
-
-
-
-<table class="sign">
-    <tr>
-        <th colspan="2">For and on behalf of Million Genius Coders</th>
-        <th colspan="2">For and on behalf of {{ $mou->school_name }}</th>
-    </tr>
-    <tr>
-        <td>Signature:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-        <td>Signature:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-    </tr>
-    <tr>
-        <td>Name:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-        <td>Name:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-    </tr>
-    <tr>
-        <td>Designation:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-        <td>Designation:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-    </tr>
-    <tr>
-        <td>Date:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-        <td>Date:</td>
-        <td>_ _ _ _ _ _ _ _ _</td>
-    </tr>
-</table>
-
-<h3>TERMS & CONDITIONS</h3>
-<p><b>3. Payment Terms</b></p>
-<ul>
-    <li>The total contract value is &#8377;{{ $mou->total_contract_value }}</li>
-    <li>Payment shall be made in three installments as follows:
-        <ul>
-            <li>Advance Payment: &#8377;{{ $mou->advance_payment }}</li>
-            <li>Mid-Term Payment: &#8377;{{ $mou->mid_payment }}</li>
-            <li>Final Payment: &#8377;{{ $mou->final_payment }}</li>
-        </ul>
-    </li>
-    <li>Payment shall be made via [Bank Transfer / Cheque / Online Payment] to the Service Provider's designated account.</li>
-</ul>
-
-<p><b>4. Late Payment Clause</b></p>
-<ul>
-    <li>If payment is not made within [X] days from the due date, a penalty of XX% per month will be applicable.</li>
-    <li>If non-payment exceeds [X] days, the Service Provider reserves the right to pause or terminate services.</li>
-</ul>
-
-<p><b>5. Deliverables & Responsibilities</b></p>
-<ul>
-    <li>The Service Provider will ensure the quality and timely delivery of all agreed services.</li>
-    <li>The School shall provide necessary infrastructure, internet connectivity, and administrative support.</li>
-</ul>
-
-<p><b>6. Confidentiality & Data Protection</b></p>
-<ul>
-    <li>The Service Provider will not share student data with third parties without prior consent.</li>
-    <li>Both parties agree to comply with data privacy laws and ensure secure handling of student information.</li>
-</ul>
-
-<p class="mt-4"><b>7. Term & Termination</b></p>
-<ul class="pl-6 list-disc">
-    <li>This MoU shall remain in effect for [1 year / 2 years] from the date of signing.</li>
-    <li>Either party may terminate this MoU by providing a [30-day] written notice.</li>
-    <li>In the event of termination, the School shall settle all pending payments before disengagement.</li>
-</ul>
-<p class="mt-4"><b>8. Dispute Resolution</b></p>
-<ul class="pl-6 list-disc">
-    <li>Any disputes arising under this MoU shall be resolved through mutual discussion and mediation.</li>
-    <li>If a resolution is not achieved, disputes will be settled under the jurisdiction of [City, State]
-        courts.</li>
-</ul> --}}
-
-{{-- <h3>SIGNATURES</h3> --}}
-{{-- <table class="sign">
-    <tr>
-        <th colspan="2">For and on behalf of Million Genius Coders</th>
-        <th colspan="2">For and on behalf of {{ $mou->school_name }}</th>
-    </tr>
-    <tr>
-        <td style="width: 20%">Signature:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-        <td style="width: 20%">Signature:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-    </tr>
-    <tr>
-        <td style="width: 20%">Name:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-        <td style="width: 20%">Name:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-    </tr>
-    <tr>
-        <td style="width: 20%">Designation:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-        <td style="width: 20%">Designation:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-    </tr>
-    <tr>
-        <td style="width: 20%">Date:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-        <td style="width: 20%">Date:</td>
-        <td style="width: 30%">_ _ _ _ _ _ _ _ _</td>
-    </tr>
-</table>
-
-<div class="footer">
-    <p>https://milliongeniuscoders.com | +91 8248826374</p>
-</div> --}}
