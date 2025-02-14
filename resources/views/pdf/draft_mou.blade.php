@@ -112,9 +112,9 @@
             <li>
                 <strong>MILLION GENIUS CODERS</strong>, powered by KGISL Educational Institutions, a company incorporated under the provisions of the Companies Act, 1956, and having its principal place of business at 365, Thudiyalur Rd, Saravanampatti, Coimbatore, Tamil Nadu 641035 (hereinafter referred to as "MGC"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its successors and assigns, of the <strong>FIRST PART</strong>;
             </li>
-            <br>
+
             <p>AND</p>
-            <br>
+
             <li>
                 <strong>{{ $mou->school->name ?? 'School Name' }}</strong>, having its principal place of business at <strong>{{ $mou->school_address ?? 'School Address' }}</strong> (hereinafter referred to as the "CLIENT"), which expression shall, unless repugnant to the context or meaning thereof, be deemed to include its trustees, beneficiaries, members, successors, and assigns, of the <strong> SECOND PART</strong>.
             </li>
@@ -183,7 +183,7 @@ education and learning of its students by availing the same from MGC; and
 Components to the CLIENT for the Term (as defined later) and upon the terms as
 hereinafter appearing.
             </li>
-        </ul>
+
         <ul style="list-style-type: lower-alpha;">
             <li>
                 “Million Genius Coders Academic System” shall mean and refer to an integrated,
@@ -191,6 +191,7 @@ technology blended solution consisting of all the Components designed for and
 implemented by MGC at schools to improve student learning.
             </li>
         </ul>
+    </ul>
     </p>
     <p>
         <b>MGC's Responsibilities</b>
