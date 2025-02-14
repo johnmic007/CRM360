@@ -23,9 +23,9 @@
         src: url("{{ public_path('fonts/DejaVuSans.ttf') }}") format('truetype');
     }
 
-        html{
+        /* html{
             font-size: 17.5px;
-        }
+        } */
         @page {
             margin: 20px;
         }
