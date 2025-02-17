@@ -19,7 +19,7 @@ class ListUsersPerformanceReports extends ListRecords
         $user = auth()->user();
 
         // Allow all reports for admin role
-        if ($user->roles()->whereIn('name', ['admin','head', 'sales_operation_head'])->exists()) {
+        if ($user->roles()->whereIn('name', ['admin','head', 'sales_operation_head', 'sales_operation'])->exists()) {
             return $query->whereDoesntHave('roles', function ($q) {
                 $q->where('name', 'admin');
             });        }
