@@ -388,7 +388,8 @@ Wizard\Step::make('Legal & Dispute Resolution')
             ->columns([
                 TextColumn::make('date')
                     ->label('Date')
-                    ->sortable(),
+                    ->sortable()
+                    ->date('Y-m-d'),
 
                 TextColumn::make('school.name')
                     ->label('School Name')
@@ -396,7 +397,7 @@ Wizard\Step::make('Legal & Dispute Resolution')
 
                 TextColumn::make('academic_year_start')
                     ->label('Academic Year')
-                    ->formatStateUsing(fn ($record) => $record->academic_year_start . ' - ' . $record->academic_year_end),
+                    ->formatStateUsing(fn ($record) => $record->academic_year_start?->format('Y-m-d') . ' - ' . $record->academic_year_end?->format('Y-m-d')),
 
                 TextColumn::make('total_students')
                     ->label('Total Students')
