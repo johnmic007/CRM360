@@ -85,6 +85,7 @@ public function getInstallmentsAttribute($value)
         static::creating(function ($draftMou) {
             if (Auth::check()) {
                 $draftMou->created_by = Auth::id();
+                $draftMou->company_id = Auth::user()->company_id;
             }
         });
     }
