@@ -16,6 +16,8 @@ class InvoiceLogRelation extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'type';
 
+    
+
 
     public function form(Form $form): Form
     {
@@ -50,17 +52,12 @@ class InvoiceLogRelation extends RelationManager
             ->filters([
                 //
             ])
-            ->headerActions([
-                Tables\Actions\CreateAction::make(),
-            ])
+            // ->headerActions([
+            //     Tables\Actions\CreateAction::make(),
+            // ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\EditAction::make(),
             ]);
+           
     }
 }
