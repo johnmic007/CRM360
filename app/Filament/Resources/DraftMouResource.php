@@ -129,14 +129,11 @@ class DraftMouResource extends Resource
                                     ->disabled()
                                     ->dehydrated(),
 
-                                TextInput::make('created_by')
-                                    ->label('Created By')
-                                    ->default(Auth::id())
-                                    ->disabled()
-                                    ->hidden()
-                                    ->dehydrated(),
-
-
+                                // TextInput::make('created_by')
+                                //     ->label('Created By')
+                                //     ->disabled()
+                                //     ->hidden()
+                                //     ->dehydrated(),
 
                             ]),
                         ]),

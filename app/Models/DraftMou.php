@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class DraftMou extends Model
 {
@@ -75,5 +76,16 @@ public function getInstallmentsAttribute($value)
         return Attribute::get(fn () => collect($this->classes)->sum(fn ($class) =>
             ($class['no_of_students'] ?? 0) * ($class['cost_per_student'] ?? 0)
         ));
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($draftMou) {
+            if (Auth::check()) {
+                $draftMou->created_by = Auth::id();
+            }
+        });
     }
 }
