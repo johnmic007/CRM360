@@ -52,6 +52,7 @@ class TrainerVisit extends Model
         'user_travel_with',
         'is_head_travel',
         'remarks',
+        'category'
     ];
 
 
@@ -71,6 +72,7 @@ class TrainerVisit extends Model
         'visit_date' => 'date',
         'files' => 'array',
         'credit_log_id' => 'array',
+        'category' => 'array',
 
 
 
