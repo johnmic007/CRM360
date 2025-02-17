@@ -24,6 +24,7 @@ class DraftMou extends Model
         'district_id',
         'block_id',
         'school_id',
+        'created_by',
         'installments',
         'agreement_period',
         'academic_year_start',

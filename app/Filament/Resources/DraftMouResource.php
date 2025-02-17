@@ -2,32 +2,34 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\DraftMouResource\Pages;
+use Filament\Forms;
+use Filament\Tables;
 use App\Models\Block;
-use App\Models\DraftMou;
 use App\Models\Items;
 use App\Models\School;
-use Filament\Forms;
+use App\Models\DraftMou;
 use Filament\Forms\Form;
-use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Grid;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\Action;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Storage;
-
-use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Group;
+use Filament\Resources\Resource;
 use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Grid;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\Group;
+use Illuminate\Support\Facades\Auth;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Wizard;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+
+use Illuminate\Support\Facades\Storage;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\DraftMouResource\Pages;
 
 class DraftMouResource extends Resource
 {
@@ -47,6 +49,9 @@ class DraftMouResource extends Resource
         return $form
             ->schema([
                 /*** 🏫 School & Contract Details ***/
+                Wizard::make([
+                    Wizard\Step::make('School & Contract Details')
+                        ->schema([
                 Section::make('School & Contract Details')
                     ->description('Enter the school information and the services being provided.')
                     ->schema([
@@ -124,10 +129,21 @@ class DraftMouResource extends Resource
                                     ->disabled()
                                     ->dehydrated(),
 
-                            ]),
-                    ])
-                    ->collapsible(),
+                                TextInput::make('created_by')
+                                    ->label('Created By')
+                                    ->default(Auth::id())
+                                    ->disabled()
+                                    ->hidden()
+                                    ->dehydrated(),
 
+
+
+                            ]),
+                        ]),
+                    ]),
+
+                Wizard\Step::make('Academic Year Details')
+                    ->schema([
                 /*** 📅 Academic Year ***/
                 Section::make('Academic Year Details')
                     ->description('Define the academic year range and course termination details.')
@@ -157,9 +173,11 @@ class DraftMouResource extends Resource
                                     ->disabled()
                                     ->dehydrated(),
                             ]),
-                    ])
-                    ->collapsible(),
+                        ]),
+                    ]),
 
+                Wizard\Step::make('Class-wise Student & Fee Structure')
+                    ->schema([
                 /*** 🏷️ Class-wise Student & Cost Details ***/
                 Section::make('Class-wise Student & Fee Structure')
                 ->description('Add details about each class, including student count and per-student cost.')
@@ -218,11 +236,12 @@ class DraftMouResource extends Resource
                         ->defaultItems(9) // Pre-loads the first 9 classes
                         ->maxItems(12) // Allows adding up to Grade 12
                         ->collapsible(),
-                ])
+                            ]),
 
-                    ->collapsible(),
+                        ]),
 
-              /*** 💳 Payment Details ***/
+                        Wizard\Step::make('Payment Information')
+                        ->schema([              /*** 💳 Payment Details ***/
 Section::make('Payment Information')
 ->description('Define the payment breakdown and payment mode.')
 ->schema([
@@ -331,8 +350,10 @@ Section::make('Payment Information')
                 ->required(),
         ]),
     ]),
+]),
 
-
+Wizard\Step::make('Legal & Dispute Resolution')
+->schema([
                 /*** 📌 Dispute & Legal Details ***/
                 Section::make('Legal & Dispute Resolution')
                     ->description('Provide legal dispute resolution details and company location.')
@@ -355,9 +376,12 @@ Section::make('Payment Information')
                                             ->required(),
                                     ]),
                             ]),
-                    ])
-                    ->collapsible(),
-            ]);
+                        ]),
+                    ]),
+            ])
+                    ->columnSpan('full') // Ensures full width
+                ->maxWidth('7xl') // Increases form width for better UI
+                    ]);
     }
 
 
