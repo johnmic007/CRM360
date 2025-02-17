@@ -19,7 +19,7 @@ class ListRevenewReports extends ListRecords
         $user = auth()->user();
     
         // Allow all reports for admin and sales_operation_head roles
-        if ($user->roles()->whereIn('name', ['admin','head','sales_operation_head'])->exists()) {
+        if ($user->roles()->whereIn('name', ['admin','head', 'sales_operation', 'sales_operation_head'])->exists()) {
             return $query;
         }
     
