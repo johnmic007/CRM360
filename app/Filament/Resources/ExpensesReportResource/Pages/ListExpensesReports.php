@@ -109,9 +109,6 @@ public function downloadPDF()
 
     $Date = request()->input('date'); // Assuming `start_date` is passed in the request
 
-
-
-
     // Calculate totals
     $totalKm = $records->sum('distance_traveled');
     $totalExpenses = $records->sum('total_expense');
@@ -235,6 +232,6 @@ protected function getHeaderWidgets(): array
     ];
 }
 
-  
-    
+
+
 }

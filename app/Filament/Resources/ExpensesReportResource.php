@@ -12,10 +12,14 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+
+
 
 class ExpensesReportResource extends Resource
 {
@@ -23,7 +27,7 @@ class ExpensesReportResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-up';
 
-    
+
     protected static ?string $navigationLabel = 'Expense Report';
 
     protected static ?string $navigationGroup = 'Reports';
@@ -132,7 +136,7 @@ class ExpensesReportResource extends Resource
 
     public static function table(Table $table): Table
     {
-       
+
         return $table
             ->columns([
                 // 1. Show the trainer’s name (related to `user`)
@@ -168,8 +172,8 @@ class ExpensesReportResource extends Resource
                     ->money('inr', true)  // or your preferred currency / formatting
                     ->sortable(),
 
-           
-                    
+
+
 
                 // 7. Total expense
                 Tables\Columns\TextColumn::make('total_expense')
@@ -180,7 +184,7 @@ class ExpensesReportResource extends Resource
                 // 8. Approval status
                 Tables\Columns\BadgeColumn::make('approval_status')
                     ->label('Approval Status')
-                    
+
                     ->colors([
                         'primary',
                         'success' => 'approved',
@@ -192,7 +196,7 @@ class ExpensesReportResource extends Resource
                 // 9. Verification status
                 Tables\Columns\BadgeColumn::make('verify_status')
                     ->label('Verify Status')
-                  
+
                     ->colors([
                         'success' => 'verified',
                         'danger'  => 'unverified',
@@ -209,113 +213,133 @@ class ExpensesReportResource extends Resource
                 //     ->limit(40),
             ])
             ->filters([
-
+                // Visit Date Filter
                 Tables\Filters\Filter::make('visit_date')
-                ->form([
-                    Forms\Components\DatePicker::make('date')
-                        ->label('Visit Date'),
-                ])
-                ->query(function (Builder $query, array $data) {
-                    // If a date is selected, filter by that specific date
-                    return $query->when($data['date'], function ($query, $date) {
-                        $query->whereDate('visit_date', $date);
-                    });
-                })
-                ->indicateUsing(function (array $data) {
-                    // Check if 'date' exists in the filter data
-                    if (!empty($data['date'])) {
-                        return 'Date: ' . \Carbon\Carbon::parse($data['date'])->format('d-m-Y');
-                    }
-            
-                    return null; // No indication if no date is selected
-                }),            
+                    ->form([
+                        Forms\Components\DatePicker::make('date')
+                            ->label('Visit Date'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['date'], function ($query, $date) {
+                            $query->whereDate('visit_date', $date);
+                        });
+                    })
+                    ->indicateUsing(function (array $data) {
+                        return !empty($data['date'])
+                            ? 'Date: ' . \Carbon\Carbon::parse($data['date'])->format('d-m-Y')
+                            : null;
+                    }),
 
-                SelectFilter::make('approval_status')
-                ->label('Approval Status')
-                ->options([
-                    'approved' => 'Approved',
-                    'pending'  => 'Pending',
-                    'rejected' => 'Rejected',
-                ])
-                ->attribute('approval_status'), // Tells Filament which column/attribute to filter
-                // or you can use ->query(...) if you need custom logic
+                // Start Date Filter (Applies to table)
+                Filter::make('start_date')
+                    ->label('Start Date')
+                    ->form([
+                        DatePicker::make('start_date')->placeholder('Select a start date'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['start_date'], function ($query, $startDate) {
+                            $query->whereDate('visit_date', '>=', $startDate);
+                        });
+                    })
+                    ->indicateUsing(fn (array $data) => !empty($data['start_date']) ? 'Start Date: ' . $data['start_date'] : null),
 
+                // End Date Filter (Applies to table)
+                Filter::make('end_date')
+                    ->label('End Date')
+                    ->form([
+                        DatePicker::make('end_date')->placeholder('Select an end date'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['end_date'], function ($query, $endDate) {
+                            $query->whereDate('visit_date', '<=', $endDate);
+                        });
+                    })
+                    ->indicateUsing(fn (array $data) => !empty($data['end_date']) ? 'End Date: ' . $data['end_date'] : null),
 
-                SelectFilter::make('user_id')
-    ->label('Filter by User') // Label for filter
-    ->options(function () {
-        return User::role(['zonal_manager', 'bdm', 'regional_manager']) // Fetch users with specific roles
-            ->pluck('name', 'id') // Return [id => name]
-            ->toArray();
-    })
-    ->searchable()
-    ->query(function (Builder $query, $data) {
-        if (empty($data['value'])) {
-            return; // Skip filtering if no user is selected
-        }
+                // Exclude Users Filter
+                Filter::make('exclude_users')
+                    ->label('Exclude Selected Users')
+                    ->form([
+                        Select::make('exclude_users')
+                            ->multiple()
+                            ->options(User::pluck('name', 'id')->toArray())
+                            ->searchable()
+                            ->placeholder('Select users to exclude'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['exclude_users'])) {
+                            $query->whereNotIn('user_id', $data['exclude_users']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data) {
+                        return empty($data['exclude_users']) ? null : 'Excluded Users: ' . User::whereIn('id', $data['exclude_users'])->pluck('name')->implode(', ');
+                    }),
 
-        $selectedUserId = $data['value']; // Get selected user ID
+                // Include Users Filter
+                Filter::make('include_users')
+                    ->label('Include Selected Users')
+                    ->form([
+                        Select::make('include_users')
+                            ->multiple()
+                            ->options(User::pluck('name', 'id')->toArray())
+                            ->searchable()
+                            ->placeholder('Select users to include'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['include_users'])) {
+                            $query->whereIn('user_id', $data['include_users']);
+                        }
+                    })
+                    ->indicateUsing(function (array $data) {
+                        return empty($data['include_users']) ? null : 'Included Users: ' . User::whereIn('id', $data['include_users'])->pluck('name')->implode(', ');
+                    }),
 
-        // Apply filter only for the selected user (No subordinates)
-        $query->where('user_id', $selectedUserId);
-    }),
+                // Approval Status Filter
+                Filter::make('approval_status')
+                    ->label('Approval Status')
+                    ->form([
+                        Select::make('approval_status')
+                            ->options([
+                                'approved' => 'Approved',
+                                'pending' => 'Pending',
+                                'rejected' => 'Rejected',
+                            ])
+                            ->placeholder('All'),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['approval_status'], function ($query, $status) {
+                            $query->where('approval_status', $status);
+                        });
+                    })
+                    ->indicateUsing(fn (array $data) => !empty($data['approval_status']) ? 'Approval Status: ' . $data['approval_status'] : null),
 
-            /**
-             * (C) Filter by Verify Status
-             */
-            // SelectFilter::make('verify_status')
-            //     ->label('Verify Status')
-            //     ->options([
-            //         'verified'   => 'Verified',
-            //         'pending'  => 'Pending',
-            //     ])
-            //     ->attribute('verify_status'),
-
-                
-            //     SelectFilter::make('selected_user')
-            //     ->label('User Team Visits') // Shortened label
-            //     ->options(function () {
-            //         // Fetch users with specific roles (e.g., 'BDA' and 'BDM')
-            //         return User::role(['zonal_manager', 'bdm', 'regional_manager']) // Use the `role` method from Spatie's package
-            //             ->pluck('name', 'id') // Fetch users' names and IDs
-            //             ->all();
-            //     })
-            //     ->searchable()
-            //     ->query(function (Builder $query, $data) {
-            //         // Check if the 'value' key exists in the data and retrieve its value
-            //         if (empty($data['value'])) {
-            //             // If no value is provided, skip the filter logic
-            //             return;
-            //         }
-
-            //         $selectedUserId = $data['value']; // Extract the selected user ID
-
-            //         // Fetch the selected user
-            //         $selectedUser = User::find($selectedUserId);
-
-            //         if ($selectedUser) {
-            //             // Fetch subordinate IDs
-            //             try {
-            //                 $subordinateIds = $selectedUser->getAllSubordinateIds();
-            //                 $subordinateIds[] = $selectedUser->id; // Include the selected user's ID
-
-            //                 $query->whereIn('user_id', $subordinateIds); // Apply filter
-            //             } catch (\Exception $e) {
-            //                 // Log or handle any errors
-            //                 logger()->error('Error fetching subordinate IDs:', ['message' => $e->getMessage()]);
-            //             }
-            //         } else {
-            //             // Log when the selected user cannot be found
-            //             logger()->warning('User not found for selected ID:', ['user_id' => $selectedUserId]);
-            //         }
-            //     }),
+                // User Filter (Zonal Manager, BDM, Regional Manager)
+                Filter::make('user_id')
+                    ->label('Filter by User')
+                    ->form([
+                        Select::make('user_id')
+                            ->label('Filter by User')
+                            ->options(function () {
+                                return User::whereHas('roles', function ($query) {
+                                    $query->whereIn('name', ['zonal_manager', 'bdm', 'regional_manager']);
+                                })->pluck('name', 'id')->toArray();
+                            })
+                            ->searchable(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        return $query->when($data['user_id'], function ($query, $userId) {
+                            $query->where('user_id', $userId);
+                        });
+                    })
+                    ->indicateUsing(fn (array $data) => !empty($data['user_id']) ? 'User: ' . User::find($data['user_id'])->name : null),
             ])
+
             ->actions([
                 Tables\Actions\ViewAction::make(),
             ])
             ->paginated([10, 25,]);
 
-          
+
     }
 
     public static function getRelations(): array
