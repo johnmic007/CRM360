@@ -505,6 +505,7 @@ class InvoResource extends Resource
 
                 FileUpload::make('files')
             ->disk('s3')
+            ->downloadable()
                 ->directory('CRM')
                 ->multiple()
             
@@ -693,6 +694,7 @@ class InvoResource extends Resource
                         FileUpload::make('payment_proof')
                             ->label('Payment Proof')
                         ->disk('s3')
+                        ->downloadable()
                             ->directory('CRM')
                             ->directory('payment_proofs')
                             ->nullable(),

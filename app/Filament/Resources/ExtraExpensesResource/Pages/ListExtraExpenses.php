@@ -6,14 +6,17 @@ use App\Filament\Resources\ExtraExpensesResource;
 use App\Filament\Resources\ExtraExpensesResource\Widgets\ExpenseStats;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Illuminate\Database\Eloquent\Builder;
 
 class ListExtraExpenses extends ListRecords
 {
+    use ExposesTableToWidgets; // ✅ Allows widgets to interact with table filters.
+
     protected static string $resource = ExtraExpensesResource::class;
 
     /**
-     * Only records with travel_type = extra_expense in the table.
+     * ✅ Apply filters using `getTableQuery()`
      */
     protected function getTableQuery(): Builder
     {
@@ -27,11 +30,10 @@ class ListExtraExpenses extends ListRecords
         ];
     }
 
-
     protected function getHeaderWidgets(): array
     {
         return [
-            ExpenseStats::class, // ✅ Add stats widget to the List Page
+            ExpenseStats::class, // ✅ Now the widget dynamically updates based on filters
         ];
     }
 }

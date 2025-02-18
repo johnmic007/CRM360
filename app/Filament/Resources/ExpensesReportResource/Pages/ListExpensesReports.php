@@ -3,8 +3,10 @@
 namespace App\Filament\Resources\ExpensesReportResource\Pages;
 
 use App\Filament\Resources\ExpensesReportResource;
+use App\Filament\Resources\ExpensesReportResource\Widgets\ExpensesReportStats;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Filament\Actions;
+use Filament\Pages\Concerns\ExposesTableToWidgets;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Http; // For making an HTTP request
@@ -13,6 +15,10 @@ use Illuminate\Support\Facades\Http; // For making an HTTP request
 
 class ListExpensesReports extends ListRecords
 {
+
+    use ExposesTableToWidgets; // ✅ Allows widget to access table query and filters.
+
+
     protected static string $resource = ExpensesReportResource::class;
 
 
@@ -21,46 +27,46 @@ class ListExpensesReports extends ListRecords
 {
     return [
         // Total Expenses
-        Actions\Action::make('total_expenses')
-            ->label(function () {
-                $query = $this->getTableQuery();
-                if (method_exists($this, 'applyFiltersToTableQuery')) {
-                    $this->applyFiltersToTableQuery($query);
-                }
-                $totalExpenses = $query->sum('total_expense');
-                return "Total Expenses: ₹" . number_format($totalExpenses, 2);
-            })
-            ->color('success')
-            ->icon('heroicon-o-calculator')
-            ->disabled(), // Display-only action
+        // Actions\Action::make('total_expenses')
+        //     ->label(function () {
+        //         $query = $this->getTableQuery();
+        //         if (method_exists($this, 'applyFiltersToTableQuery')) {
+        //             $this->applyFiltersToTableQuery($query);
+        //         }
+        //         $totalExpenses = $query->sum('total_expense');
+        //         return "Total Expenses: ₹" . number_format($totalExpenses, 2);
+        //     })
+        //     ->color('success')
+        //     ->icon('heroicon-o-calculator')
+        //     ->disabled(), // Display-only action
 
-        // Total Requests
-        Actions\Action::make('total_requests')
-            ->label(function () {
-                $query = $this->getTableQuery();
-                if (method_exists($this, 'applyFiltersToTableQuery')) {
-                    $this->applyFiltersToTableQuery($query);
-                }
-                $totalRequests = $query->count();
-                return "Total Requests: {$totalRequests}";
-            })
-            ->color('primary')
-            ->icon('heroicon-o-document-text')
-            ->disabled(), // Display-only action
+        // // Total Requests
+        // Actions\Action::make('total_requests')
+        //     ->label(function () {
+        //         $query = $this->getTableQuery();
+        //         if (method_exists($this, 'applyFiltersToTableQuery')) {
+        //             $this->applyFiltersToTableQuery($query);
+        //         }
+        //         $totalRequests = $query->count();
+        //         return "Total Requests: {$totalRequests}";
+        //     })
+        //     ->color('primary')
+        //     ->icon('heroicon-o-document-text')
+        //     ->disabled(), // Display-only action
 
-        // Approved Expenses
-        Actions\Action::make('approved_expenses')
-            ->label(function () {
-                $query = $this->getTableQuery();
-                if (method_exists($this, 'applyFiltersToTableQuery')) {
-                    $this->applyFiltersToTableQuery($query);
-                }
-                $approvedExpenses = $query->where('approval_status', 'approved')->sum('total_expense');
-                return "Approved Expenses: ₹" . number_format($approvedExpenses, 2);
-            })
-            ->color('success')
-            ->icon('heroicon-o-check-circle')
-            ->disabled(), // Display-only action
+        // // Approved Expenses
+        // Actions\Action::make('approved_expenses')
+        //     ->label(function () {
+        //         $query = $this->getTableQuery();
+        //         if (method_exists($this, 'applyFiltersToTableQuery')) {
+        //             $this->applyFiltersToTableQuery($query);
+        //         }
+        //         $approvedExpenses = $query->where('approval_status', 'approved')->sum('total_expense');
+        //         return "Approved Expenses: ₹" . number_format($approvedExpenses, 2);
+        //     })
+        //     ->color('success')
+        //     ->icon('heroicon-o-check-circle')
+        //     ->disabled(), // Display-only action
 
 
             Actions\Action::make('download_pdf')
@@ -219,6 +225,14 @@ protected function getTableQuery(): Builder
 
     // Include the logged-in user's own data + subordinates' data
     return $query->whereIn('user_id', array_merge([$user->id], $subordinateIds));
+}
+
+
+protected function getHeaderWidgets(): array
+{
+    return [
+        ExpensesReportStats::class, // ✅ Moved stats from action label to widget.
+    ];
 }
 
   

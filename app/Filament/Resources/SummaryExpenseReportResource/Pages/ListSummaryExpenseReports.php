@@ -212,32 +212,63 @@ use Illuminate\Support\Facades\Response as ResponseFacade;
 
             protected function getTableQuery(): Builder
             {
-                // Start with the default query
-                $query = parent::getTableQuery();
+                $query = parent::getTableQuery(); // Get the default query
+        
                 $user = auth()->user();
-            
-                // 1) First, ensure the list only includes users who have EITHER the 'bda' or 'bdm' role.
-                $query->whereHas('roles', function ($q) {
-                    $q->whereIn('name', ['bda', 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation_head',]);
-                });
-            
-                // 2) If the logged-in user is Admin or Sales Operation Head:
-                //    - They can see all bda/bdm, but exclude admin users if you still want.
-                if ($user->roles()->whereIn('name', ['admin', 'head','sales_operation_head'])->exists()) {
-                    return $query->whereDoesntHave('roles', function ($q) {
-                        $q->where('name', 'admin');
-                    });
+        
+        
+                if ($user->roles()->where('name', 'admin')->exists()) {
+                    return $query; // Show all users for admins
                 }
-            
-                // 3) Otherwise, only show subordinate users (with bda/bdm) and exclude admin.
+        
+                if ($user->roles()->where('name', 'accounts_head')->exists()) {
+                    return $query; // Show all users for admins
+                }
+        
+        
+                if ($user->roles()->where('name', 'sales_operation')->exists()) {
+                    return $query->where('company_id', $user->company_id);
+                }
+        
+        
+                // Fetch all subordinate IDs for the logged-in user
                 $subordinateIds = $user->getAllSubordinateIds();
-            
-                return $query
-                    ->whereIn('id', $subordinateIds)
-                    ->whereDoesntHave('roles', function ($q) {
-                        $q->where('name', 'admin');
-                    });
+        
+                // dd($subordinateIds);
+        
+                // Always apply the filter for subordinates
+                return $query->whereIn('id', $subordinateIds);
             }
+
+
+            // protected function getTableQuery(): Builder
+            // {
+            //     // Start with the default query
+            //     $query = parent::getTableQuery();
+            //     $user = auth()->user();
+            
+            //     // 1) First, ensure the list only includes users who have EITHER the 'bda' or 'bdm' role.
+            //     $query->whereHas('roles', function ($q) {
+            //         $q->whereIn('name', ['bda', 'bdm' , 'zonal_manager' , 'regional_manager' , 'head' , 'sales_operation_head',]);
+            //     });
+            
+            //     // 2) If the logged-in user is Admin or Sales Operation Head:
+            //     //    - They can see all bda/bdm, but exclude admin users if you still want.
+            //     if ($user->roles()->whereIn('name', ['admin', 'head','sales_operation_head'])->exists()) {
+            //         return $query->whereDoesntHave('roles', function ($q) {
+            //             $q->where('name', 'admin');
+            //         });
+            //     }
+            
+            //     // 3) Otherwise, only show subordinate users (with bda/bdm) and exclude admin.
+            //     $subordinateIds = $user->getAllSubordinateIds();
+            
+            //     return $query
+            //         ->whereIn('id', $subordinateIds)
+            //         ->whereDoesntHave('roles', function ($q) {
+            //             $q->where('name', 'admin');
+            //         });
+            // }
             
 
             // Add this method to handle the download action
@@ -286,6 +317,9 @@ use Illuminate\Support\Facades\Response as ResponseFacade;
                 return response()->json(['error' => 'Failed to generate PDF. Please try again.'], 500);
             }
         }
+
+
+        
 
 
         
