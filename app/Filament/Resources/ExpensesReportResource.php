@@ -35,10 +35,10 @@
 
         protected static ?string $pluralLabel = 'Expense Report';
 
-        public static function canViewAny(): bool
-        {
-            return auth()->user()->hasRole(['admin', 'head', 'sales_head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
-        }
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , 'company', 'sales_head' , 'head' , 'zonal_manager' , 'regional_manager' ,'bdm', 'bda' ]);
+    }
 
 
         public static function form(Form $form): Form
