@@ -33,6 +33,7 @@ class SalesLeadStatus extends Model
         'follow_up_date',
         'visited_date',
         'message',
+        'company_id',
     ];
 
     public function salesLead()
@@ -76,21 +77,26 @@ class SalesLeadStatus extends Model
     {
         parent::boot();
 
+        static::creating(function ($salesleadstatus) { // Change variable name to match the model
+            if (Auth::check()) {
+                $salesleadstatus->company_id = Auth::user()->company_id; // Set the user's company_id
+            }
+        });
 
         static::creating(function ($status) {
             dispatch(new StoreSchoolVisitJob($status    ->toArray()));
         });
-    
+
         static::saving(function ($status) {
             // Log the incoming data
             Log::info('Saving triggered with status:', ['status' => $status->toArray()]);
-    
+
             $data = $status;
 
             // dd($data);
 
 
-            
+
 
             if ($status->status === 'Assigned to Another User') {
                 Log::warning('Attempt to save status "Assigned to Another User". Not creating entry.', [
@@ -105,26 +111,26 @@ class SalesLeadStatus extends Model
                     'school_id'  => $status->school_id,
                     'status'     => 'Pending',
                 ]);
-    
+
                 // Send a Filament notification
                 \Filament\Notifications\Notification::make()
                     ->title('School Already Assigned')
                     ->body('This school is assigned to another user. Please contact your manager for reassignment.')
                     ->warning()
                     ->send();
-    
+
                 // Stop further saving
                 return false;
             }
-            
-    
+
+
             // Check if a SalesLeadManagement record exists for the given school and user
             $existing = SalesLeadManagement::where('school_id', $data['school_id'] ?? null)
                 ->where('allocated_to', $data['allocated_to'] ?? Auth::id())
                 ->first();
-    
+
             Log::info('Existing SalesLeadManagement record:', ['existing' => $existing]);
-    
+
             if (!$existing) {
                 // Create a new SalesLeadManagement record
                 $salesLeadManagement = SalesLeadManagement::create([
@@ -136,55 +142,55 @@ class SalesLeadStatus extends Model
                     'allocated_to' => $data['allocated_to'] ?? Auth::id(),
                     'company_id'   => Auth::user()->company_id ?? null,
                 ]);
-    
+
                 Log::info('New SalesLeadManagement created:', ['salesLeadManagement' => $salesLeadManagement->toArray()]);
-    
+
                 // Check if the user is already assigned to the school
                 $alreadyAssigned = SchoolUser::where('school_id', $data['school_id'] ?? null)
                     ->where('user_id', Auth::id())
                     ->exists();
-    
+
                 Log::info('User already assigned to school:', ['alreadyAssigned' => $alreadyAssigned]);
-    
+
                 if (!$alreadyAssigned) {
                     // Assign the user to the school
                     SchoolUser::create([
                         'school_id' => $data['school_id'],
                         'user_id'   => Auth::id(),
                     ]);
-    
+
                     Log::info('User assigned to school:', [
                         'school_id' => $data['school_id'],
                         'user_id'   => Auth::id(),
                     ]);
                 }
-    
+
                 // Update the model with the new SalesLeadManagement ID and default status
                 $status->sales_lead_management_id = $salesLeadManagement->id;
                 $status->status = 'School Nurturing';
             } else {
                 // Reference the existing record
                 $status->sales_lead_management_id = $existing->id;
-    
+
                 if (!$status->status) {
                     $status->status = $existing->status ?? 'School Nurturing';
                 }
-    
+
                 Log::info('Using existing SalesLeadManagement record:', [
                     'sales_lead_management_id' => $existing->id,
                     'status' => $status->status,
                 ]);
             }
-    
+
             // Sync the status with SalesLeadManagement
             if ($status->sales_lead_management_id) {
                 $salesLead = SalesLeadManagement::find($status->sales_lead_management_id);
-    
+
                 if ($salesLead) {
                     // Update the status in the SalesLeadManagement record
                     $salesLead->status = $status->status;
                     $salesLead->save();
-    
+
                     Log::info('Updated SalesLeadManagement status:', [
                         'id' => $salesLead->id,
                         'status' => $salesLead->status,
@@ -196,27 +202,27 @@ class SalesLeadStatus extends Model
                     throw new \Exception("SalesLeadManagement record not found for ID: {$status->sales_lead_management_id}");
                 }
             }
-    
+
             // Assign default visited_by and created_by fields if not set
             if (!$status->visited_by && Auth::check()) {
                 $status->visited_by = Auth::id();
                 Log::info('Visited_by field updated:', ['visited_by' => $status->visited_by]);
             }
-    
+
             if (!$status->created_by && Auth::check()) {
                 $status->created_by = Auth::id();
                 Log::info('Created_by field updated:', ['created_by' => $status->created_by]);
             }
-    
+
             // Ensure the status is set to a default value if still empty
             if (!$status->status) {
                 $status->status = 'School Nurturing';
                 Log::info('Default status applied:', ['status' => $status->status]);
             }
-    
+
             // Final log before saving
             Log::info('Final status before save:', ['status' => $status->toArray()]);
         });
     }
-    
+
 }

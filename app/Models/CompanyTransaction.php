@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 
 class CompanyTransaction extends Model
@@ -16,7 +17,8 @@ class CompanyTransaction extends Model
         'requested_at',
         'issued_at',
         'wallet_user_id', // User ID of the wallet being topped up (if applicable)
-        'description',    // Description of the transaction
+        'description',
+        'company_id',    // Description of the transaction
     ];
 
     /**
@@ -37,6 +39,17 @@ class CompanyTransaction extends Model
     return $this->belongsToMany(WalletLog::class, 'company_transaction_wallet_log')
         ->withPivot('type') // Include the type field in the pivot table
         ->withTimestamps(); // Tracks when the association was created
+}
+
+protected static function boot()
+{
+    parent::boot();
+
+    static::creating(function ($draftMou) {
+        if (Auth::check()) {
+            $draftMou->company_id = Auth::user()->company_id;
+        }
+    });
 }
 
 }

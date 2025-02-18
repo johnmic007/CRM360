@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Items extends Model
 {
@@ -13,6 +14,17 @@ class Items extends Model
     protected $fillable = [
         'name',
         'price',
-        'remarks', 
+        'remarks',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($item) { // Change variable name to match the model
+            if (Auth::check()) {
+                $item->company_id = Auth::user()->company_id; // Set the user's company_id
+            }
+        });
+    }
 }

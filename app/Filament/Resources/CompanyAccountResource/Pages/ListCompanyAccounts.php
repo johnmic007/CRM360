@@ -13,14 +13,22 @@ class ListCompanyAccounts extends ListRecords
 {
     protected static string $resource = CompanyAccountResource::class;
 
-    
+
 
 
     protected function getTableQuery(): Builder
-    {
-        return User::query()->whereHas('roles', function ($query) {
-            $query->where('name', 'accounts_head');
-        });
-    }
-    
+{
+    $user = auth()->user(); // Get the authenticated user
+
+    return User::query()->whereHas('roles', function ($query) use ($user) {
+        $query->where('name', 'accounts_head');
+
+        // Apply company filter only if $user is not null
+        if ($user) {
+            $query->where('company_id', $user->company_id);
+        }
+    });
+}
+
+
 }

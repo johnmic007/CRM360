@@ -6,12 +6,14 @@ use App\Filament\Resources\SalesLeadStatusResource;
 use App\Models\VisitEntry;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
+
 
 class ListSalesLeadStatuses extends ListRecords
 {
     protected static string $resource = SalesLeadStatusResource::class;
 
-  
+
 
 
 
