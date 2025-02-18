@@ -42,7 +42,7 @@ class UserResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_operation', 'sales_head' ,     'zonal_manager', 'regional _manager', 'senior_manager', 'bdm']);
+        return auth()->user()->hasRole(['admin', 'sales_operation', 'sales_head' ,     'zonal_manager', 'regional_manager', 'senior_manager', 'bdm']);
     }
 
     public static function canDelete(Model $record): bool

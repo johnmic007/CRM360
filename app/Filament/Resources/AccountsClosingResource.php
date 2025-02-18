@@ -6,6 +6,7 @@ use App\Filament\Resources\AccountsClosingResource\Pages;
 use App\Filament\Resources\AccountsClosingResource\RelationManagers;
 use App\Filament\Resources\WalletLogResource\RelationManagers\AssociatedDebitsRelationManager;
 use App\Models\AccountsClosing;
+use App\Models\TrainerVisit;
 use App\Models\User;
 use App\Models\WalletLog;
 use Filament\Forms;
@@ -20,6 +21,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Dompdf\Dompdf;
+use Illuminate\Support\Facades\View;
 
 class AccountsClosingResource extends Resource
 {
@@ -85,10 +88,38 @@ class AccountsClosingResource extends Resource
             ], layout: FiltersLayout::AboveContent  )
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('Download PDF')
+                ->action(fn ($record) => self::downloadAssociatedDebitsPDF($record))
+                ->icon('heroicon-o-arrow-down-tray'),
             ])
             ->paginated([10, 25,]);
 
             
+    }
+
+
+    public static function downloadAssociatedDebitsPDF(WalletLog $walletLog)
+    {
+        // Fetch only associated debits for this WalletLog
+        $associatedDebits = $walletLog->associatedDebits;
+
+        // Render the Blade template with filtered data
+        $html = View::make('pdf.associated-debits', [
+            'walletLog' => $walletLog,
+            'associatedDebits' => $associatedDebits,
+        ])->render();
+
+        // Initialize Dompdf
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Return the PDF as a download
+        return response()->streamDownload(
+            fn () => print($dompdf->output()),
+            'associated_debits_' . $walletLog->id . '_' . now()->format('YmdHis') . '.pdf'
+        );
     }
 
     public static function getRelations(): array

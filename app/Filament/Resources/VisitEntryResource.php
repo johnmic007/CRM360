@@ -33,7 +33,7 @@ class VisitEntryResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole([ 'zonal_manager', 'regional _manager', 'senior_manager', 'bdm' , 'bda']);
+        return auth()->user()->hasRole([ 'zonal_manager', 'regional_manager', 'senior_manager', 'bdm' , 'bda']);
     }
 
 

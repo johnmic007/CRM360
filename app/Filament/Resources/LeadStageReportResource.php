@@ -40,7 +40,7 @@ class LeadStageReportResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'sales_head', 'head', 'sales_operation', 'sales_operation_head', 'zonal_manager', 'regional _manager', 'head' , 'bdm' , 'bda']);
+        return auth()->user()->hasRole(['admin', 'sales_operation' , 'sales_operation_head' , 'company', 'sales_head' , 'head' , 'zonal_manager' , 'regional_manager' ,'bdm', 'bda' ]);
     }
 
 

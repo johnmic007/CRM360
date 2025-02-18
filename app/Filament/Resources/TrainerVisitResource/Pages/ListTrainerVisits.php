@@ -3,11 +3,13 @@
 namespace App\Filament\Resources\TrainerVisitResource\Pages;
 
 use App\Filament\Resources\TrainerVisitResource;
+use App\Models\ExtraExpenseCategory;
 use App\Models\TrainerVisit;
 use Filament\Actions;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ListRecords;
@@ -53,6 +55,16 @@ class ListTrainerVisits extends ListRecords
                         ->required()
                         ->placeholder('Provide a brief description of the extra expense.')
                         ->rows(3),
+                        Select::make('category')
+                            ->label('📂 Expense Category')
+                            ->options(
+                                ExtraExpenseCategory::pluck('name', 'name')->toArray()
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->placeholder('Select or add a category...')
+                            ->helperText('Choose the category that best fits this expense.')
+                            ->columnSpanFull(),
 
                         
                         
@@ -87,6 +99,7 @@ class ListTrainerVisits extends ListRecords
                         'total_expense' => $data['total_expense'],
                         'description' => $data['description'],
                         'visit_date' => $data['visit_date'],
+                        'category' => $data['category'],
 
                         'travel_bill' => $data['travel_bill'], // Save the file paths as an array
 
