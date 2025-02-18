@@ -28,7 +28,7 @@ class ListTasks extends ListRecords
             )
             ->when(
                 auth()->user()->hasRole(['admin', 'sales_operation' , 'head_trainer']), // Admins and Sales see all tasks for their company
-                fn (Builder $query) => $query->where('company_id', auth()->user()->company_id) // Admins see tasks for their company
+                fn (Builder $query) => $query->where('company_id', auth()->user()->company_id ?? 0) // Admins see tasks for their company
             );
     }
 
@@ -95,28 +95,22 @@ class ListTasks extends ListRecords
         ];
     }
 
-    protected function getTaskStatusCount(string $status, int $userId, int $companyId, bool $isAdmin): int
+    protected function getTaskStatusCount(string $status, int $userId, ?int $companyId = null, bool $isAdmin): int
     {
         return TaskResource::getEloquentQuery()
             ->where('status', $status)
-            ->when(
-                !$isAdmin,
-                fn ($query) => $query->where('user_id', $userId), // Non-admins see their tasks
-                fn ($query) => $query->where('company_id', $companyId) // Admins see all company tasks
-            )
+            ->when(!$isAdmin, fn ($query) => $query->where('user_id', $userId))
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId))
             ->count();
     }
 
-    protected function getDueTaskCount(int $userId, int $companyId, bool $isAdmin): int
+    protected function getDueTaskCount(int $userId, ?int $companyId = null, bool $isAdmin): int
     {
         return TaskResource::getEloquentQuery()
             ->whereDate('end_date', '<', now())
             ->whereIn('status', ['pending', 'in_progress'])
-            ->when(
-                !$isAdmin,
-                fn ($query) => $query->where('user_id', $userId), // Non-admins see their tasks
-                fn ($query) => $query->where('company_id', $companyId) // Admins see all company tasks
-            )
+            ->when(!$isAdmin, fn ($query) => $query->where('user_id', $userId))
+            ->when($companyId, fn ($query) => $query->where('company_id', $companyId)) // ✅ Avoid NULL errors
             ->count();
     }
 }

@@ -13,12 +13,12 @@ class ListWalletLogs extends ListRecords
 {
     protected static string $resource = WalletLogResource::class;
 
-    
+
 
     protected function getTableQuery(): Builder
     {
         $userId = auth()->id();
-        $companyId = auth()->user()->company_id;
+        $companyId = $user->company_id ?? 0;
         $isAdminOrSales = auth()->user()->hasAnyRole(['admin', 'sales_operation','accounts_head' ]);
 
         return parent::getTableQuery()
@@ -32,7 +32,7 @@ class ListWalletLogs extends ListRecords
     public function getTabs(): array
     {
         $userId = auth()->id();
-        $companyId = auth()->user()->company_id;
+        $companyId = $user->company_id ?? 0;
         $isAdminOrSales = auth()->user()->hasAnyRole(['admin', 'sales_operation','accounts_head' ]);
 
         return [
@@ -69,7 +69,7 @@ class ListWalletLogs extends ListRecords
         ];
     }
 
-    protected function getLogTypeCount(string $type, int $userId, int $companyId, bool $isAdminOrSales): int
+    protected function getLogTypeCount(string $type, int $userId, ?int $companyId = null, bool $isAdminOrSales): int
     {
         return WalletLogResource::getEloquentQuery()
             ->where('type', $type)
@@ -82,7 +82,7 @@ class ListWalletLogs extends ListRecords
     }
 
 
-    
+
 
     // public  function getHeaderWidgets(): array
     // {

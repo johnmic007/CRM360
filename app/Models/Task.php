@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -35,5 +36,16 @@ class Task extends Model
     public function school()
     {
         return $this->belongsTo(School::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($task) {
+            if (Auth::check()) {
+                $task->company_id = Auth::user()->company_id;
+            }
+        });
     }
 }
