@@ -165,15 +165,30 @@ class AccountsClosingResource extends Resource
 
 public static function downloadAccountsClosingPDF3(WalletLog $walletLog)
 {
-    // Fetch all associated debits using the relationship
+    // Fetch all associated debits ensuring trainerVisit and school relationships exist
     $associatedDebits = $walletLog->associatedDebits()
-        ->whereNotNull('trainer_visit_id') // Ensure trainer_visit_id exists
-        ->with(['trainerVisit.school.district']) // Eager load relationships
-        ->get();
+    ->whereNotNull('trainer_visit_id')
+    ->with(['trainerVisit.salesLeadStatus.school.district']) // Load school through SalesLeadStatus
+    ->get();
+
+
+        $formattedLogs = $associatedDebits->map(function ($log) {
+            return [
+                'date' => optional($log->trainerVisit)->visit_date 
+                    ? \Carbon\Carbon::parse($log->trainerVisit->visit_date)->format('d/m/Y') 
+                    : 'N/A',
+                'school_name' => optional($log->trainerVisit->school)->name ?? 'N/A',
+                'school_address' => optional($log->trainerVisit->school)->address ?? 'N/A',
+                // 'district_name' => optional($log->trainerVisit->school->district)->name ?? 'N/A',
+            ];
+        });
+
+        // dd($formattedLogs);
 
     // Render the Blade template with the fetched data
     $html = View::make('pdf.accounts_closing3', [
         'walletLog' => $walletLog,
+        'formattedLogs' =>$formattedLogs,
         'walletLogs' => $associatedDebits, // Pass associated debits
     ])->render();
 
