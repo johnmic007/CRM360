@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Dompdf\Dompdf;
 use Illuminate\Support\Facades\View;
+use Filament\Tables\Actions\ActionGroup as ActionsActionGroup;
+
 
 class AccountsClosingResource extends Resource
 {
@@ -86,27 +88,40 @@ class AccountsClosingResource extends Resource
                     }
                 }),
             ], layout: FiltersLayout::AboveContent  )
+
+
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\Action::make('Download PDF')
-                ->action(fn ($record) => self::downloadAssociatedDebitsPDF($record))
+
+                ActionsActionGroup::make([
+
+                    Tables\Actions\Action::make('Download PDF 1')
+                ->action(fn ($record) => self::downloadAccountsClosingPDF1($record))
                 ->icon('heroicon-o-arrow-down-tray'),
+
+                    Tables\Actions\Action::make('Download PDF 2')
+                    ->action(fn ($record) => self::downloadAccountsClosingPDF2($record))
+                    ->icon('heroicon-o-arrow-down-tray'),
+
+                    Tables\Actions\Action::make('Download PDF 3')
+                    ->action(fn ($record) => self::downloadAccountsClosingPDF3($record))
+                    ->icon('heroicon-o-arrow-down-tray'),
+                ])
             ])
             ->paginated([10, 25,]);
-
-            
     }
 
-
-    public static function downloadAssociatedDebitsPDF(WalletLog $walletLog)
+    public static function downloadAccountsClosingPDF1(WalletLog $walletLog)
     {
-        // Fetch only associated debits for this WalletLog
-        $associatedDebits = $walletLog->associatedDebits;
+        // Fetch all associated debits using the relationship
+        $associatedDebits = $walletLog->associatedDebits()->with('trainerVisit')->get();
+        $closingData = $walletLog->associatedDebits ?? collect();
 
-        // Render the Blade template with filtered data
-        $html = View::make('pdf.associated-debits', [
+        // Render the Blade template with the fetched data
+        $html = View::make('pdf.accounts_closing1', [
             'walletLog' => $walletLog,
-            'associatedDebits' => $associatedDebits,
+            'walletLogs' => $associatedDebits, // Pass associated debits
+            'closingData' => $closingData,
         ])->render();
 
         // Initialize Dompdf
@@ -118,9 +133,64 @@ class AccountsClosingResource extends Resource
         // Return the PDF as a download
         return response()->streamDownload(
             fn () => print($dompdf->output()),
-            'associated_debits_' . $walletLog->id . '_' . now()->format('YmdHis') . '.pdf'
+            'accounts_closing_' . $walletLog->id . '_' . now()->format('YmdHis') . '.pdf'
         );
     }
+
+    public static function downloadAccountsClosingPDF2(WalletLog $walletLog)
+{
+    // Fetch all associated debits using the relationship
+    $associatedDebits = $walletLog->associatedDebits()->with('trainerVisit')->get();
+    $closingData = $walletLog->associatedDebits ?? collect();
+
+    // Render the Blade template with the fetched data
+    $html = View::make('pdf.accounts_closing2', [
+        'walletLog' => $walletLog,
+        'walletLogs' => $associatedDebits, // Pass associated debits
+        'closingData' => $closingData,
+    ])->render();
+
+    // Initialize Dompdf
+    $dompdf = new Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // Return the PDF as a download
+    return response()->streamDownload(
+        fn () => print($dompdf->output()),
+        'accounts_closing_' . $walletLog->id . '_' . now()->format('YmdHis') . '.pdf'
+    );
+}
+
+public static function downloadAccountsClosingPDF3(WalletLog $walletLog)
+{
+    // Fetch all associated debits using the relationship
+    $associatedDebits = $walletLog->associatedDebits()
+        ->whereNotNull('trainer_visit_id') // Ensure trainer_visit_id exists
+        ->with(['trainerVisit.school.district']) // Eager load relationships
+        ->get();
+
+    // Render the Blade template with the fetched data
+    $html = View::make('pdf.accounts_closing3', [
+        'walletLog' => $walletLog,
+        'walletLogs' => $associatedDebits, // Pass associated debits
+    ])->render();
+
+    // Initialize Dompdf
+    $dompdf = new Dompdf();
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // Return the PDF as a download
+    return response()->streamDownload(
+        fn () => print($dompdf->output()),
+        'accounts_closing_' . $walletLog->id . '_' . now()->format('YmdHis') . '.pdf'
+    );
+}
+
+
 
     public static function getRelations(): array
     {

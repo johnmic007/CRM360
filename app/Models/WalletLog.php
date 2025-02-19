@@ -46,13 +46,42 @@ class WalletLog extends Model
         return $this->hasMany(TrainerVisit::class, 'user_id', 'user_id');
     }
 
-public function associatedDebits()
-{
-    return $this->hasMany(WalletLog::class, 'wallet_logs', 'id')
-        ->where('type', 'debit');
-}
+    public function associatedDebits()
+    {
+        return $this->hasMany(WalletLog::class, 'wallet_logs', 'id')
+            ->where('type', 'debit');
+    }
 
-    
+    public function trainerVisit()
+    {
+    return $this->belongsTo(TrainerVisit::class, 'trainer_visit_id', 'id');
+    }
+
+    // Indirect relationship with School through TrainerVisit
+    public function school()
+    {
+        return $this->hasOneThrough(
+            School::class,
+            TrainerVisit::class,
+            'id',        // Foreign key on TrainerVisit table
+            'id',        // Foreign key on School table
+            'trainer_visit_id', // Local key on WalletLog table
+            'school_id'  // Local key on TrainerVisit table
+        );
+    }
+
+    // Indirect relationship with District through TrainerVisit → School
+    public function district()
+    {
+        return $this->hasOneThrough(
+            District::class,
+            School::class,
+            'id',        // Foreign key on School table
+            'id',        // Foreign key on District table
+            'school_id', // Local key on TrainerVisit table
+            'district_id'// Local key on School table
+        );
+    }
 
     /**
      * Scope a query to only include credit type logs.

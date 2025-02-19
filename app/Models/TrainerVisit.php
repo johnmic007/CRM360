@@ -85,6 +85,11 @@ class TrainerVisit extends Model
     }
 
 
+        public function trainerVisit()
+    {
+        return $this->belongsTo(TrainerVisit::class, 'trainer_visit_id', 'id');
+    }
+
     public function visitEntry()
     {
         return $this->belongsTo(VisitEntry::class);
@@ -125,6 +130,7 @@ class TrainerVisit extends Model
 
 
 
+    
 
 
     public function user()
@@ -222,10 +228,10 @@ class TrainerVisit extends Model
                 //     if (!is_null($trainerVisit->food_expense)) {
                 //         // Retrieve the current food expense rate
                 //         $foodExpenseRate = Setting::getFoodExpenseRate();
-                
+
                 //         // Parse the visit date to a standard format
                 //         $visitDate = Carbon::parse($trainerVisit->visit_date)->format('Y-m-d');
-                
+
                 //         // Update food_expense and total_expense
                 //         $trainerVisit->update([
                 //             'food_expense' => $foodExpenseRate, // Update the existing food expense
@@ -234,7 +240,7 @@ class TrainerVisit extends Model
                 //         ]);
                 //     }
                 // }
-                
+
                 if ($trainerVisit->travel_type == 'with_colleague') {
 
 
