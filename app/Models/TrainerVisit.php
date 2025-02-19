@@ -61,6 +61,12 @@ class TrainerVisit extends Model
         return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
     }
 
+    public function salesLeadStatus()
+{
+    return $this->hasOne(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
+}
+
+
 
 
     protected $casts = [
@@ -127,6 +133,12 @@ class TrainerVisit extends Model
     {
         return $this->belongsTo(Block::class);
     }
+
+    public function district()
+{
+    return $this->belongsTo(District::class, 'district_id');
+}
+
 
 
 
