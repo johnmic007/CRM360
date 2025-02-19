@@ -104,13 +104,19 @@ class SalesLeadStatus extends Model
                     'user_id' => Auth::id(),
                 ]);
 
-                ApprovalRequest::create([
-                    'message'    => $status->message ?? 'Request for reassignment.',
-                    'company_id' => Auth::user()->company_id ?? null,
-                    'user_id'    => Auth::id(),
-                    'school_id'  => $status->school_id,
-                    'status'     => 'Pending',
-                ]);
+                ApprovalRequest::firstOrCreate(
+                    [
+                        'message'   => $status->message ?? 'Request',
+                        'company_id' => Auth::user()->company_id ?? null,
+                        'user_id'   => Auth::id(),
+                        'school_id' => $status->school_id,
+                        'status'    => 'Pending'
+                    ],
+                    [
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]
+                );
 
                 // Send a Filament notification
                 \Filament\Notifications\Notification::make()
