@@ -41,7 +41,7 @@ class AccountsClosingResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()->hasRole(['admin', 'accounts_head' , 'company' ]);
+        return auth()->user()->hasRole(['admin', 'accounts_head' , 'company' , 'sales_operation_head' ,'sales_operation']);
     }
 
     public static function canEdit(Model $record): bool
