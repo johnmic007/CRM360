@@ -22,10 +22,23 @@ class InternalWalletTransferResource extends Resource
     protected static ?string $navigationGroup = 'Finance';
 
     public static function canViewAny(): bool
-    {
-        return auth()->user()->hasRole(['admin']);
+{
+    $user = auth()->user();
+
+    if (!$user) {
+        return false; // Ensure there's a logged-in user
     }
 
+    // Allow access if the user is an admin, sales head, or accounts head
+    if ($user->hasAnyRole(['admin', 'sales_operation_head', 'accounts_head'])) {
+        return true;
+    }
+
+    // Check if the user is involved in any internal wallet transfer
+    return InternalWalletTransfer::where('from_user_id', $user->id)
+        ->orWhere('to_user_id', $user->id)
+        ->exists();
+}
 
     public static function form(Forms\Form $form): Forms\Form
     {
@@ -34,9 +47,14 @@ class InternalWalletTransferResource extends Resource
 
     Forms\Components\Select::make('from_user_id')
         ->label('From User')
-        ->options(User::whereDoesntHave('roles', function ($query) {
-            $query->whereIn('name', ['admin', 'accounts', 'accounts_head']);
-        })->pluck('name', 'id'))
+        ->options(function () {
+            $user = auth()->user();
+            return User::where('company_id', $user->company_id)
+                ->whereDoesntHave('roles', function ($query) {
+                    $query->whereIn('name', ['admin', 'accounts', 'accounts_head']);
+                })
+                ->pluck('name', 'id');
+        })
         ->required()
         ->reactive()
         ->afterStateUpdated(fn ($state, callable $set) =>
@@ -52,9 +70,14 @@ class InternalWalletTransferResource extends Resource
 
     Forms\Components\Select::make('to_user_id')
                     ->label('To User')
-                    ->options(User::whereDoesntHave('roles', function ($query) {
-                        $query->whereIn('name', ['admin', 'accounts', 'accounts_head']);
-                    })->pluck('name', 'id'))
+                    ->options(function () {
+                        $user = auth()->user();
+                        return User::where('company_id', $user->company_id)
+                            ->whereDoesntHave('roles', function ($query) {
+                                $query->whereIn('name', ['admin', 'accounts', 'accounts_head']);
+                            })
+                            ->pluck('name', 'id');
+                    })
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(fn ($state, callable $set) =>
