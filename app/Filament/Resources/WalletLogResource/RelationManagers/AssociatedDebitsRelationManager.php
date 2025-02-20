@@ -66,7 +66,7 @@ class AssociatedDebitsRelationManager extends RelationManager
                             $associatedDebits = $walletLog->associatedDebits()->get();
 
                             $parentLog = WalletLog::where('id', $walletLog->wallet_logs)
-                            ->first();
+                                ->first();
 
                             // dd($parentLog ,$walletLog );
 
@@ -82,15 +82,15 @@ class AssociatedDebitsRelationManager extends RelationManager
 
 
 
-                // Find the User to update their wallet_balance
-                $user = User::find($walletLog->user_id);
-                if (!$user) {
-                    return; // User not found
-                }
+                            // Find the User to update their wallet_balance
+                            $user = User::find($walletLog->user_id);
+                            if (!$user) {
+                                return; // User not found
+                            }
 
-                // Update user's wallet_balance
-                $user->wallet_balance += $walletLog->amount;
-                $user->save();
+                            // Update user's wallet_balance
+                            $user->wallet_balance += $walletLog->amount;
+                            $user->save();
 
                             // Create a new WalletLog entry for the deduction
                             WalletLog::create([
@@ -106,7 +106,7 @@ class AssociatedDebitsRelationManager extends RelationManager
 
                             ]);
 
-                       
+
 
                             // Update TrainerVisit status to pending
                             TrainerVisit::where('id', $walletLog->trainer_visit_id)
@@ -114,7 +114,20 @@ class AssociatedDebitsRelationManager extends RelationManager
                         });
                     })
                     ->color('danger')
+                    ->visible(fn ($record) => $this->isLastAssociatedDebit($record))
                     ->icon('heroicon-o-arrow-path'),
             ]);
     }
+
+
+
+    private function isLastAssociatedDebit($record): bool
+{
+    $lastAssociatedDebit = WalletLog::where('wallet_logs', $record->wallet_logs)
+        ->where('type', 'debit')
+        ->orderByDesc('created_at')
+        ->first();
+
+    return $lastAssociatedDebit && $lastAssociatedDebit->id === $record->id;
+}
 }
