@@ -21,6 +21,12 @@ class InternalWalletTransferResource extends Resource
 
     protected static ?string $navigationGroup = 'Finance';
 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()->hasRole(['admin']);
+    }
+
+
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
