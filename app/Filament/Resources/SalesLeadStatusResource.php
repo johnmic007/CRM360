@@ -84,7 +84,7 @@ class SalesLeadStatusResource extends Resource
                     Select::make('head_id')
                         ->label('Select Head you travel with')
                         ->options(function () {
-                            return \App\Models\User::role(['zonal_manager', 'regional_manager', 'sales_operation_head'])
+                            return \App\Models\User::role(['zonal_manager', 'regional_manager',  'head' , 'sales_head'])
                                 ->get()
                                 ->mapWithKeys(function ($user) {
                                     return [$user->id => "{$user->name} ({$user->email})"];
