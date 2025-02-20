@@ -62,9 +62,9 @@ class TrainerVisit extends Model
     }
 
     public function salesLeadStatus()
-{
-    return $this->hasOne(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
-}
+    {
+        return $this->hasMany(SalesLeadStatus::class, 'visit_entry_id', 'visit_entry_id');
+    }
 
 
 
@@ -91,7 +91,7 @@ class TrainerVisit extends Model
     }
 
 
-        public function trainerVisit()
+    public function trainerVisit()
     {
         return $this->belongsTo(TrainerVisit::class, 'trainer_visit_id', 'id');
     }
@@ -135,14 +135,14 @@ class TrainerVisit extends Model
     }
 
     public function district()
-{
-    return $this->belongsTo(District::class, 'district_id');
-}
+    {
+        return $this->belongsTo(District::class, 'district_id');
+    }
 
 
 
 
-    
+
 
 
     public function user()

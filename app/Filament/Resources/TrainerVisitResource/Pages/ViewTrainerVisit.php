@@ -254,39 +254,36 @@ class ViewTrainerVisit extends ViewRecord
                             }),
 
 
-                        Select::make('selected_credit_logs')
+                            Select::make('selected_credit_logs')
                             ->label('Select Credit Logs to Apply')
                             ->visible(function () use ($walletLogs, $userId) {
                                 // Fetch credit transactions where transaction_id is null
                                 $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
-                                ->where('type', 'credit')
-                                ->whereNull('transaction_id')
+                                    ->where('type', 'credit')
+                                    ->whereNull('transaction_id')
                                     ->get();
-
+                        
                                 // Fetch all debit transactions for the user
                                 $debitLogs = \App\Models\WalletLog::where('user_id', $userId)
                                     ->where('type', 'debit')
                                     ->whereNull('transaction_id')
                                     ->get();
-
+                        
                                 // Calculate total amounts
                                 $totalCredits = $creditLogs->sum('amount');
                                 $totalDebits = $debitLogs->sum('amount');
-
-                                // dd(  $creditLogs ,  $totalCredits , $totalDebits  );
-
+                        
                                 // Show the field only if the debit difference is greater
                                 return $totalDebits > $totalCredits;
                             })
                             ->options(function () use ($walletLogs, $userId) {
-                                // Fetch credit transactions where transaction_id is null
+                                // Fetch credit transactions where transaction_id is NOT null and balance is >= 0
                                 $creditLogs = \App\Models\WalletLog::where('user_id', $userId)
                                     ->where('type', 'credit')
                                     ->whereNotNull('transaction_id')
+                                    ->where('balance', '>=', 0) // Exclude negative balances
                                     ->get();
-
-                                    // dd($creditLogs);
-
+                        
                                 // Map the logs into options
                                 return $creditLogs->mapWithKeys(function ($log) {
                                     return [
@@ -301,13 +298,13 @@ class ViewTrainerVisit extends ViewRecord
                                 // Filter the selected logs
                                 $selectedLogs = $walletLogs->whereIn('id', $state);
                                 $totalSelectedCredits = $selectedLogs->sum('balance');
-
+                        
                                 // Calculate remaining expense
                                 $remainingExpense = max(0, $totalExpense - $totalSelectedCredits);
-
+                        
                                 // Update the reimbursement field dynamically
                                 $set('remaining_due', number_format($remainingExpense, 2));
-                            }),
+                            }),                        
 
                         // Remaining due preview
                         TextInput::make('remaining_due')

@@ -27,7 +27,8 @@ class WalletLog extends Model
         'wallet_logs',
         'credit_type',
         'transaction_id',
-        'approved_by'
+        'approved_by',
+        'reverted_by',
 
     ];
 

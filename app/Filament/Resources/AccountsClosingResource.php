@@ -171,6 +171,12 @@ public static function downloadAccountsClosingPDF3(WalletLog $walletLog)
     ->with(['trainerVisit.salesLeadStatus.school.district']) // Load school through SalesLeadStatus
     ->get();
 
+    // foreach ($associatedDebits as $debit) {
+    //     if ($debit->trainerVisit && $debit->trainerVisit->salesLeadStatus) {
+    //         dd($debit->trainerVisit->salesLeadStatus);
+    //     }
+    // }
+
 
         $formattedLogs = $associatedDebits->map(function ($log) {
             return [

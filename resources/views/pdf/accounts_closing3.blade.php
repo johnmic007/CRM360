@@ -26,14 +26,16 @@
             </thead>
             <tbody>
                 @foreach ($walletLogs as $log)
-                    <tr>
-                        <td>
-                            {{ $log->trainerVisit->visit_date ? \Carbon\Carbon::parse($log->trainerVisit->visit_date)->format('d/m/Y') : 'N/A' }}
-                        </td>
-                        <td>{{ optional($log->trainerVisit->salesLeadStatus->school)->name ?? 'N/A' }}</td>
-                        <td>{{ optional($log->trainerVisit->salesLeadStatus->school)->address ?? 'N/A' }}</td>
-                        <td>{{ optional($log->trainerVisit->salesLeadStatus->school->district)->name ?? 'N/A' }}</td>
-                    </tr>
+                    @foreach ($log->trainerVisit->salesLeadStatus as $leadStatus) <!-- Loop through multiple sales lead statuses -->
+                        <tr>
+                            <td>
+                                {{ $log->trainerVisit->visit_date ? \Carbon\Carbon::parse($log->trainerVisit->visit_date)->format('d/m/Y') : 'N/A' }}
+                            </td>
+                            <td>{{ optional($leadStatus->school)->name ?? 'N/A' }}</td>
+                            <td>{{ optional($leadStatus->school)->address ?? 'N/A' }}</td>
+                            <td>{{ optional($leadStatus->school->district)->name ?? 'N/A' }}</td>
+                        </tr>
+                    @endforeach
                 @endforeach
             </tbody>
         </table>
